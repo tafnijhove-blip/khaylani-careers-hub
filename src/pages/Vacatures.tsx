@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Loader2, Trash2, XCircle } from "lucide-react";
+import { Building2, Plus, Loader2, Trash2, XCircle, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -24,6 +24,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const regios = ["Noord-Holland", "Zuid-Holland", "Utrecht", "Gelderland", "Noord-Brabant", "Limburg", "Zeeland", "Friesland", "Groningen", "Drenthe", "Overijssel", "Flevoland"];
 
@@ -34,6 +41,12 @@ const Vacatures = () => {
   const [bestaandeBedrijven, setBestaandeBedrijven] = useState<any[]>([]);
   const [alleVacatures, setAlleVacatures] = useState<any[]>([]);
   const [vereistenInput, setVereistenInput] = useState("");
+  
+  // Edit state
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingVacature, setEditingVacature] = useState<any>(null);
+  const [editVereisten, setEditVereisten] = useState<string[]>([]);
+  const [editVereistenInput, setEditVereistenInput] = useState("");
   
   // Bedrijf fields
   const [bedrijfNaam, setBedrijfNaam] = useState("");
@@ -173,6 +186,77 @@ const Vacatures = () => {
         description: error.message,
         variant: "destructive",
       });
+    }
+  };
+
+  const openEditDialog = (vacature: any) => {
+    setEditingVacature(vacature);
+    setEditVereisten(vacature.vereisten || []);
+    setEditVereistenInput("");
+    setEditDialogOpen(true);
+  };
+
+  const closeEditDialog = () => {
+    setEditDialogOpen(false);
+    setEditingVacature(null);
+    setEditVereisten([]);
+    setEditVereistenInput("");
+  };
+
+  const addEditVereiste = () => {
+    const trimmed = editVereistenInput.trim();
+    if (trimmed && !editVereisten.includes(trimmed)) {
+      setEditVereisten([...editVereisten, trimmed]);
+      setEditVereistenInput("");
+    }
+  };
+
+  const removeEditVereiste = (index: number) => {
+    setEditVereisten(editVereisten.filter((_, i) => i !== index));
+  };
+
+  const handleEditVereistenKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addEditVereiste();
+    }
+  };
+
+  const handleUpdateVacature = async () => {
+    if (!editingVacature) return;
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("vacatures")
+        .update({
+          functietitel: editingVacature.functietitel,
+          vereisten: editVereisten,
+          aantal_posities: editingVacature.aantal_posities,
+          status: editingVacature.status,
+          prioriteit: editingVacature.prioriteit,
+          beloning: editingVacature.beloning || null,
+          opmerkingen: editingVacature.opmerkingen || null,
+        })
+        .eq("id", editingVacature.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "✓ Vacature bijgewerkt",
+        description: `${editingVacature.functietitel} is succesvol bijgewerkt`,
+      });
+
+      closeEditDialog();
+      fetchVacatures();
+    } catch (error: any) {
+      toast({
+        title: "Fout bij bijwerken",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -688,17 +772,28 @@ const Vacatures = () => {
                           {vacature.prioriteit}
                         </Badge>
                       </TableCell>
-                      <TableCell>{vacature.aantal_posities}</TableCell>
+                       <TableCell>{vacature.aantal_posities}</TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="hover:bg-orange-100 hover:text-orange-800"
-                          onClick={() => deleteVacature(vacature.id, vacature.functietitel)}
-                          title="Verwijder vacature (bedrijf blijft behouden)"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-primary/10 hover:text-primary"
+                            onClick={() => openEditDialog(vacature)}
+                            title="Bewerk vacature"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-orange-100 hover:text-orange-800"
+                            onClick={() => deleteVacature(vacature.id, vacature.functietitel)}
+                            title="Verwijder vacature (bedrijf blijft behouden)"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -707,6 +802,149 @@ const Vacatures = () => {
             </CardContent>
           </Card>
         )}
+
+        {/* Edit Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl text-gradient flex items-center gap-2">
+                <Pencil className="h-6 w-6" />
+                Vacature Bewerken
+              </DialogTitle>
+              <DialogDescription>
+                Pas de vacature gegevens aan en voeg functie-eisen toe of verwijder ze
+              </DialogDescription>
+            </DialogHeader>
+
+            {editingVacature && (
+              <div className="space-y-6 mt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-functietitel">Functietitel *</Label>
+                  <Input
+                    id="edit-functietitel"
+                    value={editingVacature.functietitel}
+                    onChange={(e) => setEditingVacature({ ...editingVacature, functietitel: e.target.value })}
+                    placeholder="Bijv. Senior Developer"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-vereisten">Functie-eisen (druk op Enter of komma om toe te voegen)</Label>
+                  <Input
+                    id="edit-vereisten"
+                    value={editVereistenInput}
+                    onChange={(e) => setEditVereistenInput(e.target.value)}
+                    onKeyDown={handleEditVereistenKeyDown}
+                    onBlur={addEditVereiste}
+                    placeholder="Bijv. HBO diploma, 3 jaar ervaring"
+                  />
+                  {editVereisten.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {editVereisten.map((vereiste, index) => (
+                        <Badge
+                          key={index}
+                          variant="secondary"
+                          className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => removeEditVereiste(index)}
+                        >
+                          {vereiste} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-aantalPosities">Aantal Posities</Label>
+                    <Input
+                      id="edit-aantalPosities"
+                      type="number"
+                      min="1"
+                      value={editingVacature.aantal_posities}
+                      onChange={(e) => setEditingVacature({ ...editingVacature, aantal_posities: parseInt(e.target.value) || 1 })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-status">Status</Label>
+                    <Select 
+                      value={editingVacature.status} 
+                      onValueChange={(value) => setEditingVacature({ ...editingVacature, status: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="open">Open</SelectItem>
+                        <SelectItem value="invulling">In Vulling</SelectItem>
+                        <SelectItem value="on_hold">On Hold</SelectItem>
+                        <SelectItem value="gesloten">Gesloten</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-prioriteit">Prioriteit</Label>
+                    <Select 
+                      value={editingVacature.prioriteit} 
+                      onValueChange={(value) => setEditingVacature({ ...editingVacature, prioriteit: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="laag">Laag</SelectItem>
+                        <SelectItem value="normaal">Normaal</SelectItem>
+                        <SelectItem value="hoog">Hoog</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-beloning">Beloning</Label>
+                  <Input
+                    id="edit-beloning"
+                    value={editingVacature.beloning || ''}
+                    onChange={(e) => setEditingVacature({ ...editingVacature, beloning: e.target.value })}
+                    placeholder="Bijv. €4000 - €5000 per maand"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-opmerkingen">Opmerkingen</Label>
+                  <Textarea
+                    id="edit-opmerkingen"
+                    value={editingVacature.opmerkingen || ''}
+                    onChange={(e) => setEditingVacature({ ...editingVacature, opmerkingen: e.target.value })}
+                    placeholder="Extra informatie over de vacature"
+                    rows={4}
+                  />
+                </div>
+
+                <div className="flex gap-4 pt-4">
+                  <Button 
+                    onClick={handleUpdateVacature} 
+                    disabled={loading}
+                    className="flex-1"
+                  >
+                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Wijzigingen Opslaan
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={closeEditDialog}
+                    disabled={loading}
+                  >
+                    Annuleren
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Bestaande Bedrijven */}
         {bestaandeBedrijven.length > 0 && (
