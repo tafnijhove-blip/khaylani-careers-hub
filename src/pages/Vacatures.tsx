@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +31,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { getVacatureStatusClass, getPriorityClass, getVacatureStatusLabel, getPriorityLabel } from "@/lib/statusUtils";
 
 const regios = ["Noord-Holland", "Zuid-Holland", "Utrecht", "Gelderland", "Noord-Brabant", "Limburg", "Zeeland", "Friesland", "Groningen", "Drenthe", "Overijssel", "Flevoland"];
 

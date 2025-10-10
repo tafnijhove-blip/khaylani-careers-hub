@@ -96,32 +96,37 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <span className="text-2xl font-bold text-gradient">Khaylani</span>
             </Link>
 
-            {/* Navigation Links */}
-            <div className="hidden md:flex items-center gap-2">
-              {navItems.map((item) => (
-                <Link key={item.path} to={item.path}>
-                  <Button
-                    variant={isActive(item.path) ? "default" : "ghost"}
-                    className="gap-2 transition-all duration-300 hover:scale-105"
-                  >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
-                  </Button>
-                </Link>
-              ))}
-            </div>
+        {/* Navigation Links */}
+        <nav className="hidden md:flex items-center gap-2" aria-label="Hoofdnavigatie">
+          {navItems.map((item) => (
+            <Link key={item.path} to={item.path}>
+              <Button
+                variant={isActive(item.path) ? "default" : "ghost"}
+                className="gap-2 transition-all duration-300 hover:scale-105"
+                aria-current={isActive(item.path) ? "page" : undefined}
+              >
+                <item.icon className="h-4 w-4" aria-hidden="true" />
+                {item.label}
+              </Button>
+            </Link>
+          ))}
+        </nav>
 
-            {/* User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-12 w-12 rounded-full hover:scale-110 transition-transform">
-                  <Avatar className="h-12 w-12 border-2 border-primary/20">
-                    <AvatarFallback className="bg-gradient-primary text-white text-lg font-bold">
-                      {userName ? userName.charAt(0).toUpperCase() : "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
+        {/* User Menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              className="relative h-12 w-12 rounded-full hover:scale-110 transition-transform"
+              aria-label="Gebruikersmenu openen"
+            >
+              <Avatar className="h-12 w-12 border-2 border-primary/20">
+                <AvatarFallback className="bg-gradient-primary text-white text-lg font-bold">
+                  {userName ? userName.charAt(0).toUpperCase() : "U"}
+                </AvatarFallback>
+              </Avatar>
+            </Button>
+          </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 glass-card border-2 border-primary/20" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
@@ -144,7 +149,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-primary/10">
+        <nav className="md:hidden border-t border-primary/10" aria-label="Mobiele navigatie">
           <div className="flex justify-around p-2">
             {navItems.map((item) => (
               <Link key={item.path} to={item.path} className="flex-1">
@@ -152,18 +157,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   variant={isActive(item.path) ? "default" : "ghost"}
                   size="sm"
                   className="w-full gap-1 flex-col h-auto py-3"
+                  aria-current={isActive(item.path) ? "page" : undefined}
                 >
-                  <item.icon className="h-5 w-5" />
+                  <item.icon className="h-5 w-5" aria-hidden="true" />
                   <span className="text-xs font-medium">{item.label}</span>
                 </Button>
               </Link>
             ))}
           </div>
-        </div>
+        </nav>
       </nav>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" role="main">
+        {children}
+      </main>
     </div>
   );
 };

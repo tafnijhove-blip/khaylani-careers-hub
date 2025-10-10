@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { TrendingUp, Briefcase, Building2, MapPin, Clock } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const Analytics = () => {
   const [stats, setStats] = useState({
@@ -94,14 +95,19 @@ const Analytics = () => {
     urgent: "#ef4444",
   };
 
+  const chartColors = useMemo(() => ({
+    primary: "hsl(var(--primary))",
+    accent: "hsl(var(--accent))",
+    muted: "hsl(var(--muted))",
+    border: "hsl(var(--border))",
+    card: "hsl(var(--card))",
+  }), []);
+
   if (loading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Analytics laden...</p>
-          </div>
+          <LoadingSpinner size="lg" message="Analytics laden..." />
         </div>
       </DashboardLayout>
     );
@@ -110,10 +116,11 @@ const Analytics = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        <div>
+        {/* Analytics Header */}
+        <header>
           <h1 className="text-3xl font-bold text-foreground mb-2">Analytics Dashboard</h1>
           <p className="text-muted-foreground">Uitgebreide statistieken en inzichten in vacatures en bedrijven</p>
-        </div>
+        </header>
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

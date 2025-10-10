@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle, Trash2, XCircl
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import MapView from "@/components/MapView";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
 
 interface Bedrijf {
   id: string;
@@ -167,51 +169,29 @@ const Dashboard = () => {
     return vacatures.filter((v) => v.bedrijf_id === bedrijfId);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "open":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "invulling":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "on_hold":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "gesloten":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "hoog":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "normaal":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "laag":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const filteredBedrijven = bedrijven.filter(
-    (b) =>
-      b.naam.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      b.regio.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (b.plaats && b.plaats.toLowerCase().includes(searchTerm.toLowerCase()))
+  const filteredBedrijven = useMemo(() => 
+    bedrijven.filter(
+      (b) =>
+        b.naam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        b.regio.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (b.plaats && b.plaats.toLowerCase().includes(searchTerm.toLowerCase()))
+    ),
+    [bedrijven, searchTerm]
   );
+
+  const handleDeleteVacature = useCallback((vacatureId: string, functietitel: string) => {
+    return deleteVacature(vacatureId, functietitel);
+  }, []);
+
+  const handleDeleteBedrijf = useCallback((bedrijfId: string, bedrijfNaam: string) => {
+    return deleteBedrijf(bedrijfId, bedrijfNaam);
+  }, []);
 
   if (loading) {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Laden...</p>
-          </div>
+          <LoadingSpinner size="lg" message="Dashboard laden..." />
         </div>
       </DashboardLayout>
     );
@@ -221,7 +201,7 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
+        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
           <div>
             <h1 className="text-4xl font-bold text-gradient mb-2">Kaartoverzicht</h1>
             <p className="text-muted-foreground text-lg">Interactief overzicht van alle bedrijven en vacatures</p>
@@ -230,7 +210,7 @@ const Dashboard = () => {
             <Plus className="h-5 w-5" />
             Nieuwe Vacature
           </Button>
-        </div>
+        </header>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
@@ -242,7 +222,9 @@ const Dashboard = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-4xl font-bold text-gradient">{bedrijven.length}</div>
+              <div className="text-4xl font-bold text-gradient" role="status" aria-label={`Totaal ${bedrijven.length} bedrijven`}>
+                {bedrijven.length}
+              </div>
             </CardContent>
           </Card>
 
@@ -277,21 +259,22 @@ const Dashboard = () => {
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder="Zoek op bedrijfsnaam, regio of plaats..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 bg-card"
+            aria-label="Zoek bedrijven"
           />
         </div>
 
         {/* Interactive Map */}
         <Card className="border-2 border-primary/30 overflow-hidden shadow-xl hover:shadow-glow transition-all duration-500">
           <CardHeader className="bg-gradient-primary text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-shine opacity-20"></div>
+            <div className="absolute inset-0 bg-gradient-shine opacity-20" aria-hidden="true"></div>
             <CardTitle className="flex items-center gap-3 relative z-10">
-              <div className="h-10 w-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <div className="h-10 w-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center" aria-hidden="true">
                 <MapPin className="h-6 w-6" />
               </div>
               Interactieve Kaart Nederland
@@ -301,7 +284,7 @@ const Dashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="h-[500px]">
+            <div className="h-[500px]" role="region" aria-label="Interactieve kaart met bedrijfslocaties">
               <MapView bedrijven={bedrijven} vacatures={vacatures} vacatureStats={vacatureStats} />
             </div>
           </CardContent>
@@ -381,7 +364,7 @@ const Dashboard = () => {
                                   <div className="flex items-center justify-between mb-1">
                                     <span className="font-medium truncate">{vacature.functietitel}</span>
                                     <div className="flex items-center gap-1">
-                                      <Badge className={getPriorityColor(vacature.prioriteit)} variant="outline">
+                                      <Badge className={getPriorityClass(vacature.prioriteit)} variant="outline">
                                         {vacature.prioriteit}
                                       </Badge>
                                       <Button
@@ -399,7 +382,7 @@ const Dashboard = () => {
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <Badge className={getStatusColor(vacature.status)} variant="outline">
+                                    <Badge className={getVacatureStatusClass(vacature.status)} variant="outline">
                                       {vacature.status}
                                     </Badge>
                                     <span className="text-xs text-green-600 font-medium">

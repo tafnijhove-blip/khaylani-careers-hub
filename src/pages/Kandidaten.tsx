@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,6 +25,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { getKandidaatStatusClass, getKandidaatStatusLabel } from "@/lib/statusUtils";
 
 interface Vacature {
   id: string;
@@ -170,36 +172,18 @@ const Kandidaten = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "geplaatst":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "gestart":
-        return "bg-green-100 text-green-800 border-green-200";
-      case "afgerond":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-      case "gestopt":
-        return "bg-red-100 text-red-800 border-red-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case "geplaatst": return "Geplaatst";
-      case "gestart": return "Gestart";
-      case "afgerond": return "Afgerond";
-      case "gestopt": return "Gestopt";
-      default: return status;
-    }
-  };
+  const kandidatenStats = useMemo(() => ({
+    total: kandidaten.length,
+    geplaatst: kandidaten.filter((k) => k.status === "geplaatst").length,
+    gestart: kandidaten.filter((k) => k.status === "gestart").length,
+    afgerond: kandidaten.filter((k) => k.status === "afgerond").length,
+  }), [kandidaten]);
 
   return (
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Kandidatenbeheer</h1>
             <p className="text-muted-foreground">Beheer geplaatste kandidaten en hun status</p>
@@ -323,7 +307,7 @@ const Kandidaten = () => {
               </form>
             </DialogContent>
           </Dialog>
-        </div>
+        </header>
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -333,7 +317,7 @@ const Kandidaten = () => {
               <Users className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{kandidaten.length}</div>
+              <div className="text-3xl font-bold text-foreground">{kandidatenStats.total}</div>
             </CardContent>
           </Card>
 
@@ -344,7 +328,7 @@ const Kandidaten = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">
-                {kandidaten.filter((k) => k.status === "geplaatst").length}
+                {kandidatenStats.geplaatst}
               </div>
             </CardContent>
           </Card>
@@ -356,7 +340,7 @@ const Kandidaten = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">
-                {kandidaten.filter((k) => k.status === "gestart").length}
+                {kandidatenStats.gestart}
               </div>
             </CardContent>
           </Card>
@@ -368,7 +352,7 @@ const Kandidaten = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">
-                {kandidaten.filter((k) => k.status === "afgerond").length}
+                {kandidatenStats.afgerond}
               </div>
             </CardContent>
           </Card>
@@ -379,7 +363,7 @@ const Kandidaten = () => {
           <h2 className="text-2xl font-bold mb-4">Kandidaten Overzicht</h2>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <LoadingSpinner message="Kandidaten laden..." />
             </div>
           ) : kandidaten.length === 0 ? (
             <Card className="border-2 border-dashed">
@@ -407,8 +391,8 @@ const Kandidaten = () => {
                           {kandidaat.vacatures.bedrijven.naam}
                         </p>
                       </div>
-                      <Badge className={getStatusColor(kandidaat.status)} variant="outline">
-                        {getStatusLabel(kandidaat.status)}
+                      <Badge className={getKandidaatStatusClass(kandidaat.status)} variant="outline">
+                        {getKandidaatStatusLabel(kandidaat.status)}
                       </Badge>
                     </div>
                   </CardHeader>

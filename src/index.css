@@ -76,6 +76,48 @@ All colors MUST be HSL.
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     --transition-elastic: all 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Status Colors - Semantic Tokens */
+    --status-open: 142 76% 36%;
+    --status-open-bg: 142 76% 95%;
+    --status-open-border: 142 76% 85%;
+    --status-invulling: 45 93% 47%;
+    --status-invulling-bg: 45 93% 95%;
+    --status-invulling-border: 45 93% 85%;
+    --status-hold: 25 95% 53%;
+    --status-hold-bg: 25 95% 95%;
+    --status-hold-border: 25 95% 85%;
+    --status-gesloten: 215 15% 45%;
+    --status-gesloten-bg: 215 15% 95%;
+    --status-gesloten-border: 215 15% 85%;
+
+    /* Priority Colors - Semantic Tokens */
+    --priority-urgent: 0 84% 60%;
+    --priority-urgent-bg: 0 84% 95%;
+    --priority-urgent-border: 0 84% 85%;
+    --priority-hoog: 25 95% 53%;
+    --priority-hoog-bg: 25 95% 95%;
+    --priority-hoog-border: 25 95% 85%;
+    --priority-normaal: 213 94% 58%;
+    --priority-normaal-bg: 213 94% 95%;
+    --priority-normaal-border: 213 94% 85%;
+    --priority-laag: 215 15% 45%;
+    --priority-laag-bg: 215 15% 95%;
+    --priority-laag-border: 215 15% 85%;
+
+    /* Kandidaat Status Colors */
+    --kandidaat-geplaatst: 213 94% 58%;
+    --kandidaat-geplaatst-bg: 213 94% 95%;
+    --kandidaat-geplaatst-border: 213 94% 85%;
+    --kandidaat-gestart: 142 76% 36%;
+    --kandidaat-gestart-bg: 142 76% 95%;
+    --kandidaat-gestart-border: 142 76% 85%;
+    --kandidaat-afgerond: 215 15% 45%;
+    --kandidaat-afgerond-bg: 215 15% 95%;
+    --kandidaat-afgerond-border: 215 15% 85%;
+    --kandidaat-gestopt: 0 84% 60%;
+    --kandidaat-gestopt-bg: 0 84% 95%;
+    --kandidaat-gestopt-border: 0 84% 85%;
   }
 
   .dark {
