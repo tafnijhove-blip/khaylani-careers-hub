@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle } from "lucide-react";
+import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import MapView from "@/components/MapView";
@@ -78,6 +78,31 @@ const Dashboard = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteVacature = async (vacatureId: string, functietitel: string) => {
+    if (!confirm(`Weet je zeker dat je de vacature "${functietitel}" wilt verwijderen?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("vacatures").delete().eq("id", vacatureId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Vacature verwijderd",
+        description: `${functietitel} is succesvol verwijderd`,
+      });
+
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Fout bij verwijderen",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -275,12 +300,25 @@ const Dashboard = () => {
                                 const open = stat?.posities_open || vacature.aantal_posities;
                                 
                                 return (
-                                <div key={vacature.id} className="p-2 bg-muted/50 rounded-lg text-sm">
+                                <div key={vacature.id} className="p-2 bg-muted/50 rounded-lg text-sm group/vacature">
                                   <div className="flex items-center justify-between mb-1">
                                     <span className="font-medium truncate">{vacature.functietitel}</span>
-                                    <Badge className={getPriorityColor(vacature.prioriteit)} variant="outline">
-                                      {vacature.prioriteit}
-                                    </Badge>
+                                    <div className="flex items-center gap-1">
+                                      <Badge className={getPriorityColor(vacature.prioriteit)} variant="outline">
+                                        {vacature.prioriteit}
+                                      </Badge>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 opacity-0 group-hover/vacature:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          deleteVacature(vacature.id, vacature.functietitel);
+                                        }}
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
                                   </div>
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <Badge className={getStatusColor(vacature.status)} variant="outline">
