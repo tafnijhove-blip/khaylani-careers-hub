@@ -84,33 +84,41 @@ const MapView = ({ bedrijven, vacatures = [], onBedrijfClick }: MapViewProps) =>
     // Add markers for each bedrijf with coordinates
     bedrijven.forEach((bedrijf) => {
       if (bedrijf.lat && bedrijf.lng && map.current) {
-        // Create a custom marker element
+        // Create a custom marker element (wrapper)
         const el = document.createElement('div');
-        el.className = 'custom-marker';
-        el.style.width = '40px';
-        el.style.height = '40px';
-        el.style.borderRadius = '50%';
-        el.style.backgroundColor = '#3B82F6';
-        el.style.border = '3px solid white';
-        el.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+        el.className = 'custom-marker-wrapper';
         el.style.cursor = 'pointer';
         el.style.display = 'flex';
         el.style.alignItems = 'center';
         el.style.justifyContent = 'center';
-        el.style.fontSize = '18px';
-        el.style.fontWeight = 'bold';
-        el.style.color = 'white';
-        el.style.transition = 'transform 0.2s ease-in-out, background-color 0.2s ease-in-out';
-        el.textContent = bedrijf.naam.charAt(0).toUpperCase();
 
-        // Add hover effect without position change
+        // Inner visual marker (we scale this, not the wrapper)
+        const inner = document.createElement('div');
+        inner.style.width = '40px';
+        inner.style.height = '40px';
+        inner.style.borderRadius = '50%';
+        inner.style.backgroundColor = '#3B82F6';
+        inner.style.border = '3px solid white';
+        inner.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
+        inner.style.display = 'flex';
+        inner.style.alignItems = 'center';
+        inner.style.justifyContent = 'center';
+        inner.style.fontSize = '18px';
+        inner.style.fontWeight = 'bold';
+        inner.style.color = 'white';
+        inner.style.transition = 'transform 0.2s ease-in-out, background-color 0.2s ease-in-out';
+        inner.textContent = bedrijf.naam.charAt(0).toUpperCase();
+
+        el.appendChild(inner);
+
+        // Hover effect without breaking mapbox transform
         el.addEventListener('mouseenter', () => {
-          el.style.transform = 'scale(1.15)';
-          el.style.backgroundColor = '#2563EB';
+          inner.style.transform = 'scale(1.15)';
+          inner.style.backgroundColor = '#2563EB';
         });
         el.addEventListener('mouseleave', () => {
-          el.style.transform = 'scale(1)';
-          el.style.backgroundColor = '#3B82F6';
+          inner.style.transform = 'scale(1)';
+          inner.style.backgroundColor = '#3B82F6';
         });
 
         // Get vacatures for this bedrijf
