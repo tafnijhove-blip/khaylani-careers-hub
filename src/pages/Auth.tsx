@@ -23,7 +23,7 @@ const Auth = () => {
 
       // Redirect based on role
       if (role === 'superadmin') {
-        navigate("/admin");
+        navigate("/superadmin");
       } else {
         // For other roles, fetch company_id and redirect to company dashboard
         const { data: profileData } = await supabase

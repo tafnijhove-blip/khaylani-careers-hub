@@ -45,7 +45,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/admin" element={<SuperAdminDashboard />} />
+              <Route path="/superadmin" element={<SuperAdminDashboard />} />
               <Route path="/bedrijf/:companyId" element={<CompanyDashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/vacatures" element={<Vacatures />} />
