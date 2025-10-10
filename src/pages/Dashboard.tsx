@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle, Trash2 } from "lucide-react";
+import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle, Trash2, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import MapView from "@/components/MapView";
@@ -81,8 +81,9 @@ const Dashboard = () => {
     }
   };
 
-  const deleteVacature = async (vacatureId: string, functietitel: string) => {
-    if (!confirm(`Weet je zeker dat je de vacature "${functietitel}" wilt verwijderen?`)) {
+  const deleteVacature = async (vacatureId: string, functietitel: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (!confirm(`Weet je zeker dat je de vacature "${functietitel}" wilt verwijderen?\n\nLET OP: Alleen de vacature wordt verwijderd, niet het bedrijf.`)) {
       return;
     }
 
@@ -92,8 +93,64 @@ const Dashboard = () => {
       if (error) throw error;
 
       toast({
-        title: "Vacature verwijderd",
+        title: "✓ Vacature verwijderd",
         description: `${functietitel} is succesvol verwijderd`,
+      });
+
+      fetchData();
+    } catch (error: any) {
+      toast({
+        title: "Fout bij verwijderen",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteBedrijf = async (bedrijfId: string, bedrijfNaam: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    
+    // Check if there are vacatures for this bedrijf
+    const bedrijfVacatures = getVacaturesForBedrijf(bedrijfId);
+    
+    if (bedrijfVacatures.length > 0) {
+      if (!confirm(`LET OP: Dit bedrijf heeft ${bedrijfVacatures.length} actieve vacature(s).\n\nAls je "${bedrijfNaam}" verwijdert, worden ook alle bijbehorende vacatures en kandidaten permanent verwijderd.\n\nWeet je zeker dat je door wilt gaan?`)) {
+        return;
+      }
+    } else {
+      if (!confirm(`Weet je zeker dat je bedrijf "${bedrijfNaam}" wilt verwijderen?`)) {
+        return;
+      }
+    }
+
+    try {
+      // First delete all kandidaten for vacatures of this bedrijf
+      const { error: kandidatenError } = await supabase
+        .from("kandidaten")
+        .delete()
+        .in("vacature_id", bedrijfVacatures.map(v => v.id));
+
+      if (kandidatenError) throw kandidatenError;
+
+      // Then delete all vacatures
+      const { error: vacaturesError } = await supabase
+        .from("vacatures")
+        .delete()
+        .eq("bedrijf_id", bedrijfId);
+
+      if (vacaturesError) throw vacaturesError;
+
+      // Finally delete the bedrijf
+      const { error: bedrijfError } = await supabase
+        .from("bedrijven")
+        .delete()
+        .eq("id", bedrijfId);
+
+      if (bedrijfError) throw bedrijfError;
+
+      toast({
+        title: "✓ Bedrijf verwijderd",
+        description: `${bedrijfNaam} en alle bijbehorende vacatures zijn verwijderd`,
       });
 
       fetchData();
@@ -263,12 +320,21 @@ const Dashboard = () => {
                 return (
                   <Card
                     key={bedrijf.id}
-                    className="border-2 hover:shadow-xl hover:border-primary/50 transition-all duration-300 cursor-pointer group"
+                    className="border-2 hover:shadow-xl hover:border-primary/50 transition-all duration-300 group relative"
                   >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground z-10"
+                      onClick={(e) => deleteBedrijf(bedrijf.id, bedrijf.naam, e)}
+                      title="Verwijder bedrijf (inclusief alle vacatures)"
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
                     <CardHeader>
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex-1">
-                          <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          <CardTitle className="text-lg group-hover:text-primary transition-colors pr-10">
                             {bedrijf.naam}
                           </CardTitle>
                           <CardDescription className="flex items-center gap-1 mt-1">
@@ -313,8 +379,9 @@ const Dashboard = () => {
                                         className="h-6 w-6 opacity-0 group-hover/vacature:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          deleteVacature(vacature.id, vacature.functietitel);
+                                          deleteVacature(vacature.id, vacature.functietitel, e);
                                         }}
+                                        title="Verwijder vacature (bedrijf blijft behouden)"
                                       >
                                         <Trash2 className="h-3 w-3" />
                                       </Button>

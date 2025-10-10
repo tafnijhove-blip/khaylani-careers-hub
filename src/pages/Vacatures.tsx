@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Loader2, Trash2 } from "lucide-react";
+import { Building2, Plus, Loader2, Trash2, XCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -90,7 +90,7 @@ const Vacatures = () => {
   };
 
   const deleteVacature = async (vacatureId: string, functietitel: string) => {
-    if (!confirm(`Weet je zeker dat je de vacature "${functietitel}" wilt verwijderen?`)) {
+    if (!confirm(`Weet je zeker dat je de vacature "${functietitel}" wilt verwijderen?\n\nLET OP: Alleen de vacature wordt verwijderd, niet het bedrijf.`)) {
       return;
     }
 
@@ -100,10 +100,72 @@ const Vacatures = () => {
       if (error) throw error;
 
       toast({
-        title: "Vacature verwijderd",
+        title: "✓ Vacature verwijderd",
         description: `${functietitel} is succesvol verwijderd`,
       });
 
+      fetchVacatures();
+    } catch (error: any) {
+      toast({
+        title: "Fout bij verwijderen",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteBedrijf = async (bedrijfId: string, bedrijfNaam: string) => {
+    // Count vacatures for this bedrijf
+    const vacaturesCount = alleVacatures.filter(v => v.bedrijf_id === bedrijfId).length;
+    
+    if (vacaturesCount > 0) {
+      if (!confirm(`LET OP: Dit bedrijf heeft ${vacaturesCount} actieve vacature(s).\n\nAls je "${bedrijfNaam}" verwijdert, worden ook alle bijbehorende vacatures en kandidaten permanent verwijderd.\n\nWeet je zeker dat je door wilt gaan?`)) {
+        return;
+      }
+    } else {
+      if (!confirm(`Weet je zeker dat je bedrijf "${bedrijfNaam}" wilt verwijderen?`)) {
+        return;
+      }
+    }
+
+    try {
+      // Get all vacature ids for this bedrijf
+      const vacatureIds = alleVacatures
+        .filter(v => v.bedrijf_id === bedrijfId)
+        .map(v => v.id);
+
+      // First delete all kandidaten for these vacatures
+      if (vacatureIds.length > 0) {
+        const { error: kandidatenError } = await supabase
+          .from("kandidaten")
+          .delete()
+          .in("vacature_id", vacatureIds);
+
+        if (kandidatenError) throw kandidatenError;
+      }
+
+      // Then delete all vacatures
+      const { error: vacaturesError } = await supabase
+        .from("vacatures")
+        .delete()
+        .eq("bedrijf_id", bedrijfId);
+
+      if (vacaturesError) throw vacaturesError;
+
+      // Finally delete the bedrijf
+      const { error: bedrijfError } = await supabase
+        .from("bedrijven")
+        .delete()
+        .eq("id", bedrijfId);
+
+      if (bedrijfError) throw bedrijfError;
+
+      toast({
+        title: "✓ Bedrijf verwijderd",
+        description: `${bedrijfNaam} en alle bijbehorende vacatures zijn verwijderd`,
+      });
+
+      fetchBedrijven();
       fetchVacatures();
     } catch (error: any) {
       toast({
@@ -566,8 +628,11 @@ const Vacatures = () => {
         {alleVacatures.length > 0 && (
           <Card className="border-2">
             <CardHeader>
-              <CardTitle>Bestaande Vacatures</CardTitle>
-              <CardDescription>Beheer en verwijder vacatures</CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-orange-600" />
+                Bestaande Vacatures
+              </CardTitle>
+              <CardDescription>Verwijder alleen de vacature - het bedrijf blijft behouden</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -579,7 +644,7 @@ const Vacatures = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>Prioriteit</TableHead>
                     <TableHead>Posities</TableHead>
-                    <TableHead className="text-right">Acties</TableHead>
+                    <TableHead className="text-right">Actie</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -628,14 +693,73 @@ const Vacatures = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="hover:bg-destructive hover:text-destructive-foreground"
+                          className="hover:bg-orange-100 hover:text-orange-800"
                           onClick={() => deleteVacature(vacature.id, vacature.functietitel)}
+                          title="Verwijder vacature (bedrijf blijft behouden)"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Bestaande Bedrijven */}
+        {bestaandeBedrijven.length > 0 && (
+          <Card className="border-2 border-destructive/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-destructive">
+                <XCircle className="h-5 w-5" />
+                Bedrijven Beheer
+              </CardTitle>
+              <CardDescription className="text-destructive/80">
+                <strong>Waarschuwing:</strong> Bij het verwijderen van een bedrijf worden ook alle bijbehorende vacatures en kandidaten permanent verwijderd
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Bedrijfsnaam</TableHead>
+                    <TableHead>Regio</TableHead>
+                    <TableHead>Plaats</TableHead>
+                    <TableHead>Contactpersoon</TableHead>
+                    <TableHead>Aantal Vacatures</TableHead>
+                    <TableHead className="text-right">Actie</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bestaandeBedrijven.map((bedrijf) => {
+                    const vacaturesCount = alleVacatures.filter(v => v.bedrijf_id === bedrijf.id).length;
+                    return (
+                      <TableRow key={bedrijf.id}>
+                        <TableCell className="font-medium">{bedrijf.naam}</TableCell>
+                        <TableCell>{bedrijf.regio}</TableCell>
+                        <TableCell>{bedrijf.plaats || '-'}</TableCell>
+                        <TableCell>{bedrijf.contactpersoon || '-'}</TableCell>
+                        <TableCell>
+                          <Badge variant={vacaturesCount > 0 ? "default" : "secondary"}>
+                            {vacaturesCount} vacature{vacaturesCount !== 1 ? 's' : ''}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => deleteBedrijf(bedrijf.id, bedrijf.naam)}
+                            title="Verwijder bedrijf (inclusief alle vacatures en kandidaten)"
+                          >
+                            <XCircle className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </CardContent>
