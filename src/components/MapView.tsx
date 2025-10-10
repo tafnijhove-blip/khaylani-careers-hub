@@ -239,12 +239,15 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
               vacatureCard.addEventListener('click', () => {
                 isExpanded = !isExpanded;
                 if (isExpanded) {
-                  detailsDiv.style.maxHeight = detailsDiv.scrollHeight + 'px';
-                  cardContent.querySelector('span:last-child').textContent = '▲';
+                  // Set to a large value to ensure all content is visible
+                  detailsDiv.style.maxHeight = '500px';
+                  detailsDiv.style.overflow = 'visible';
+                  cardContent.querySelector('span:last-child')!.textContent = '▲';
                   vacatureCard.style.background = '#f9fafb';
                 } else {
                   detailsDiv.style.maxHeight = '0';
-                  cardContent.querySelector('span:last-child').textContent = '▼';
+                  detailsDiv.style.overflow = 'hidden';
+                  cardContent.querySelector('span:last-child')!.textContent = '▼';
                   vacatureCard.style.background = 'white';
                 }
               });
