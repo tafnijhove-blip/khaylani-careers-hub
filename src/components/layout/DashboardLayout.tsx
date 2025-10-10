@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MapPin, LayoutDashboard, FileText, Users, BarChart3, Settings, LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import logo from "@/assets/logo-khaylani.png";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -80,10 +81,15 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <Link to="/dashboard" className="flex items-center gap-2 group">
-              <div className="p-2 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-all duration-300">
-                <MapPin className="h-6 w-6 text-primary" />
-              </div>
+            <Link to="/dashboard" className="flex items-center gap-3 group">
+              <img
+                src={logo}
+                alt="Khaylani bedrijfslogo"
+                className="h-7 w-auto"
+                loading="eager"
+                width={112}
+                height={28}
+              />
               <span className="text-xl font-bold text-foreground">Khaylani</span>
             </Link>
 

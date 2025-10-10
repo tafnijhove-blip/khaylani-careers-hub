@@ -78,13 +78,8 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       center: [5.2913, 52.1326], // Center of Netherlands
       zoom: 6.5,
       pitch: 0,
+      cooperativeGestures: true, // Allow page scroll; zoom only with Ctrl/Cmd
     });
-
-    // Disable scroll zoom to allow page scrolling
-    map.current.scrollZoom.disable();
-    
-    // Enable drag to pan
-    map.current.dragPan.enable();
 
     // Add navigation controls
     map.current.addControl(
@@ -176,6 +171,16 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           // Vacatures container
           const vacaturesContainer = document.createElement('div');
           vacaturesContainer.style.cssText = 'max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;';
+
+          // Let page scroll when reaching top/bottom of this list
+          vacaturesContainer.addEventListener('wheel', (e: WheelEvent) => {
+            const atTop = vacaturesContainer.scrollTop === 0;
+            const atBottom = Math.ceil(vacaturesContainer.scrollTop + vacaturesContainer.clientHeight) >= vacaturesContainer.scrollHeight;
+            if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
+              e.preventDefault();
+              window.scrollBy({ top: e.deltaY, behavior: 'auto' });
+            }
+          }, { passive: false });
           
           let showAll = false;
           const vacaturesToShow = bedrijfVacatures.slice(0, 3);
