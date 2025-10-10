@@ -78,6 +78,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       center: [5.2913, 52.1326], // Center of Netherlands
       zoom: 6.5,
       pitch: 0,
+      cooperativeGestures: true, // Requires Ctrl+scroll to zoom, allows page scroll
     });
 
     // Add navigation controls
