@@ -89,6 +89,7 @@ const MapView = ({ bedrijven, onBedrijfClick }: MapViewProps) => {
         el.style.fontSize = '18px';
         el.style.fontWeight = 'bold';
         el.style.color = 'white';
+        el.style.transition = 'all 0.2s ease-in-out';
         el.textContent = bedrijf.naam.charAt(0).toUpperCase();
 
         // Add hover effect
