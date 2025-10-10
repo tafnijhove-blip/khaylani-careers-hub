@@ -78,8 +78,11 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       center: [5.2913, 52.1326], // Center of Netherlands
       zoom: 6.5,
       pitch: 0,
-      cooperativeGestures: true, // Allow page scroll; zoom only with Ctrl/Cmd
+      cooperativeGestures: true,
     });
+
+    // Disable map scroll zoom so popup scrolling works reliably
+    map.current.scrollZoom.disable();
 
     // Add navigation controls
     map.current.addControl(
@@ -134,10 +137,11 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
         
         // Create popup container
         const popupContainer = document.createElement('div');
-        popupContainer.style.cssText = 'padding: 10px; max-width: 320px; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; font-family: system-ui, -apple-system, sans-serif;';
-        // Prevent the map/page from hijacking scroll inside the popup
-        popupContainer.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
-        popupContainer.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+        popupContainer.style.cssText = 'padding: 10px; max-width: 320px; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; font-family: system-ui, -apple-system, sans-serif;';
+        // Prevent the map from hijacking scroll inside the popup (capture phase)
+        const stopEvent = (e: Event) => { e.stopPropagation(); (e as any).stopImmediatePropagation?.(); };
+        popupContainer.addEventListener('wheel', stopEvent, { passive: true, capture: true });
+        popupContainer.addEventListener('touchmove', stopEvent, { passive: true, capture: true });
         
         // Header
         const header = document.createElement('div');
