@@ -97,15 +97,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </Link>
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-2" aria-label="Hoofdnavigatie">
+        <nav className="hidden lg:flex items-center gap-1" aria-label="Hoofdnavigatie">
           {navItems.map((item) => (
             <Link key={item.path} to={item.path}>
               <Button
                 variant={isActive(item.path) ? "default" : "ghost"}
-                className="gap-2 transition-all duration-300 hover:scale-105"
+                size="sm"
+                className="gap-1.5 transition-all duration-300 hover:scale-105 text-xs"
                 aria-current={isActive(item.path) ? "page" : undefined}
               >
-                <item.icon className="h-4 w-4" aria-hidden="true" />
+                <item.icon className="h-3.5 w-3.5" aria-hidden="true" />
                 {item.label}
               </Button>
             </Link>
