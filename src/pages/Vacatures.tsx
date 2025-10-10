@@ -14,8 +14,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Loader2 } from "lucide-react";
+import { Building2, Plus, Loader2, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const regios = ["Noord-Holland", "Zuid-Holland", "Utrecht", "Gelderland", "Noord-Brabant", "Limburg", "Zeeland", "Friesland", "Groningen", "Drenthe", "Overijssel", "Flevoland"];
 
@@ -24,6 +32,7 @@ const Vacatures = () => {
   const [loading, setLoading] = useState(false);
   const [isNewBedrijf, setIsNewBedrijf] = useState(true);
   const [bestaandeBedrijven, setBestaandeBedrijven] = useState<any[]>([]);
+  const [alleVacatures, setAlleVacatures] = useState<any[]>([]);
   const [vereistenInput, setVereistenInput] = useState("");
   
   // Bedrijf fields
@@ -48,6 +57,7 @@ const Vacatures = () => {
 
   useEffect(() => {
     fetchBedrijven();
+    fetchVacatures();
   }, []);
 
   const fetchBedrijven = async () => {
@@ -58,6 +68,49 @@ const Vacatures = () => {
     
     if (!error && data) {
       setBestaandeBedrijven(data);
+    }
+  };
+
+  const fetchVacatures = async () => {
+    const { data, error } = await supabase
+      .from("vacatures")
+      .select(`
+        *,
+        bedrijven (
+          naam,
+          regio,
+          plaats
+        )
+      `)
+      .order("datum_toegevoegd", { ascending: false });
+    
+    if (!error && data) {
+      setAlleVacatures(data);
+    }
+  };
+
+  const deleteVacature = async (vacatureId: string, functietitel: string) => {
+    if (!confirm(`Weet je zeker dat je de vacature "${functietitel}" wilt verwijderen?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("vacatures").delete().eq("id", vacatureId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Vacature verwijderd",
+        description: `${functietitel} is succesvol verwijderd`,
+      });
+
+      fetchVacatures();
+    } catch (error: any) {
+      toast({
+        title: "Fout bij verwijderen",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -212,6 +265,7 @@ const Vacatures = () => {
 
       resetForm();
       await fetchBedrijven();
+      await fetchVacatures();
     } catch (error: any) {
       toast({
         title: "Fout bij opslaan",
@@ -507,6 +561,86 @@ const Vacatures = () => {
             </form>
           </CardContent>
         </Card>
+
+        {/* Bestaande Vacatures */}
+        {alleVacatures.length > 0 && (
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle>Bestaande Vacatures</CardTitle>
+              <CardDescription>Beheer en verwijder vacatures</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Functietitel</TableHead>
+                    <TableHead>Bedrijf</TableHead>
+                    <TableHead>Locatie</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Prioriteit</TableHead>
+                    <TableHead>Posities</TableHead>
+                    <TableHead className="text-right">Acties</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {alleVacatures.map((vacature) => (
+                    <TableRow key={vacature.id}>
+                      <TableCell className="font-medium">{vacature.functietitel}</TableCell>
+                      <TableCell>{vacature.bedrijven?.naam || '-'}</TableCell>
+                      <TableCell>
+                        {vacature.bedrijven?.plaats ? `${vacature.bedrijven.plaats}, ` : ''}
+                        {vacature.bedrijven?.regio || '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            vacature.status === 'open'
+                              ? 'bg-green-100 text-green-800 border-green-200'
+                              : vacature.status === 'invulling'
+                              ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                              : vacature.status === 'on_hold'
+                              ? 'bg-orange-100 text-orange-800 border-orange-200'
+                              : 'bg-gray-100 text-gray-800 border-gray-200'
+                          }
+                        >
+                          {vacature.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={
+                            vacature.prioriteit === 'urgent'
+                              ? 'bg-red-100 text-red-800 border-red-200'
+                              : vacature.prioriteit === 'hoog'
+                              ? 'bg-orange-100 text-orange-800 border-orange-200'
+                              : vacature.prioriteit === 'normaal'
+                              ? 'bg-blue-100 text-blue-800 border-blue-200'
+                              : 'bg-gray-100 text-gray-800 border-gray-200'
+                          }
+                        >
+                          {vacature.prioriteit}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{vacature.aantal_posities}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="hover:bg-destructive hover:text-destructive-foreground"
+                          onClick={() => deleteVacature(vacature.id, vacature.functietitel)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
