@@ -13,6 +13,8 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Vacatures = lazy(() => import("./pages/Vacatures"));
 const Kandidaten = lazy(() => import("./pages/Kandidaten"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
+const CompanyDashboard = lazy(() => import("./pages/CompanyDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
@@ -41,8 +43,10 @@ const App = () => (
             }
           >
             <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/admin" element={<SuperAdminDashboard />} />
+              <Route path="/bedrijf/:companyId" element={<CompanyDashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/vacatures" element={<Vacatures />} />
               <Route path="/kandidaten" element={<Kandidaten />} />

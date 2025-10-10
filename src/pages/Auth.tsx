@@ -9,10 +9,41 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const checkUserAndRedirect = async (session: any) => {
+      if (!session) return;
+
+      // Fetch user role
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', session.user.id)
+        .single();
+
+      const role = roleData?.role;
+
+      // Redirect based on role
+      if (role === 'superadmin') {
+        navigate("/admin");
+      } else {
+        // For other roles, fetch company_id and redirect to company dashboard
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('company_id')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profileData?.company_id) {
+          navigate(`/bedrijf/${profileData.company_id}`);
+        } else {
+          navigate("/dashboard");
+        }
+      }
+    };
+
     // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate("/dashboard");
+        checkUserAndRedirect(session);
       }
     });
 
@@ -21,7 +52,7 @@ const Auth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/dashboard");
+        checkUserAndRedirect(session);
       }
     });
 

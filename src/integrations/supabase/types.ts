@@ -201,9 +201,49 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          can_delete_vacancies: boolean | null
+          can_edit_vacancies: boolean | null
+          can_manage_companies: boolean | null
+          can_manage_users: boolean | null
+          can_view_companies: boolean | null
+          can_view_users: boolean | null
+          can_view_vacancies: boolean | null
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          can_delete_vacancies?: boolean | null
+          can_edit_vacancies?: boolean | null
+          can_manage_companies?: boolean | null
+          can_manage_users?: boolean | null
+          can_view_companies?: boolean | null
+          can_view_users?: boolean | null
+          can_view_vacancies?: boolean | null
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          can_delete_vacancies?: boolean | null
+          can_edit_vacancies?: boolean | null
+          can_manage_companies?: boolean | null
+          can_manage_users?: boolean | null
+          can_view_companies?: boolean | null
+          can_view_users?: boolean | null
+          can_view_vacancies?: boolean | null
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
+          company_id: string | null
           created_at: string
           email: string
           id: string
@@ -213,6 +253,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string
           email: string
           id: string
@@ -222,6 +263,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          company_id?: string | null
           created_at?: string
           email?: string
           id?: string
@@ -229,7 +271,15 @@ export type Database = {
           telefoon?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "bedrijven"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
