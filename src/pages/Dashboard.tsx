@@ -1,0 +1,309 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+
+interface Bedrijf {
+  id: string;
+  naam: string;
+  regio: string;
+  plaats: string | null;
+  logo_url: string | null;
+  contactpersoon: string | null;
+}
+
+interface Vacature {
+  id: string;
+  functietitel: string;
+  status: string;
+  prioriteit: string;
+  aantal_posities: number;
+  bedrijf_id: string;
+}
+
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [bedrijven, setBedrijven] = useState<Bedrijf[]>([]);
+  const [vacatures, setVacatures] = useState<Vacature[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [bedrijvenResponse, vacaturesResponse] = await Promise.all([
+        supabase.from("bedrijven").select("*").order("naam"),
+        supabase.from("vacatures").select("*").order("datum_toegevoegd", { ascending: false }),
+      ]);
+
+      if (bedrijvenResponse.error) throw bedrijvenResponse.error;
+      if (vacaturesResponse.error) throw vacaturesResponse.error;
+
+      setBedrijven(bedrijvenResponse.data || []);
+      setVacatures(vacaturesResponse.data || []);
+    } catch (error: any) {
+      toast({
+        title: "Fout bij laden",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getVacaturesForBedrijf = (bedrijfId: string) => {
+    return vacatures.filter((v) => v.bedrijf_id === bedrijfId);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "open":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "invulling":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "on_hold":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "gesloten":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case "urgent":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "hoog":
+        return "bg-orange-100 text-orange-800 border-orange-200";
+      case "normaal":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "laag":
+        return "bg-gray-100 text-gray-800 border-gray-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
+    }
+  };
+
+  const filteredBedrijven = bedrijven.filter(
+    (b) =>
+      b.naam.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      b.regio.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (b.plaats && b.plaats.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Laden...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  return (
+    <DashboardLayout>
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Kaartoverzicht</h1>
+            <p className="text-muted-foreground">Interactief overzicht van alle bedrijven en vacatures</p>
+          </div>
+          <Button onClick={() => navigate("/vacatures")} className="gap-2 shadow-md">
+            <Plus className="h-4 w-4" />
+            Nieuwe Vacature
+          </Button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-2 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Totaal Bedrijven</CardTitle>
+              <Building2 className="h-5 w-5 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">{bedrijven.length}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Open Vacatures</CardTitle>
+              <Briefcase className="h-5 w-5 text-accent" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">
+                {vacatures.filter((v) => v.status === "open").length}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-2 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Totaal Posities</CardTitle>
+              <MapPin className="h-5 w-5 text-accent-orange" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">
+                {vacatures.reduce((sum, v) => sum + v.aantal_posities, 0)}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Zoek op bedrijfsnaam, regio of plaats..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 bg-card"
+          />
+        </div>
+
+        {/* Map Placeholder */}
+        <Card className="border-2 overflow-hidden">
+          <CardHeader className="bg-gradient-primary text-white">
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Interactieve Kaart Nederland
+            </CardTitle>
+            <CardDescription className="text-white/80">
+              Visueel overzicht van alle bedrijfslocaties en vacatures
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 h-96 flex items-center justify-center relative overflow-hidden">
+              {/* Simplified Netherlands shape */}
+              <svg
+                viewBox="0 0 300 400"
+                className="w-full h-full opacity-10 absolute"
+                fill="currentColor"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M150 50 L180 80 L200 120 L210 160 L220 200 L210 240 L190 280 L170 320 L150 360 L130 320 L110 280 L90 240 L80 200 L90 160 L100 120 L120 80 Z" />
+              </svg>
+              <div className="text-center relative z-10">
+                <MapPin className="h-16 w-16 text-primary mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-foreground mb-2">Kaart komt binnenkort</h3>
+                <p className="text-muted-foreground max-w-md">
+                  Interactieve kaart met bedrijfspins wordt geïmplementeerd met echte locatiedata
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bedrijven List */}
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Bedrijven & Vacatures</h2>
+          {filteredBedrijven.length === 0 ? (
+            <Card className="border-2 border-dashed">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
+                <p className="text-lg font-medium text-muted-foreground mb-2">Geen bedrijven gevonden</p>
+                <p className="text-sm text-muted-foreground mb-4">Begin met het toevoegen van een bedrijf en vacature</p>
+                <Button onClick={() => navigate("/vacatures")} className="gap-2">
+                  <Plus className="h-4 w-4" />
+                  Nieuwe Vacature Toevoegen
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredBedrijven.map((bedrijf) => {
+                const bedrijfVacatures = getVacaturesForBedrijf(bedrijf.id);
+                return (
+                  <Card
+                    key={bedrijf.id}
+                    className="border-2 hover:shadow-xl hover:border-primary/50 transition-all duration-300 cursor-pointer group"
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                            {bedrijf.naam}
+                          </CardTitle>
+                          <CardDescription className="flex items-center gap-1 mt-1">
+                            <MapPin className="h-3 w-3" />
+                            {bedrijf.regio}
+                            {bedrijf.plaats && ` • ${bedrijf.plaats}`}
+                          </CardDescription>
+                        </div>
+                        {bedrijf.logo_url && (
+                          <img src={bedrijf.logo_url} alt={bedrijf.naam} className="h-12 w-12 object-contain rounded" />
+                        )}
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {bedrijf.contactpersoon && (
+                          <p className="text-sm text-muted-foreground">Contact: {bedrijf.contactpersoon}</p>
+                        )}
+                        <div className="border-t pt-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">Vacatures</span>
+                            <Badge variant="secondary">{bedrijfVacatures.length}</Badge>
+                          </div>
+                          {bedrijfVacatures.length > 0 ? (
+                            <div className="space-y-2">
+                              {bedrijfVacatures.slice(0, 2).map((vacature) => (
+                                <div key={vacature.id} className="p-2 bg-muted/50 rounded-lg text-sm">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <span className="font-medium truncate">{vacature.functietitel}</span>
+                                    <Badge className={getPriorityColor(vacature.prioriteit)} variant="outline">
+                                      {vacature.prioriteit}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge className={getStatusColor(vacature.status)} variant="outline">
+                                      {vacature.status}
+                                    </Badge>
+                                    <span className="text-xs text-muted-foreground">
+                                      {vacature.aantal_posities} positie(s)
+                                    </span>
+                                  </div>
+                                </div>
+                              ))}
+                              {bedrijfVacatures.length > 2 && (
+                                <p className="text-xs text-muted-foreground text-center">
+                                  +{bedrijfVacatures.length - 2} meer...
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground text-center py-2">Geen vacatures</p>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default Dashboard;
