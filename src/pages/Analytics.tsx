@@ -11,6 +11,8 @@ const Analytics = () => {
     openVacatures: 0,
     totalBedrijven: 0,
     totalPosities: 0,
+    positiesVervuld: 0,
+    positiesOpen: 0,
   });
   const [regioData, setRegioData] = useState<any[]>([]);
   const [statusData, setStatusData] = useState<any[]>([]);
@@ -23,20 +25,27 @@ const Analytics = () => {
 
   const fetchAnalytics = async () => {
     try {
-      const [bedrijvenRes, vacaturesRes] = await Promise.all([
+      const [bedrijvenRes, vacaturesRes, vacatureStatsRes] = await Promise.all([
         supabase.from("bedrijven").select("*"),
         supabase.from("vacatures").select("*"),
+        supabase.from("vacature_stats").select("*"),
       ]);
 
       const bedrijven = bedrijvenRes.data || [];
       const vacatures = vacaturesRes.data || [];
+      const vacatureStats = vacatureStatsRes.data || [];
+
+      const totalPosities = vacatures.reduce((sum, v) => sum + v.aantal_posities, 0);
+      const positiesVervuld = vacatureStats.reduce((sum, vs) => sum + (vs.posities_vervuld || 0), 0);
 
       // Calculate stats
       setStats({
         totalVacatures: vacatures.length,
         openVacatures: vacatures.filter((v) => v.status === "open").length,
         totalBedrijven: bedrijven.length,
-        totalPosities: vacatures.reduce((sum, v) => sum + v.aantal_posities, 0),
+        totalPosities,
+        positiesVervuld,
+        positiesOpen: totalPosities - positiesVervuld,
       });
 
       // Regio distribution
@@ -148,7 +157,9 @@ const Analytics = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">{stats.totalPosities}</div>
-              <p className="text-xs text-muted-foreground mt-1">Te vervullen functies</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {stats.positiesVervuld} vervuld • {stats.positiesOpen} open
+              </p>
             </CardContent>
           </Card>
         </div>

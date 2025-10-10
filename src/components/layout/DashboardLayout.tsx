@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MapPin, LayoutDashboard, FileText, BarChart3, Settings, LogOut, User } from "lucide-react";
+import { MapPin, LayoutDashboard, FileText, Users, BarChart3, Settings, LogOut, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface DashboardLayoutProps {
@@ -66,6 +66,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const navItems = [
     { icon: MapPin, label: "Kaartoverzicht", path: "/dashboard" },
     { icon: FileText, label: "Vacaturebeheer", path: "/vacatures" },
+    { icon: Users, label: "Kandidaten", path: "/kandidaten" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
     { icon: Settings, label: "Instellingen", path: "/instellingen" },
   ];

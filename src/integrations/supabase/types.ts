@@ -54,6 +54,13 @@ export type Database = {
             foreignKeyName: "activity_log_related_vacature_id_fkey"
             columns: ["related_vacature_id"]
             isOneToOne: false
+            referencedRelation: "vacature_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_related_vacature_id_fkey"
+            columns: ["related_vacature_id"]
+            isOneToOne: false
             referencedRelation: "vacatures"
             referencedColumns: ["id"]
           },
@@ -127,6 +134,69 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kandidaten: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          cv_url: string | null
+          einddatum: string | null
+          email: string | null
+          id: string
+          naam: string
+          opmerkingen: string | null
+          startdatum: string | null
+          status: string
+          telefoon: string | null
+          updated_at: string
+          vacature_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          cv_url?: string | null
+          einddatum?: string | null
+          email?: string | null
+          id?: string
+          naam: string
+          opmerkingen?: string | null
+          startdatum?: string | null
+          status?: string
+          telefoon?: string | null
+          updated_at?: string
+          vacature_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          cv_url?: string | null
+          einddatum?: string | null
+          email?: string | null
+          id?: string
+          naam?: string
+          opmerkingen?: string | null
+          startdatum?: string | null
+          status?: string
+          telefoon?: string | null
+          updated_at?: string
+          vacature_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kandidaten_vacature_id_fkey"
+            columns: ["vacature_id"]
+            isOneToOne: false
+            referencedRelation: "vacature_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kandidaten_vacature_id_fkey"
+            columns: ["vacature_id"]
+            isOneToOne: false
+            referencedRelation: "vacatures"
             referencedColumns: ["id"]
           },
         ]
@@ -258,7 +328,27 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      vacature_stats: {
+        Row: {
+          aantal_posities: number | null
+          bedrijf_id: string | null
+          functietitel: string | null
+          id: string | null
+          posities_open: number | null
+          posities_vervuld: number | null
+          prioriteit: Database["public"]["Enums"]["prioriteit_level"] | null
+          status: Database["public"]["Enums"]["vacature_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vacatures_bedrijf_id_fkey"
+            columns: ["bedrijf_id"]
+            isOneToOne: false
+            referencedRelation: "bedrijven"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       has_role: {

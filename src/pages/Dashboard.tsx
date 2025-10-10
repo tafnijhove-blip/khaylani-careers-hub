@@ -31,11 +31,23 @@ interface Vacature {
   vereisten: string[] | null;
 }
 
+interface VacatureStat {
+  id: string;
+  bedrijf_id: string;
+  functietitel: string;
+  aantal_posities: number;
+  status: string;
+  prioriteit: string;
+  posities_vervuld: number;
+  posities_open: number;
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [bedrijven, setBedrijven] = useState<Bedrijf[]>([]);
   const [vacatures, setVacatures] = useState<Vacature[]>([]);
+  const [vacatureStats, setVacatureStats] = useState<VacatureStat[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -45,16 +57,19 @@ const Dashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [bedrijvenResponse, vacaturesResponse] = await Promise.all([
+      const [bedrijvenResponse, vacaturesResponse, vacatureStatsResponse] = await Promise.all([
         supabase.from("bedrijven").select("*").order("naam"),
         supabase.from("vacatures").select("*").order("datum_toegevoegd", { ascending: false }),
+        supabase.from("vacature_stats").select("*"),
       ]);
 
       if (bedrijvenResponse.error) throw bedrijvenResponse.error;
       if (vacaturesResponse.error) throw vacaturesResponse.error;
+      if (vacatureStatsResponse.error) throw vacatureStatsResponse.error;
 
       setBedrijven(bedrijvenResponse.data || []);
       setVacatures(vacaturesResponse.data || []);
+      setVacatureStats(vacatureStatsResponse.data || []);
     } catch (error: any) {
       toast({
         title: "Fout bij laden",
@@ -196,7 +211,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="p-0">
             <div className="h-[500px]">
-              <MapView bedrijven={bedrijven} vacatures={vacatures} />
+              <MapView bedrijven={bedrijven} vacatures={vacatures} vacatureStats={vacatureStats} />
             </div>
           </CardContent>
         </Card>
@@ -254,7 +269,12 @@ const Dashboard = () => {
                           </div>
                           {bedrijfVacatures.length > 0 ? (
                             <div className="space-y-2">
-                              {bedrijfVacatures.slice(0, 2).map((vacature) => (
+                              {bedrijfVacatures.slice(0, 2).map((vacature) => {
+                                const stat = vacatureStats.find(vs => vs.id === vacature.id);
+                                const vervuld = stat?.posities_vervuld || 0;
+                                const open = stat?.posities_open || vacature.aantal_posities;
+                                
+                                return (
                                 <div key={vacature.id} className="p-2 bg-muted/50 rounded-lg text-sm">
                                   <div className="flex items-center justify-between mb-1">
                                     <span className="font-medium truncate">{vacature.functietitel}</span>
@@ -262,16 +282,21 @@ const Dashboard = () => {
                                       {vacature.prioriteit}
                                     </Badge>
                                   </div>
-                                  <div className="flex items-center gap-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <Badge className={getStatusColor(vacature.status)} variant="outline">
                                       {vacature.status}
                                     </Badge>
-                                    <span className="text-xs text-muted-foreground">
-                                      {vacature.aantal_posities} positie(s)
+                                    <span className="text-xs text-green-600 font-medium">
+                                      ✓ {vervuld}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">•</span>
+                                    <span className="text-xs text-orange-600 font-medium">
+                                      ○ {open} open
                                     </span>
                                   </div>
                                 </div>
-                              ))}
+                                );
+                              })}
                               {bedrijfVacatures.length > 2 && (
                                 <p className="text-xs text-muted-foreground text-center">
                                   +{bedrijfVacatures.length - 2} meer...

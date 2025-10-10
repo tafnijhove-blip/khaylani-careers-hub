@@ -24,13 +24,20 @@ interface Vacature {
   vereisten: string[] | null;
 }
 
+interface VacatureStat {
+  id: string;
+  posities_vervuld: number;
+  posities_open: number;
+}
+
 interface MapViewProps {
   bedrijven: Bedrijf[];
   vacatures?: Vacature[];
+  vacatureStats?: VacatureStat[];
   onBedrijfClick?: (bedrijf: Bedrijf) => void;
 }
 
-const MapView = ({ bedrijven, vacatures = [], onBedrijfClick }: MapViewProps) => {
+const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string>('');
@@ -160,15 +167,24 @@ const MapView = ({ bedrijven, vacatures = [], onBedrijfClick }: MapViewProps) =>
               laag: '#6b7280'
             };
 
+            const stat = vacatureStats.find(vs => vs.id === vacature.id);
+            const vervuld = stat?.posities_vervuld || 0;
+            const open = stat?.posities_open || vacature.aantal_posities;
+
             popupContent += `
               <div style="background: #f9fafb; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
                   <span style="font-weight: 600; font-size: 13px; color: #1a1a1a;">${vacature.functietitel}</span>
                   <span style="background: ${priorityColors[vacature.prioriteit] || '#6b7280'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;">${vacature.prioriteit}</span>
                 </div>
-                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px;">
                   <span style="background: ${statusColors[vacature.status] || '#6b7280'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;">${vacature.status}</span>
                   <span style="color: #6b7280; font-size: 12px;">${vacature.aantal_posities} positie(s)</span>
+                </div>
+                <div style="background: white; padding: 6px 8px; border-radius: 4px; border: 1px solid #e5e7eb;">
+                  <span style="font-size: 11px; color: #059669; font-weight: 600;">✓ ${vervuld} vervuld</span>
+                  <span style="color: #d1d5db; margin: 0 4px;">•</span>
+                  <span style="font-size: 11px; color: #f59e0b; font-weight: 600;">○ ${open} open</span>
                 </div>
             `;
 
@@ -220,7 +236,7 @@ const MapView = ({ bedrijven, vacatures = [], onBedrijfClick }: MapViewProps) =>
       map.current?.remove();
       map.current = null;
     };
-  }, [loading, mapboxToken, bedrijven, vacatures, onBedrijfClick]);
+  }, [loading, mapboxToken, bedrijven, vacatures, vacatureStats, onBedrijfClick]);
 
   if (loading) {
     return (
