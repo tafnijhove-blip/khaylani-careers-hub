@@ -80,6 +80,12 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       pitch: 0,
     });
 
+    // Disable scroll zoom to allow page scrolling
+    map.current.scrollZoom.disable();
+    
+    // Enable drag to pan
+    map.current.dragPan.enable();
+
     // Add navigation controls
     map.current.addControl(
       new mapboxgl.NavigationControl({
