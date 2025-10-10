@@ -216,7 +216,12 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
               `;
               
               const detailsDiv = document.createElement('div');
-              detailsDiv.style.cssText = 'max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;';
+              detailsDiv.style.cssText = 'max-height: 0; overflow: hidden; transition: max-height 0.3s ease; overscroll-behavior: contain;';
+
+              // Ensure scroll inside details doesn't affect map
+              const stopScroll = (e: Event) => { e.stopPropagation(); (e as any).stopImmediatePropagation?.(); };
+              detailsDiv.addEventListener('wheel', stopScroll, { passive: true, capture: true });
+              detailsDiv.addEventListener('touchmove', stopScroll, { passive: true, capture: true });
               
               if (vacature.vereisten && vacature.vereisten.length > 0) {
                 detailsDiv.innerHTML = `
@@ -239,27 +244,24 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
               vacatureCard.addEventListener('click', () => {
                 isExpanded = !isExpanded;
                 if (isExpanded) {
-                  // Remove all height restrictions and show all content
-                  detailsDiv.style.maxHeight = 'none';
-                  detailsDiv.style.overflow = 'visible';
-                  detailsDiv.style.height = 'auto';
+                  // Limit details to their own scroll area
+                  detailsDiv.style.maxHeight = '220px';
+                  detailsDiv.style.overflowY = 'auto';
+                  (detailsDiv.style as any)['-webkit-overflow-scrolling'] = 'touch';
                   cardContent.querySelector('span:last-child')!.textContent = '▲';
                   vacatureCard.style.background = '#f9fafb';
                   
-                  // Force reflow to ensure content is visible
+                  // Ensure expanded content is visible within the list
                   setTimeout(() => {
                     const cardRect = vacatureCard.getBoundingClientRect();
                     const containerRect = vacaturesContainer.getBoundingClientRect();
-                    
-                    // If card extends beyond visible area, scroll it into view
                     if (cardRect.bottom > containerRect.bottom) {
                       vacatureCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                     }
-                  }, 100);
+                  }, 50);
                 } else {
                   detailsDiv.style.maxHeight = '0';
                   detailsDiv.style.overflow = 'hidden';
-                  detailsDiv.style.height = '0';
                   cardContent.querySelector('span:last-child')!.textContent = '▼';
                   vacatureCard.style.background = 'white';
                 }
