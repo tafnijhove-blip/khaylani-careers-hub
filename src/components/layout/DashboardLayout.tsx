@@ -77,20 +77,23 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navigation */}
-      <nav className="bg-card border-b border-border sticky top-0 z-50 backdrop-blur-lg bg-card/80">
+      <nav className="bg-gradient-glass border-b-2 border-primary/10 sticky top-0 z-50 backdrop-blur-xl shadow-lg">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-20">
             {/* Logo */}
             <Link to="/dashboard" className="flex items-center gap-3 group">
-              <img
-                src={logo}
-                alt="Khaylani bedrijfslogo"
-                className="h-7 w-auto"
-                loading="eager"
-                width={112}
-                height={28}
-              />
-              <span className="text-xl font-bold text-foreground">Khaylani</span>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-primary blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                <img
+                  src={logo}
+                  alt="Khaylani bedrijfslogo"
+                  className="h-8 w-auto relative z-10 group-hover:scale-110 transition-transform"
+                  loading="eager"
+                  width={128}
+                  height={32}
+                />
+              </div>
+              <span className="text-2xl font-bold text-gradient">Khaylani</span>
             </Link>
 
             {/* Navigation Links */}
@@ -99,7 +102,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <Link key={item.path} to={item.path}>
                   <Button
                     variant={isActive(item.path) ? "default" : "ghost"}
-                    className="gap-2 transition-all duration-300"
+                    className="gap-2 transition-all duration-300 hover:scale-105"
                   >
                     <item.icon className="h-4 w-4" />
                     {item.label}
@@ -111,27 +114,27 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar>
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                <Button variant="ghost" className="relative h-12 w-12 rounded-full hover:scale-110 transition-transform">
+                  <Avatar className="h-12 w-12 border-2 border-primary/20">
+                    <AvatarFallback className="bg-gradient-primary text-white text-lg font-bold">
                       {userName ? userName.charAt(0).toUpperCase() : "U"}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-56 glass-card border-2 border-primary/20" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userName}</p>
+                    <p className="text-base font-semibold leading-none">{userName}</p>
                     <p className="text-xs leading-none text-muted-foreground">Account</p>
                   </div>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/instellingen")}>
+                <DropdownMenuSeparator className="bg-primary/10" />
+                <DropdownMenuItem onClick={() => navigate("/instellingen")} className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
                   <span>Profiel</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Uitloggen</span>
                 </DropdownMenuItem>
@@ -141,17 +144,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         </div>
 
         {/* Mobile Navigation */}
-        <div className="md:hidden border-t border-border">
+        <div className="md:hidden border-t border-primary/10">
           <div className="flex justify-around p-2">
             {navItems.map((item) => (
               <Link key={item.path} to={item.path} className="flex-1">
                 <Button
                   variant={isActive(item.path) ? "default" : "ghost"}
                   size="sm"
-                  className="w-full gap-1 flex-col h-auto py-2"
+                  className="w-full gap-1 flex-col h-auto py-3"
                 >
-                  <item.icon className="h-4 w-4" />
-                  <span className="text-xs">{item.label}</span>
+                  <item.icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{item.label}</span>
                 </Button>
               </Link>
             ))}

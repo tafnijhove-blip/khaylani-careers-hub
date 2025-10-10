@@ -221,48 +221,54 @@ const Dashboard = () => {
     <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Kaartoverzicht</h1>
-            <p className="text-muted-foreground">Interactief overzicht van alle bedrijven en vacatures</p>
+            <h1 className="text-4xl font-bold text-gradient mb-2">Kaartoverzicht</h1>
+            <p className="text-muted-foreground text-lg">Interactief overzicht van alle bedrijven en vacatures</p>
           </div>
-          <Button onClick={() => navigate("/vacatures")} className="gap-2 shadow-md">
-            <Plus className="h-4 w-4" />
+          <Button onClick={() => navigate("/vacatures")} className="gap-2 shadow-glow">
+            <Plus className="h-5 w-5" />
             Nieuwe Vacature
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-2 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up">
+          <Card className="border-primary/20 hover:border-primary/40 hover:shadow-glow transition-all duration-500 glow-border overflow-hidden group">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Totaal Bedrijven</CardTitle>
-              <Building2 className="h-5 w-5 text-primary" />
+              <div className="h-12 w-12 rounded-full bg-gradient-primary flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform">
+                <Building2 className="h-6 w-6 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">{bedrijven.length}</div>
+              <div className="text-4xl font-bold text-gradient">{bedrijven.length}</div>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="border-accent-cyan/20 hover:border-accent-cyan/40 hover:shadow-glow-cyan transition-all duration-500 glow-border overflow-hidden group">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Open Vacatures</CardTitle>
-              <Briefcase className="h-5 w-5 text-accent" />
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-accent-cyan to-accent-teal flex items-center justify-center shadow-glow-cyan group-hover:scale-110 transition-transform">
+                <Briefcase className="h-6 w-6 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">
+              <div className="text-4xl font-bold bg-gradient-to-r from-accent-cyan to-accent-teal bg-clip-text text-transparent">
                 {vacatures.filter((v) => v.status === "open").length}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-2 hover:shadow-lg transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <Card className="border-accent-purple/20 hover:border-accent-purple/40 hover:shadow-glow transition-all duration-500 glow-border overflow-hidden group">
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Totaal Posities</CardTitle>
-              <MapPin className="h-5 w-5 text-accent-orange" />
+              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-accent-purple to-primary flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform">
+                <MapPin className="h-6 w-6 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-foreground">
+              <div className="text-4xl font-bold bg-gradient-to-r from-accent-purple to-primary bg-clip-text text-transparent">
                 {vacatures.reduce((sum, v) => sum + v.aantal_posities, 0)}
               </div>
             </CardContent>
@@ -281,13 +287,16 @@ const Dashboard = () => {
         </div>
 
         {/* Interactive Map */}
-        <Card className="border-2 overflow-hidden">
-          <CardHeader className="bg-gradient-primary text-white">
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
+        <Card className="border-2 border-primary/30 overflow-hidden shadow-xl hover:shadow-glow transition-all duration-500">
+          <CardHeader className="bg-gradient-primary text-white relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-shine opacity-20"></div>
+            <CardTitle className="flex items-center gap-3 relative z-10">
+              <div className="h-10 w-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <MapPin className="h-6 w-6" />
+              </div>
               Interactieve Kaart Nederland
             </CardTitle>
-            <CardDescription className="text-white/80">
+            <CardDescription className="text-white/90 relative z-10">
               Visueel overzicht van alle bedrijfslocaties en vacatures
             </CardDescription>
           </CardHeader>
@@ -299,16 +308,18 @@ const Dashboard = () => {
         </Card>
 
         {/* Bedrijven List */}
-        <div>
-          <h2 className="text-2xl font-bold mb-4">Bedrijven & Vacatures</h2>
+        <div className="animate-fade-in-up">
+          <h2 className="text-3xl font-bold mb-6 text-gradient">Bedrijven & Vacatures</h2>
           {filteredBedrijven.length === 0 ? (
-            <Card className="border-2 border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">Geen bedrijven gevonden</p>
-                <p className="text-sm text-muted-foreground mb-4">Begin met het toevoegen van een bedrijf en vacature</p>
+            <Card className="border-2 border-dashed border-primary/30 bg-gradient-glass">
+              <CardContent className="flex flex-col items-center justify-center py-16">
+                <div className="h-24 w-24 rounded-full bg-gradient-primary/10 flex items-center justify-center mb-6 animate-pulse-glow">
+                  <AlertCircle className="h-12 w-12 text-primary" />
+                </div>
+                <p className="text-xl font-semibold text-foreground mb-2">Geen bedrijven gevonden</p>
+                <p className="text-sm text-muted-foreground mb-6">Begin met het toevoegen van een bedrijf en vacature</p>
                 <Button onClick={() => navigate("/vacatures")} className="gap-2">
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-5 w-5" />
                   Nieuwe Vacature Toevoegen
                 </Button>
               </CardContent>
@@ -320,7 +331,7 @@ const Dashboard = () => {
                 return (
                   <Card
                     key={bedrijf.id}
-                    className="border-2 hover:shadow-xl hover:border-primary/50 transition-all duration-300 group relative"
+                    className="border-2 border-primary/10 hover:border-primary/40 hover:shadow-glow transition-all duration-500 group relative overflow-hidden glow-border"
                   >
                     <Button
                       variant="ghost"
