@@ -68,6 +68,7 @@ export type Database = {
       }
       bedrijven: {
         Row: {
+          adres: string | null
           beloning: string | null
           contactpersoon: string | null
           created_at: string
@@ -85,6 +86,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          adres?: string | null
           beloning?: string | null
           contactpersoon?: string | null
           created_at?: string
@@ -102,6 +104,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          adres?: string | null
           beloning?: string | null
           contactpersoon?: string | null
           created_at?: string

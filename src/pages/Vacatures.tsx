@@ -30,6 +30,7 @@ const Vacatures = () => {
   const [bedrijfNaam, setBedrijfNaam] = useState("");
   const [regio, setRegio] = useState("");
   const [plaats, setPlaats] = useState("");
+  const [adres, setAdres] = useState("");
   const [contactpersoon, setContactpersoon] = useState("");
   const [telefoon, setTelefoon] = useState("");
   const [email, setEmail] = useState("");
@@ -85,6 +86,7 @@ const Vacatures = () => {
     setBedrijfNaam("");
     setRegio("");
     setPlaats("");
+    setAdres("");
     setContactpersoon("");
     setTelefoon("");
     setEmail("");
@@ -117,12 +119,34 @@ const Vacatures = () => {
           throw new Error("Bedrijfsnaam en regio zijn verplicht");
         }
 
+        // Geocode address if provided
+        let lat = null;
+        let lng = null;
+        if (adres) {
+          try {
+            const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-address', {
+              body: { address: adres }
+            });
+            
+            if (!geocodeError && geocodeData) {
+              lat = geocodeData.lat;
+              lng = geocodeData.lng;
+            }
+          } catch (err) {
+            console.error('Geocoding failed:', err);
+            // Continue without coordinates if geocoding fails
+          }
+        }
+
         const { data: newBedrijf, error: bedrijfError } = await supabase
           .from("bedrijven")
           .insert({
             naam: bedrijfNaam,
             regio,
             plaats: plaats || null,
+            adres: adres || null,
+            lat,
+            lng,
             contactpersoon: contactpersoon || null,
             telefoon: telefoon || null,
             email: email || null,
@@ -288,6 +312,19 @@ const Vacatures = () => {
                           placeholder="Naam contactpersoon"
                         />
                       </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="adres">Adres (voor kaartweergave)</Label>
+                      <Input
+                        id="adres"
+                        value={adres}
+                        onChange={(e) => setAdres(e.target.value)}
+                        placeholder="Bijv. Keizersgracht 100, Amsterdam"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Voer een volledig adres in voor nauwkeurige pinpositie op de kaart
+                      </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
