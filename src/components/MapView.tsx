@@ -177,7 +177,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
 
           // Vacatures container
           const vacaturesContainer = document.createElement('div');
-          vacaturesContainer.style.cssText = 'max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;';
+          vacaturesContainer.style.cssText = 'max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;';
 
           // Make the list scroll independently of the page/map
           vacaturesContainer.style.overscrollBehavior = 'contain';
@@ -239,14 +239,27 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
               vacatureCard.addEventListener('click', () => {
                 isExpanded = !isExpanded;
                 if (isExpanded) {
-                  // Set to a large value to ensure all content is visible
-                  detailsDiv.style.maxHeight = '500px';
+                  // Remove all height restrictions and show all content
+                  detailsDiv.style.maxHeight = 'none';
                   detailsDiv.style.overflow = 'visible';
+                  detailsDiv.style.height = 'auto';
                   cardContent.querySelector('span:last-child')!.textContent = '▲';
                   vacatureCard.style.background = '#f9fafb';
+                  
+                  // Force reflow to ensure content is visible
+                  setTimeout(() => {
+                    const cardRect = vacatureCard.getBoundingClientRect();
+                    const containerRect = vacaturesContainer.getBoundingClientRect();
+                    
+                    // If card extends beyond visible area, scroll it into view
+                    if (cardRect.bottom > containerRect.bottom) {
+                      vacatureCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                  }, 100);
                 } else {
                   detailsDiv.style.maxHeight = '0';
                   detailsDiv.style.overflow = 'hidden';
+                  detailsDiv.style.height = '0';
                   cardContent.querySelector('span:last-child')!.textContent = '▼';
                   vacatureCard.style.background = 'white';
                 }
