@@ -134,7 +134,10 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
         
         // Create popup container
         const popupContainer = document.createElement('div');
-        popupContainer.style.cssText = 'padding: 10px; max-width: 320px; font-family: system-ui, -apple-system, sans-serif;';
+        popupContainer.style.cssText = 'padding: 10px; max-width: 320px; max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; font-family: system-ui, -apple-system, sans-serif;';
+        // Prevent the map/page from hijacking scroll inside the popup
+        popupContainer.addEventListener('wheel', (e) => e.stopPropagation(), { passive: true });
+        popupContainer.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
         
         // Header
         const header = document.createElement('div');
@@ -172,15 +175,14 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           const vacaturesContainer = document.createElement('div');
           vacaturesContainer.style.cssText = 'max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;';
 
-          // Let page scroll when reaching top/bottom of this list
+          // Make the list scroll independently of the page/map
+          vacaturesContainer.style.overscrollBehavior = 'contain';
           vacaturesContainer.addEventListener('wheel', (e: WheelEvent) => {
-            const atTop = vacaturesContainer.scrollTop === 0;
-            const atBottom = Math.ceil(vacaturesContainer.scrollTop + vacaturesContainer.clientHeight) >= vacaturesContainer.scrollHeight;
-            if ((atTop && e.deltaY < 0) || (atBottom && e.deltaY > 0)) {
-              e.preventDefault();
-              window.scrollBy({ top: e.deltaY, behavior: 'auto' });
-            }
-          }, { passive: false });
+            e.stopPropagation();
+          }, { passive: true });
+          vacaturesContainer.addEventListener('touchmove', (e: TouchEvent) => {
+            e.stopPropagation();
+          }, { passive: true });
           
           let showAll = false;
           const vacaturesToShow = bedrijfVacatures.slice(0, 3);
