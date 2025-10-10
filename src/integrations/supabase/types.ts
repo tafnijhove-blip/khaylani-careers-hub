@@ -360,7 +360,13 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "recruiter" | "accountmanager" | "management" | "marketing_hr"
+      app_role:
+        | "recruiter"
+        | "accountmanager"
+        | "management"
+        | "marketing_hr"
+        | "superadmin"
+        | "ceo"
       prioriteit_level: "laag" | "normaal" | "hoog" | "urgent"
       vacature_status: "open" | "invulling" | "on_hold" | "gesloten"
     }
@@ -490,7 +496,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["recruiter", "accountmanager", "management", "marketing_hr"],
+      app_role: [
+        "recruiter",
+        "accountmanager",
+        "management",
+        "marketing_hr",
+        "superadmin",
+        "ceo",
+      ],
       prioriteit_level: ["laag", "normaal", "hoog", "urgent"],
       vacature_status: ["open", "invulling", "on_hold", "gesloten"],
     },
