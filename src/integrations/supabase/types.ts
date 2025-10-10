@@ -73,6 +73,45 @@ export type Database = {
           },
         ]
       }
+      bedrijf_relaties: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          detacheringbureau_id: string
+          id: string
+          klant_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          detacheringbureau_id: string
+          id?: string
+          klant_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          detacheringbureau_id?: string
+          id?: string
+          klant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bedrijf_relaties_detacheringbureau_id_fkey"
+            columns: ["detacheringbureau_id"]
+            isOneToOne: false
+            referencedRelation: "bedrijven"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bedrijf_relaties_klant_id_fkey"
+            columns: ["klant_id"]
+            isOneToOne: false
+            referencedRelation: "bedrijven"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bedrijven: {
         Row: {
           adres: string | null
@@ -90,6 +129,7 @@ export type Database = {
           plaats: string | null
           regio: string
           telefoon: string | null
+          type: Database["public"]["Enums"]["bedrijf_type"]
           updated_at: string
         }
         Insert: {
@@ -108,6 +148,7 @@ export type Database = {
           plaats?: string | null
           regio: string
           telefoon?: string | null
+          type?: Database["public"]["Enums"]["bedrijf_type"]
           updated_at?: string
         }
         Update: {
@@ -126,6 +167,7 @@ export type Database = {
           plaats?: string | null
           regio?: string
           telefoon?: string | null
+          type?: Database["public"]["Enums"]["bedrijf_type"]
           updated_at?: string
         }
         Relationships: [
@@ -421,6 +463,7 @@ export type Database = {
         | "marketing_hr"
         | "superadmin"
         | "ceo"
+      bedrijf_type: "detacheringbureau" | "klant"
       prioriteit_level: "laag" | "normaal" | "hoog" | "urgent"
       vacature_status: "open" | "invulling" | "on_hold" | "gesloten"
     }
@@ -558,6 +601,7 @@ export const Constants = {
         "superadmin",
         "ceo",
       ],
+      bedrijf_type: ["detacheringbureau", "klant"],
       prioriteit_level: ["laag", "normaal", "hoog", "urgent"],
       vacature_status: ["open", "invulling", "on_hold", "gesloten"],
     },
