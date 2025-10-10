@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MapPin, LayoutDashboard, FileText, Users, BarChart3, Settings, LogOut, User } from "lucide-react";
+import { MapPin, LayoutDashboard, FileText, Users, BarChart3, Settings, LogOut, User, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import logo from "@/assets/logo-khaylani.png";
 
@@ -24,6 +24,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const location = useLocation();
   const { toast } = useToast();
   const [userName, setUserName] = useState<string>("");
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     // Check authentication
@@ -38,9 +39,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           .eq("id", session.user.id)
           .single()
           .then(({ data }) => {
-            if (data) {
-              setUserName(data.naam);
-            }
+            if (data) setUserName(data.naam);
+          });
+
+        // Fetch user role
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", session.user.id)
+          .maybeSingle()
+          .then(({ data }) => {
+            setUserRole(data?.role ?? null);
           });
       }
     });
@@ -64,13 +73,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     });
   };
 
-  const navItems = [
+  const baseNavItems = [
     { icon: MapPin, label: "Kaartoverzicht", path: "/dashboard" },
     { icon: FileText, label: "Vacaturebeheer", path: "/vacatures" },
     { icon: Users, label: "Kandidaten", path: "/kandidaten" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
     { icon: Settings, label: "Instellingen", path: "/instellingen" },
   ];
+  const navItems = userRole === 'superadmin'
+    ? [{ icon: Shield, label: 'Superadmin', path: '/superadmin' }, ...baseNavItems]
+    : baseNavItems;
 
   const isActive = (path: string) => location.pathname === path;
 
