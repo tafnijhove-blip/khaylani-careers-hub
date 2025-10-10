@@ -131,14 +131,19 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
         // Get vacatures for this bedrijf
         const bedrijfVacatures = vacatures.filter(v => v.bedrijf_id === bedrijf.id);
         
-        // Create compact popup with limited height
-        let popupContent = `
-          <div style="padding: 10px; max-width: 280px; font-family: system-ui, -apple-system, sans-serif;">
-            <h3 style="font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #1a1a1a;">${bedrijf.naam}</h3>
-            <p style="color: #666; font-size: 12px; margin-bottom: 8px;">
-              ${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}
-            </p>
+        // Create popup container
+        const popupContainer = document.createElement('div');
+        popupContainer.style.cssText = 'padding: 10px; max-width: 320px; font-family: system-ui, -apple-system, sans-serif;';
+        
+        // Header
+        const header = document.createElement('div');
+        header.innerHTML = `
+          <h3 style="font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #1a1a1a;">${bedrijf.naam}</h3>
+          <p style="color: #666; font-size: 12px; margin-bottom: 8px;">
+            ${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}
+          </p>
         `;
+        popupContainer.appendChild(header);
 
         if (bedrijfVacatures.length > 0) {
           const totalPosities = bedrijfVacatures.reduce((sum, v) => sum + v.aantal_posities, 0);
@@ -148,57 +153,141 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           }, 0);
           const totalOpen = totalPosities - totalVervuld;
 
-          popupContent += `
-            <div style="background: #f3f4f6; padding: 8px; border-radius: 6px; margin-bottom: 8px;">
-              <div style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">
-                ${bedrijfVacatures.length} Vacature${bedrijfVacatures.length > 1 ? 's' : ''}
-              </div>
-              <div style="display: flex; gap: 12px;">
-                <span style="font-size: 11px; color: #059669; font-weight: 600;">✓ ${totalVervuld} vervuld</span>
-                <span style="font-size: 11px; color: #f59e0b; font-weight: 600;">○ ${totalOpen} open</span>
-              </div>
+          // Summary box
+          const summaryBox = document.createElement('div');
+          summaryBox.style.cssText = 'background: #f3f4f6; padding: 8px; border-radius: 6px; margin-bottom: 8px;';
+          summaryBox.innerHTML = `
+            <div style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">
+              ${bedrijfVacatures.length} Vacature${bedrijfVacatures.length > 1 ? 's' : ''}
             </div>
-            <div style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; gap: 12px;">
+              <span style="font-size: 11px; color: #059669; font-weight: 600;">✓ ${totalVervuld} vervuld</span>
+              <span style="font-size: 11px; color: #f59e0b; font-weight: 600;">○ ${totalOpen} open</span>
+            </div>
           `;
+          popupContainer.appendChild(summaryBox);
 
-          bedrijfVacatures.slice(0, 3).forEach((vacature) => {
-            const stat = vacatureStats.find(vs => vs.id === vacature.id);
-            const vervuld = stat?.posities_vervuld || 0;
-            const open = stat?.posities_open || vacature.aantal_posities;
+          // Vacatures container
+          const vacaturesContainer = document.createElement('div');
+          vacaturesContainer.style.cssText = 'max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;';
+          
+          let showAll = false;
+          const vacaturesToShow = bedrijfVacatures.slice(0, 3);
 
-            popupContent += `
-              <div style="background: white; padding: 6px 8px; border-radius: 4px; border: 1px solid #e5e7eb;">
-                <div style="font-weight: 500; font-size: 12px; color: #1f2937; margin-bottom: 3px;">${vacature.functietitel}</div>
+          const renderVacatures = () => {
+            vacaturesContainer.innerHTML = '';
+            const displayVacatures = showAll ? bedrijfVacatures : vacaturesToShow;
+            
+            displayVacatures.forEach((vacature) => {
+              const stat = vacatureStats.find(vs => vs.id === vacature.id);
+              const vervuld = stat?.posities_vervuld || 0;
+              const open = stat?.posities_open || vacature.aantal_posities;
+
+              const vacatureCard = document.createElement('div');
+              vacatureCard.style.cssText = 'background: white; padding: 6px 8px; border-radius: 4px; border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.2s;';
+              
+              const cardContent = document.createElement('div');
+              cardContent.innerHTML = `
+                <div style="font-weight: 500; font-size: 12px; color: #1f2937; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center;">
+                  <span>${vacature.functietitel}</span>
+                  <span style="font-size: 10px; color: #9ca3af;">▼</span>
+                </div>
                 <div style="display: flex; gap: 8px; font-size: 10px;">
                   <span style="color: #059669;">✓ ${vervuld}</span>
                   <span style="color: #f59e0b;">○ ${open}</span>
                 </div>
-              </div>
-            `;
-          });
+              `;
+              
+              const detailsDiv = document.createElement('div');
+              detailsDiv.style.cssText = 'max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;';
+              
+              if (vacature.vereisten && vacature.vereisten.length > 0) {
+                detailsDiv.innerHTML = `
+                  <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+                    <div style="font-size: 10px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">FUNCTIE-EISEN:</div>
+                    <ul style="margin: 0; padding-left: 16px; font-size: 11px; color: #4b5563; line-height: 1.4;">
+                      ${vacature.vereisten.map(v => `<li style="margin-bottom: 2px;">${v}</li>`).join('')}
+                    </ul>
+                  </div>
+                `;
+              } else {
+                detailsDiv.innerHTML = `
+                  <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #9ca3af; font-style: italic;">
+                    Geen functie-eisen opgegeven
+                  </div>
+                `;
+              }
 
-          if (bedrijfVacatures.length > 3) {
-            popupContent += `<div style="text-align: center; font-size: 11px; color: #6b7280; padding: 4px;">+${bedrijfVacatures.length - 3} meer...</div>`;
-          }
+              let isExpanded = false;
+              vacatureCard.addEventListener('click', () => {
+                isExpanded = !isExpanded;
+                if (isExpanded) {
+                  detailsDiv.style.maxHeight = detailsDiv.scrollHeight + 'px';
+                  cardContent.querySelector('span:last-child').textContent = '▲';
+                  vacatureCard.style.background = '#f9fafb';
+                } else {
+                  detailsDiv.style.maxHeight = '0';
+                  cardContent.querySelector('span:last-child').textContent = '▼';
+                  vacatureCard.style.background = 'white';
+                }
+              });
 
-          popupContent += `</div>`;
+              vacatureCard.addEventListener('mouseenter', () => {
+                if (!isExpanded) {
+                  vacatureCard.style.background = '#f9fafb';
+                  vacatureCard.style.borderColor = '#d1d5db';
+                }
+              });
+
+              vacatureCard.addEventListener('mouseleave', () => {
+                if (!isExpanded) {
+                  vacatureCard.style.background = 'white';
+                  vacatureCard.style.borderColor = '#e5e7eb';
+                }
+              });
+
+              vacatureCard.appendChild(cardContent);
+              vacatureCard.appendChild(detailsDiv);
+              vacaturesContainer.appendChild(vacatureCard);
+            });
+
+            if (bedrijfVacatures.length > 3) {
+              const toggleButton = document.createElement('button');
+              toggleButton.style.cssText = 'width: 100%; text-align: center; font-size: 11px; color: #3b82f6; padding: 6px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 4px; cursor: pointer; font-weight: 500; transition: all 0.2s;';
+              toggleButton.textContent = showAll ? `Toon minder` : `Toon alle ${bedrijfVacatures.length} vacatures`;
+              
+              toggleButton.addEventListener('mouseenter', () => {
+                toggleButton.style.background = '#dbeafe';
+              });
+              toggleButton.addEventListener('mouseleave', () => {
+                toggleButton.style.background = '#eff6ff';
+              });
+              
+              toggleButton.addEventListener('click', () => {
+                showAll = !showAll;
+                renderVacatures();
+              });
+              
+              vacaturesContainer.appendChild(toggleButton);
+            }
+          };
+
+          renderVacatures();
+          popupContainer.appendChild(vacaturesContainer);
         } else {
-          popupContent += `
-            <div style="text-align: center; padding: 8px; color: #9ca3af; font-size: 12px;">
-              Geen vacatures
-            </div>
-          `;
+          const noVacatures = document.createElement('div');
+          noVacatures.style.cssText = 'text-align: center; padding: 8px; color: #9ca3af; font-size: 12px;';
+          noVacatures.textContent = 'Geen vacatures';
+          popupContainer.appendChild(noVacatures);
         }
-
-        popupContent += `</div>`;
 
         const popup = new mapboxgl.Popup({ 
           offset: 25, 
-          maxWidth: '300px',
+          maxWidth: '350px',
           closeButton: true,
           closeOnClick: false,
-          className: 'compact-popup'
-        }).setHTML(popupContent);
+          className: 'interactive-popup'
+        }).setDOMContent(popupContainer);
 
         // Add marker to map
         const marker = new mapboxgl.Marker(el)
