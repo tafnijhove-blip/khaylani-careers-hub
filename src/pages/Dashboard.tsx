@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import MapView from "@/components/MapView";
 
 interface Bedrijf {
   id: string;
@@ -16,6 +17,8 @@ interface Bedrijf {
   plaats: string | null;
   logo_url: string | null;
   contactpersoon: string | null;
+  lat: number | null;
+  lng: number | null;
 }
 
 interface Vacature {
@@ -179,7 +182,7 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Map Placeholder */}
+        {/* Interactive Map */}
         <Card className="border-2 overflow-hidden">
           <CardHeader className="bg-gradient-primary text-white">
             <CardTitle className="flex items-center gap-2">
@@ -191,23 +194,8 @@ const Dashboard = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 h-96 flex items-center justify-center relative overflow-hidden">
-              {/* Simplified Netherlands shape */}
-              <svg
-                viewBox="0 0 300 400"
-                className="w-full h-full opacity-10 absolute"
-                fill="currentColor"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M150 50 L180 80 L200 120 L210 160 L220 200 L210 240 L190 280 L170 320 L150 360 L130 320 L110 280 L90 240 L80 200 L90 160 L100 120 L120 80 Z" />
-              </svg>
-              <div className="text-center relative z-10">
-                <MapPin className="h-16 w-16 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Kaart komt binnenkort</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Interactieve kaart met bedrijfspins wordt geïmplementeerd met echte locatiedata
-                </p>
-              </div>
+            <div className="h-[500px]">
+              <MapView bedrijven={bedrijven} />
             </div>
           </CardContent>
         </Card>
