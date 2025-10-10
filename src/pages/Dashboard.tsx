@@ -28,6 +28,7 @@ interface Vacature {
   prioriteit: string;
   aantal_posities: number;
   bedrijf_id: string;
+  vereisten: string[] | null;
 }
 
 const Dashboard = () => {
@@ -195,7 +196,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="p-0">
             <div className="h-[500px]">
-              <MapView bedrijven={bedrijven} />
+              <MapView bedrijven={bedrijven} vacatures={vacatures} />
             </div>
           </CardContent>
         </Card>

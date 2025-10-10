@@ -14,12 +14,23 @@ interface Bedrijf {
   logo_url: string | null;
 }
 
+interface Vacature {
+  id: string;
+  functietitel: string;
+  status: string;
+  prioriteit: string;
+  aantal_posities: number;
+  bedrijf_id: string;
+  vereisten: string[] | null;
+}
+
 interface MapViewProps {
   bedrijven: Bedrijf[];
+  vacatures?: Vacature[];
   onBedrijfClick?: (bedrijf: Bedrijf) => void;
 }
 
-const MapView = ({ bedrijven, onBedrijfClick }: MapViewProps) => {
+const MapView = ({ bedrijven, vacatures = [], onBedrijfClick }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string>('');
@@ -89,12 +100,12 @@ const MapView = ({ bedrijven, onBedrijfClick }: MapViewProps) => {
         el.style.fontSize = '18px';
         el.style.fontWeight = 'bold';
         el.style.color = 'white';
-        el.style.transition = 'all 0.2s ease-in-out';
+        el.style.transition = 'transform 0.2s ease-in-out, background-color 0.2s ease-in-out';
         el.textContent = bedrijf.naam.charAt(0).toUpperCase();
 
-        // Add hover effect
+        // Add hover effect without position change
         el.addEventListener('mouseenter', () => {
-          el.style.transform = 'scale(1.2)';
+          el.style.transform = 'scale(1.15)';
           el.style.backgroundColor = '#2563EB';
         });
         el.addEventListener('mouseleave', () => {
@@ -102,13 +113,84 @@ const MapView = ({ bedrijven, onBedrijfClick }: MapViewProps) => {
           el.style.backgroundColor = '#3B82F6';
         });
 
-        // Create popup
-        const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-          <div style="padding: 8px;">
-            <h3 style="font-weight: bold; margin-bottom: 4px;">${bedrijf.naam}</h3>
-            <p style="color: #666; font-size: 14px;">${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}</p>
-          </div>
-        `);
+        // Get vacatures for this bedrijf
+        const bedrijfVacatures = vacatures.filter(v => v.bedrijf_id === bedrijf.id);
+        
+        // Create popup with detailed information
+        let popupContent = `
+          <div style="padding: 12px; max-width: 350px;">
+            <h3 style="font-weight: bold; margin-bottom: 8px; font-size: 16px; color: #1a1a1a;">${bedrijf.naam}</h3>
+            <p style="color: #666; font-size: 13px; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              ${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}
+            </p>
+        `;
+
+        if (bedrijfVacatures.length > 0) {
+          popupContent += `
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 12px;">
+              <div style="display: flex; align-items: center; justify-between; margin-bottom: 8px;">
+                <span style="font-weight: 600; font-size: 14px; color: #1a1a1a;">Vacatures (${bedrijfVacatures.length})</span>
+              </div>
+              <div style="max-height: 200px; overflow-y: auto;">
+          `;
+
+          bedrijfVacatures.forEach((vacature, index) => {
+            const statusColors: Record<string, string> = {
+              open: '#10b981',
+              invulling: '#f59e0b',
+              on_hold: '#f97316',
+              gesloten: '#6b7280'
+            };
+            const priorityColors: Record<string, string> = {
+              urgent: '#ef4444',
+              hoog: '#f97316',
+              normaal: '#3b82f6',
+              laag: '#6b7280'
+            };
+
+            popupContent += `
+              <div style="background: #f9fafb; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+                  <span style="font-weight: 600; font-size: 13px; color: #1a1a1a;">${vacature.functietitel}</span>
+                  <span style="background: ${priorityColors[vacature.prioriteit] || '#6b7280'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;">${vacature.prioriteit}</span>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                  <span style="background: ${statusColors[vacature.status] || '#6b7280'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;">${vacature.status}</span>
+                  <span style="color: #6b7280; font-size: 12px;">${vacature.aantal_posities} positie(s)</span>
+                </div>
+            `;
+
+            if (vacature.vereisten && vacature.vereisten.length > 0) {
+              popupContent += `
+                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+                  <span style="font-size: 11px; font-weight: 600; color: #6b7280; display: block; margin-bottom: 4px;">FUNCTIE-EISEN:</span>
+                  <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #4b5563;">
+              `;
+              vacature.vereisten.forEach(vereiste => {
+                popupContent += `<li style="margin-bottom: 2px;">${vereiste}</li>`;
+              });
+              popupContent += `</ul></div>`;
+            }
+
+            popupContent += `</div>`;
+          });
+
+          popupContent += `</div></div>`;
+        } else {
+          popupContent += `
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 12px;">
+              <p style="color: #9ca3af; font-size: 13px; text-align: center;">Geen vacatures beschikbaar</p>
+            </div>
+          `;
+        }
+
+        popupContent += `</div>`;
+
+        const popup = new mapboxgl.Popup({ offset: 25, maxWidth: '400px' }).setHTML(popupContent);
 
         // Add marker to map
         const marker = new mapboxgl.Marker(el)
@@ -130,7 +212,7 @@ const MapView = ({ bedrijven, onBedrijfClick }: MapViewProps) => {
       map.current?.remove();
       map.current = null;
     };
-  }, [loading, mapboxToken, bedrijven, onBedrijfClick]);
+  }, [loading, mapboxToken, bedrijven, vacatures, onBedrijfClick]);
 
   if (loading) {
     return (
