@@ -78,7 +78,6 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       center: [5.2913, 52.1326], // Center of Netherlands
       zoom: 6.5,
       pitch: 0,
-      cooperativeGestures: true, // Requires Ctrl+scroll to zoom, allows page scroll
     });
 
     // Add navigation controls
@@ -132,90 +131,74 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
         // Get vacatures for this bedrijf
         const bedrijfVacatures = vacatures.filter(v => v.bedrijf_id === bedrijf.id);
         
-        // Create popup with detailed information
+        // Create compact popup with limited height
         let popupContent = `
-          <div style="padding: 12px; max-width: 350px;">
-            <h3 style="font-weight: bold; margin-bottom: 8px; font-size: 16px; color: #1a1a1a;">${bedrijf.naam}</h3>
-            <p style="color: #666; font-size: 13px; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
+          <div style="padding: 10px; max-width: 280px; font-family: system-ui, -apple-system, sans-serif;">
+            <h3 style="font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #1a1a1a;">${bedrijf.naam}</h3>
+            <p style="color: #666; font-size: 12px; margin-bottom: 8px;">
               ${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}
             </p>
         `;
 
         if (bedrijfVacatures.length > 0) {
+          const totalPosities = bedrijfVacatures.reduce((sum, v) => sum + v.aantal_posities, 0);
+          const totalVervuld = bedrijfVacatures.reduce((sum, v) => {
+            const stat = vacatureStats.find(vs => vs.id === v.id);
+            return sum + (stat?.posities_vervuld || 0);
+          }, 0);
+          const totalOpen = totalPosities - totalVervuld;
+
           popupContent += `
-            <div style="border-top: 1px solid #e5e7eb; padding-top: 12px;">
-              <div style="display: flex; align-items: center; justify-between; margin-bottom: 8px;">
-                <span style="font-weight: 600; font-size: 14px; color: #1a1a1a;">Vacatures (${bedrijfVacatures.length})</span>
+            <div style="background: #f3f4f6; padding: 8px; border-radius: 6px; margin-bottom: 8px;">
+              <div style="font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 4px;">
+                ${bedrijfVacatures.length} Vacature${bedrijfVacatures.length > 1 ? 's' : ''}
               </div>
-              <div style="max-height: 200px; overflow-y: auto;">
+              <div style="display: flex; gap: 12px;">
+                <span style="font-size: 11px; color: #059669; font-weight: 600;">✓ ${totalVervuld} vervuld</span>
+                <span style="font-size: 11px; color: #f59e0b; font-weight: 600;">○ ${totalOpen} open</span>
+              </div>
+            </div>
+            <div style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
           `;
 
-          bedrijfVacatures.forEach((vacature, index) => {
-            const statusColors: Record<string, string> = {
-              open: '#10b981',
-              invulling: '#f59e0b',
-              on_hold: '#f97316',
-              gesloten: '#6b7280'
-            };
-            const priorityColors: Record<string, string> = {
-              urgent: '#ef4444',
-              hoog: '#f97316',
-              normaal: '#3b82f6',
-              laag: '#6b7280'
-            };
-
+          bedrijfVacatures.slice(0, 3).forEach((vacature) => {
             const stat = vacatureStats.find(vs => vs.id === vacature.id);
             const vervuld = stat?.posities_vervuld || 0;
             const open = stat?.posities_open || vacature.aantal_posities;
 
             popupContent += `
-              <div style="background: #f9fafb; padding: 10px; border-radius: 6px; margin-bottom: 8px;">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
-                  <span style="font-weight: 600; font-size: 13px; color: #1a1a1a;">${vacature.functietitel}</span>
-                  <span style="background: ${priorityColors[vacature.prioriteit] || '#6b7280'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;">${vacature.prioriteit}</span>
+              <div style="background: white; padding: 6px 8px; border-radius: 4px; border: 1px solid #e5e7eb;">
+                <div style="font-weight: 500; font-size: 12px; color: #1f2937; margin-bottom: 3px;">${vacature.functietitel}</div>
+                <div style="display: flex; gap: 8px; font-size: 10px;">
+                  <span style="color: #059669;">✓ ${vervuld}</span>
+                  <span style="color: #f59e0b;">○ ${open}</span>
                 </div>
-                <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-bottom: 6px;">
-                  <span style="background: ${statusColors[vacature.status] || '#6b7280'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500;">${vacature.status}</span>
-                  <span style="color: #6b7280; font-size: 12px;">${vacature.aantal_posities} positie(s)</span>
-                </div>
-                <div style="background: white; padding: 6px 8px; border-radius: 4px; border: 1px solid #e5e7eb;">
-                  <span style="font-size: 11px; color: #059669; font-weight: 600;">✓ ${vervuld} vervuld</span>
-                  <span style="color: #d1d5db; margin: 0 4px;">•</span>
-                  <span style="font-size: 11px; color: #f59e0b; font-weight: 600;">○ ${open} open</span>
-                </div>
+              </div>
             `;
-
-            if (vacature.vereisten && vacature.vereisten.length > 0) {
-              popupContent += `
-                <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
-                  <span style="font-size: 11px; font-weight: 600; color: #6b7280; display: block; margin-bottom: 4px;">FUNCTIE-EISEN:</span>
-                  <ul style="margin: 0; padding-left: 16px; font-size: 12px; color: #4b5563;">
-              `;
-              vacature.vereisten.forEach(vereiste => {
-                popupContent += `<li style="margin-bottom: 2px;">${vereiste}</li>`;
-              });
-              popupContent += `</ul></div>`;
-            }
-
-            popupContent += `</div>`;
           });
 
-          popupContent += `</div></div>`;
+          if (bedrijfVacatures.length > 3) {
+            popupContent += `<div style="text-align: center; font-size: 11px; color: #6b7280; padding: 4px;">+${bedrijfVacatures.length - 3} meer...</div>`;
+          }
+
+          popupContent += `</div>`;
         } else {
           popupContent += `
-            <div style="border-top: 1px solid #e5e7eb; padding-top: 12px;">
-              <p style="color: #9ca3af; font-size: 13px; text-align: center;">Geen vacatures beschikbaar</p>
+            <div style="text-align: center; padding: 8px; color: #9ca3af; font-size: 12px;">
+              Geen vacatures
             </div>
           `;
         }
 
         popupContent += `</div>`;
 
-        const popup = new mapboxgl.Popup({ offset: 25, maxWidth: '400px' }).setHTML(popupContent);
+        const popup = new mapboxgl.Popup({ 
+          offset: 25, 
+          maxWidth: '300px',
+          closeButton: true,
+          closeOnClick: false,
+          className: 'compact-popup'
+        }).setHTML(popupContent);
 
         // Add marker to map
         const marker = new mapboxgl.Marker(el)
