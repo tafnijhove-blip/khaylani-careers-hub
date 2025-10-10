@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
+import { supabase } from '@/integrations/supabase/client';
 import { AlertCircle } from 'lucide-react';
 
 interface Bedrijf {
@@ -25,19 +23,33 @@ const MapView = ({ bedrijven, onBedrijfClick }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [tokenSaved, setTokenSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    // Check if token is in localStorage
-    const savedToken = localStorage.getItem('mapbox_token');
-    if (savedToken) {
-      setMapboxToken(savedToken);
-      setTokenSaved(true);
-    }
+    const fetchMapboxToken = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
+        
+        if (error) throw error;
+        if (data?.token) {
+          setMapboxToken(data.token);
+        } else {
+          setError('Mapbox token niet beschikbaar');
+        }
+      } catch (err: any) {
+        console.error('Error fetching Mapbox token:', err);
+        setError('Fout bij ophalen van Mapbox token');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMapboxToken();
   }, []);
 
   useEffect(() => {
-    if (!mapContainer.current || !tokenSaved || !mapboxToken) return;
+    if (!mapContainer.current || loading || !mapboxToken) return;
     if (map.current) return; // Initialize map only once
 
     mapboxgl.accessToken = mapboxToken;
@@ -117,48 +129,27 @@ const MapView = ({ bedrijven, onBedrijfClick }: MapViewProps) => {
       map.current?.remove();
       map.current = null;
     };
-  }, [tokenSaved, mapboxToken, bedrijven, onBedrijfClick]);
+  }, [loading, mapboxToken, bedrijven, onBedrijfClick]);
 
-  const handleSaveToken = () => {
-    if (mapboxToken.trim()) {
-      localStorage.setItem('mapbox_token', mapboxToken.trim());
-      setTokenSaved(true);
-    }
-  };
-
-  if (!tokenSaved) {
+  if (loading) {
     return (
-      <Card className="p-6 border-2">
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
-            <div className="flex-1">
-              <h3 className="font-semibold mb-2">Mapbox Token Vereist</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Om de interactieve kaart te gebruiken, heb je een gratis Mapbox account nodig:
-              </p>
-              <ol className="text-sm text-muted-foreground space-y-2 mb-4 list-decimal list-inside">
-                <li>Ga naar <a href="https://mapbox.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">mapbox.com</a></li>
-                <li>Maak een gratis account aan</li>
-                <li>Kopieer je "Default public token" uit het dashboard</li>
-                <li>Plak de token hieronder en klik op Opslaan</li>
-              </ol>
-              <div className="flex gap-2">
-                <Input
-                  type="text"
-                  placeholder="pk.eyJ1Ijoi..."
-                  value={mapboxToken}
-                  onChange={(e) => setMapboxToken(e.target.value)}
-                  className="font-mono text-sm"
-                />
-                <Button onClick={handleSaveToken} disabled={!mapboxToken.trim()}>
-                  Opslaan
-                </Button>
-              </div>
-            </div>
-          </div>
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Kaart laden...</p>
         </div>
-      </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center space-y-4">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+      </div>
     );
   }
 
