@@ -53,7 +53,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     try {
       map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+        style: 'https://demotiles.maplibre.org/style.json',
         center: [5.2913, 52.1326],
         zoom: 6.5,
       });
@@ -181,7 +181,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-[480px]">
       <div ref={mapContainer} className="absolute inset-0 rounded-lg" />
     </div>
   );
