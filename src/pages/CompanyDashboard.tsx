@@ -73,7 +73,7 @@ const CompanyDashboard = () => {
     enabled: !!activeCompanyId,
   });
 
-  // Fetch users for this company (only for CEO and superadmin)
+  // Fetch users for this company (only for Manager and superadmin)
   const { data: companyUsers, isLoading: usersLoading } = useQuery({
     queryKey: ["company-users", activeCompanyId],
     queryFn: async () => {
@@ -222,7 +222,7 @@ const CompanyDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Team Members (only for CEO and superadmin) */}
+        {/* Team Members (only for Manager and superadmin) */}
         {(userRole === 'ceo' || userRole === 'superadmin') && companyUsers && companyUsers.length > 0 && (
           <Card>
             <CardHeader>

@@ -132,7 +132,7 @@ const Index = () => {
     },
     { 
       icon: Users, 
-      title: "CEO's weten precies waar de omzet zit", 
+      title: "Managers weten precies waar de omzet zit", 
       description: "Stop met raden. Zie exact welke regio's, klanten en recruiters presteren. Data die telt."
     },
     { 
@@ -146,7 +146,7 @@ const Index = () => {
     {
       quote: "Khaylani heeft onze recruitment workflow gerevolutioneerd. We besparen nu 30% tijd op administratie en hebben eindelijk realtime inzicht in alle vacatures.",
       author: "Mark van der Berg",
-      role: "CEO",
+      role: "Manager",
       company: "TechTalent Detachering"
     },
     {
@@ -246,7 +246,7 @@ const Index = () => {
               
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                 Stop met mailen en bellen. Geef je recruiters en accountmanagers <strong>direct inzicht</strong> in elkaars werk. 
-                CEO's zien real-time waar de omzet zit. Sneller schakelen = sneller plaatsen.
+                Managers zien real-time waar de omzet zit. Sneller schakelen = sneller plaatsen.
               </p>
               
 
@@ -277,7 +277,7 @@ const Index = () => {
                   Waar zitten je kansen? <span className="text-gradient">Zie het in 3 seconden</span>
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Stuur je recruiters naar de hotspots. Sales ziet direct waar ze moeten bellen. CEO's zien de spread.
+                  Stuur je recruiters naar de hotspots. Sales ziet direct waar ze moeten bellen. Managers zien de spread.
                 </p>
               </div>
               <LandingMapWithData />
@@ -309,7 +309,7 @@ const Index = () => {
         <section id="dashboard" className="py-24 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12 space-y-4">
-              <Badge variant="secondary" className="mb-2">CEO Dashboard</Badge>
+              <Badge variant="secondary" className="mb-2">Manager Dashboard</Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
                 Eindelijk weten <span className="text-gradient">wat er echt gebeurt</span>
               </h2>
@@ -520,7 +520,7 @@ const Index = () => {
                     required
                     value={formData.aantalMedewerkers}
                     onChange={(e) => setFormData({ ...formData, aantalMedewerkers: e.target.value })}
-                    placeholder="Bijvoorbeeld: 5 recruiters, 2 accountmanagers, 1 CEO"
+                    placeholder="Bijvoorbeeld: 5 recruiters, 2 accountmanagers, 1 manager"
                     className={`h-12 ${formErrors.aantalMedewerkers ? 'border-destructive' : ''}`}
                   />
                   {formErrors.aantalMedewerkers && (

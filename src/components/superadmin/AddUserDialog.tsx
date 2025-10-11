@@ -164,7 +164,7 @@ const AddUserDialog = ({ open, onOpenChange, onSuccess }: AddUserDialogProps) =>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="superadmin">Superadmin</SelectItem>
-                <SelectItem value="ceo">CEO</SelectItem>
+                <SelectItem value="ceo">Manager</SelectItem>
                 <SelectItem value="accountmanager">Account Manager</SelectItem>
                 <SelectItem value="recruiter">Recruiter</SelectItem>
               </SelectContent>

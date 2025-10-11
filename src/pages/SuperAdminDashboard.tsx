@@ -172,7 +172,7 @@ const SuperAdminDashboard = () => {
   const getRoleLabel = (role: string) => {
     const labels: Record<string, string> = {
       superadmin: "Superadmin",
-      ceo: "CEO",
+      ceo: "Manager",
       accountmanager: "Account Manager",
       recruiter: "Recruiter",
     };
@@ -461,7 +461,7 @@ const SuperAdminDashboard = () => {
                 onChange={setUserRoleFilter}
                 options={[
                   { value: "superadmin", label: "Superadmin" },
-                  { value: "ceo", label: "CEO" },
+                  { value: "ceo", label: "Manager" },
                   { value: "accountmanager", label: "Account Manager" },
                   { value: "recruiter", label: "Recruiter" },
                 ]}

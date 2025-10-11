@@ -4,7 +4,7 @@ export const usePermissions = () => {
   const { data: userRole, isLoading } = useUserRole();
 
   return {
-    // User Management (only CEO can manage users within own company)
+    // User Management (only Manager can manage users within own company)
     canManageUsers: ['superadmin', 'ceo'].includes(userRole || ''),
     canViewUsers: ['superadmin', 'ceo'].includes(userRole || ''),
     
@@ -29,13 +29,13 @@ export const usePermissions = () => {
     canViewAnalytics: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),
     canViewAdvancedAnalytics: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),
     
-    // Relations (only for CEO within own company)
+    // Relations (only for Manager within own company)
     canManageRelations: ['superadmin', 'ceo'].includes(userRole || ''),
     canViewRelations: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),
     
     // Role checks
     isSuperAdmin: userRole === 'superadmin',
-    isCEO: userRole === 'ceo',
+    isManager: userRole === 'ceo',
     isAccountManager: userRole === 'accountmanager',
     isRecruiter: userRole === 'recruiter',
     
