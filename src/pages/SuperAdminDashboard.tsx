@@ -78,6 +78,8 @@ const SuperAdminDashboard = () => {
         `)
         .order("naam");
       if (error) throw error;
+      console.log("🔍 Raw users data:", data);
+      console.log("🔍 Number of users:", data?.length);
       return data;
     },
   });
@@ -199,8 +201,21 @@ const SuperAdminDashboard = () => {
       ? (u.user_roles[0] as any)?.role 
       : null;
     const matchesRole = userRoleFilter === "all" || userRole === userRoleFilter;
+    
+    console.log(`🔍 Filtering user ${u.email}:`, {
+      naam: u.naam,
+      email: u.email,
+      user_roles: u.user_roles,
+      userRole,
+      matchesSearch,
+      matchesRole,
+      willShow: matchesSearch && matchesRole
+    });
+    
     return matchesSearch && matchesRole;
   }) || [];
+  
+  console.log("🔍 Total filtered users:", filteredUsers.length);
   
   const totalBureaus = filteredDetacheringbureaus.length;
   const totalKlanten = filteredKlantbedrijven.length;
