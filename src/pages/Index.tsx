@@ -225,15 +225,43 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Dashboard Preview - Real Component */}
+            {/* Map Preview - Geografisch overzicht */}
             <div className="mt-20 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <DashboardPreview />
+              <div className="text-center mb-8">
+                <Badge variant="secondary" className="mb-4">
+                  <MapPin className="h-4 w-4 mr-2 inline" />
+                  Live Tracking
+                </Badge>
+                <h2 className="text-3xl md:text-5xl font-bold mb-4">
+                  Geografisch <span className="text-gradient">vacature-overzicht</span>
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Zie in één oogopslag waar je vacatures openstaan en identificeer nieuwe kansen per regio
+                </p>
+              </div>
+              <MapPreview />
             </div>
 
-            <a href="#features" className="flex justify-center mt-12 animate-bounce">
+            <a href="#dashboard" className="flex justify-center mt-12 animate-bounce">
               <ChevronDown className="h-8 w-8 text-muted-foreground" />
             </a>
           </main>
+        </section>
+
+        {/* Dashboard Preview Section */}
+        <section id="dashboard" className="py-24 px-6 bg-muted/30">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-12 space-y-4">
+              <Badge variant="secondary" className="mb-2">Dashboard</Badge>
+              <h2 className="text-4xl md:text-6xl font-bold">
+                Al je data <span className="text-gradient">in één overzicht</span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Realtime inzicht in je recruitment KPI's en team activiteit
+              </p>
+            </div>
+            <DashboardPreview />
+          </div>
         </section>
 
         {/* Stats Section */}
@@ -256,22 +284,6 @@ const Index = () => {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* Map Preview Section */}
-        <section className="py-24 px-6 bg-muted/30">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-12 space-y-4">
-              <Badge variant="secondary" className="mb-2">Live Tracking</Badge>
-              <h2 className="text-4xl md:text-6xl font-bold">
-                Geografisch <span className="text-gradient">vacature-overzicht</span>
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Zie in één oogopslag waar je vacatures openstaan en identificeer nieuwe kansen per regio.
-              </p>
-            </div>
-            <MapPreview />
           </div>
         </section>
 
