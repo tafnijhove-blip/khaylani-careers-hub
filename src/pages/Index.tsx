@@ -209,12 +209,12 @@ const Index = () => {
               <LanguageSwitcher />
               <Link to="/auth">
                 <Button variant="ghost" size="sm">
-                  Inloggen
+                  {t('landing.nav.login')}
                 </Button>
               </Link>
               <a href="#offerte">
                 <Button size="sm" className="gap-2">
-                  Gratis offerte
+                  {t('landing.nav.quote')}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </a>
@@ -238,34 +238,33 @@ const Index = () => {
             <div className="text-center space-y-8 animate-fade-in">
               <Badge variant="secondary" className="mb-4 text-sm py-2 px-4">
                 <Zap className="h-4 w-4 mr-2 inline" />
-                Trusted by 50+ recruitment bureaus
+                {t('landing.hero.trust')}
               </Badge>
               
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight">
-                Recruiters en sales,{" "}
+                {t('landing.hero.main.title')}{" "}
                 <span className="text-gradient animate-shimmer bg-[length:200%_100%]">
-                  eindelijk gesynchroniseerd
+                  {t('landing.hero.main.highlight')}
                 </span>
               </h1>
               
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Stop met mailen en bellen. Geef je recruiters en accountmanagers <strong>direct inzicht</strong> in elkaars werk. 
-                Managers zien real-time waar de omzet zit. Sneller schakelen = sneller plaatsen.
+                {t('landing.hero.main.description')}
               </p>
               
 
               <div className="flex items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Real-time synchronisatie</span>
+                  <span>{t('landing.usp.realtime')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Geografisch inzicht</span>
+                  <span>{t('landing.usp.geographic')}</span>
                 </div>
                 <div className="flex items-center gap-2 hidden sm:flex">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Minder meetings, meer doen</span>
+                  <span>{t('landing.usp.efficient')}</span>
                 </div>
               </div>
             </div>
@@ -275,13 +274,13 @@ const Index = () => {
               <div className="text-center mb-8">
                 <Badge variant="secondary" className="mb-4">
                   <MapPin className="h-4 w-4 mr-2 inline" />
-                  Live Tracking
+                  {t('landing.map.badge')}
                 </Badge>
                 <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                  Waar zitten je kansen? <span className="text-gradient">Zie het in 3 seconden</span>
+                  {t('landing.map.title')} <span className="text-gradient">{t('landing.map.highlight')}</span>
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Stuur je recruiters naar de hotspots. Sales ziet direct waar ze moeten bellen. Managers zien de spread.
+                  {t('landing.map.description')}
                 </p>
               </div>
               <LandingMapWithData />
@@ -297,12 +296,12 @@ const Index = () => {
         <section id="vacatures" className="py-24 px-6 bg-muted/30">
           <div className="container mx-auto max-w-5xl">
             <div className="text-center mb-12 space-y-4">
-              <Badge variant="secondary" className="mb-2">Vacature Sync</Badge>
+              <Badge variant="secondary" className="mb-2">{t('landing.vacature.badge')}</Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                Iedereen weet <span className="text-gradient">exact wat er speelt</span>
+                {t('landing.vacature.title')} <span className="text-gradient">{t('landing.vacature.highlight')}</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Accountmanager belt klant? Recruiter ziet het. Kandidaat op gesprek? Sales weet het. Geen verrassingen meer.
+                {t('landing.vacature.description')}
               </p>
             </div>
             <VacaturePreview />
@@ -313,12 +312,12 @@ const Index = () => {
         <section id="dashboard" className="py-24 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12 space-y-4">
-              <Badge variant="secondary" className="mb-2">Manager Dashboard</Badge>
+              <Badge variant="secondary" className="mb-2">{t('landing.dashboard.badge')}</Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                Eindelijk weten <span className="text-gradient">wat er echt gebeurt</span>
+                {t('landing.dashboard.title')} <span className="text-gradient">{t('landing.dashboard.highlight')}</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Zie in één blik welke recruiters draaien, waar je omzet zit en waar je moet bijsturen. No bullshit.
+                {t('landing.dashboard.description')}
               </p>
             </div>
             <DashboardPreview />
