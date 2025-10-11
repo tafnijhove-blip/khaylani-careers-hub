@@ -70,16 +70,37 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     if (!mapContainer.current || loading || !mapboxToken) return;
     if (map.current) return; // Initialize map only once
 
+    console.log('Initializing Mapbox with token:', mapboxToken.substring(0, 20) + '...');
     mapboxgl.accessToken = mapboxToken;
     
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/light-v11',
-      center: [5.2913, 52.1326], // Center of Netherlands
-      zoom: 6.5,
-      pitch: 0,
-      cooperativeGestures: true,
-    });
+    try {
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [5.2913, 52.1326], // Center of Netherlands
+        zoom: 6.5,
+        pitch: 0,
+        cooperativeGestures: true,
+      });
+
+      // Log map load events
+      map.current.on('load', () => {
+        console.log('Map loaded successfully');
+      });
+
+      map.current.on('error', (e) => {
+        console.error('Mapbox error:', e);
+        setError(`Mapbox fout: ${e.error?.message || 'Onbekende fout'}`);
+      });
+
+      map.current.on('style.load', () => {
+        console.log('Map style loaded');
+      });
+    } catch (err: any) {
+      console.error('Error creating map:', err);
+      setError(`Fout bij aanmaken kaart: ${err.message}`);
+      return;
+    }
 
     // Disable map scroll zoom so popup scrolling works reliably
     map.current.scrollZoom.disable();
