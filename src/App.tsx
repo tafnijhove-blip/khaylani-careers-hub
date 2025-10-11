@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 import BackgroundEffect from "./components/BackgroundEffect";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -35,10 +36,11 @@ const queryClient = new QueryClient({
 const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <BackgroundEffect />
-        <Toaster />
-        <Sonner />
+      <LanguageProvider>
+        <TooltipProvider>
+          <BackgroundEffect />
+          <Toaster />
+          <Sonner />
         <BrowserRouter>
           <Suspense
             fallback={
@@ -136,6 +138,7 @@ const App = () => (
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
+      </LanguageProvider>
     </QueryClientProvider>
   </ErrorBoundary>
 );

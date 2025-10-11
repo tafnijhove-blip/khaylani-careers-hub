@@ -4,9 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Building2, MapPin, Users, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const checkUserAndRedirect = async (session: any) => {
@@ -73,36 +76,39 @@ const Auth = () => {
             <Link to="/" className="text-4xl font-bold text-white hover:text-white/90 transition-colors">Khaylani</Link>
           </div>
           <p className="text-xl text-white/90 max-w-md">
-            Professionele vacaturekaart voor detacheringsbureaus
+            {t('auth.branding.tagline')}
           </p>
         </div>
 
         <div className="relative z-10 grid grid-cols-2 gap-6">
           <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
             <Building2 className="h-8 w-8 text-white mb-3" />
-            <h3 className="text-white font-semibold mb-1">Bedrijven Beheren</h3>
-            <p className="text-white/80 text-sm">Centraal overzicht van alle klanten</p>
+            <h3 className="text-white font-semibold mb-1">{t('auth.feature.companies')}</h3>
+            <p className="text-white/80 text-sm">{t('auth.feature.companies.desc')}</p>
           </div>
           <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
             <Users className="h-8 w-8 text-white mb-3" />
-            <h3 className="text-white font-semibold mb-1">Vacatures Tracken</h3>
-            <p className="text-white/80 text-sm">Real-time status per regio</p>
+            <h3 className="text-white font-semibold mb-1">{t('auth.feature.vacancies')}</h3>
+            <p className="text-white/80 text-sm">{t('auth.feature.vacancies.desc')}</p>
           </div>
           <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
             <TrendingUp className="h-8 w-8 text-white mb-3" />
-            <h3 className="text-white font-semibold mb-1">Analytics Dashboard</h3>
-            <p className="text-white/80 text-sm">Inzicht in trends en KPI's</p>
+            <h3 className="text-white font-semibold mb-1">{t('auth.feature.analytics')}</h3>
+            <p className="text-white/80 text-sm">{t('auth.feature.analytics.desc')}</p>
           </div>
           <div className="bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/20">
             <MapPin className="h-8 w-8 text-white mb-3" />
-            <h3 className="text-white font-semibold mb-1">Interactieve Kaart</h3>
-            <p className="text-white/80 text-sm">Visueel overzicht Nederland</p>
+            <h3 className="text-white font-semibold mb-1">{t('auth.feature.map')}</h3>
+            <p className="text-white/80 text-sm">{t('auth.feature.map.desc')}</p>
           </div>
         </div>
       </div>
 
       {/* Right side - Auth Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
+        <div className="absolute top-4 right-4">
+          <LanguageSwitcher />
+        </div>
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8 text-center">
             <div className="inline-flex items-center gap-3 mb-4">
@@ -114,8 +120,8 @@ const Auth = () => {
           </div>
 
           <div className="bg-card p-8 rounded-3xl shadow-xl border border-border">
-            <h2 className="text-2xl font-bold mb-2 text-card-foreground">Welkom terug</h2>
-            <p className="text-muted-foreground mb-6">Log in op je account</p>
+            <h2 className="text-2xl font-bold mb-2 text-card-foreground">{t('auth.welcome')}</h2>
+            <p className="text-muted-foreground mb-6">{t('auth.subtitle')}</p>
             
             <SupabaseAuth
               supabaseClient={supabase}
@@ -153,7 +159,7 @@ const Auth = () => {
           </div>
 
           <p className="text-center text-sm text-muted-foreground mt-6">
-            Door in te loggen ga je akkoord met onze voorwaarden
+            {t('auth.terms')}
           </p>
         </div>
       </div>

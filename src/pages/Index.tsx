@@ -35,9 +35,12 @@ import Footer from "@/components/landing/Footer";
 import { contactFormSchema } from "@/lib/validationSchemas";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { useLanguage } from "@/contexts/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Index = () => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [showStickyNav, setShowStickyNav] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -203,6 +206,7 @@ const Index = () => {
               <span className="text-xl font-bold text-gradient">Khaylani</span>
             </Link>
             <div className="flex items-center gap-4">
+              <LanguageSwitcher />
               <Link to="/auth">
                 <Button variant="ghost" size="sm">
                   Inloggen
