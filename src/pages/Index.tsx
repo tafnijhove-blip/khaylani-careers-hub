@@ -28,7 +28,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import logoImage from "@/assets/logo-khaylani.png";
 import DashboardPreview from "@/components/landing/DashboardPreview";
-import MapPreview from "@/components/landing/MapPreview";
+import LandingMapWithData from "@/components/landing/LandingMapWithData";
 import VacaturePreview from "@/components/landing/VacaturePreview";
 
 const Index = () => {
@@ -239,7 +239,7 @@ const Index = () => {
                   Zie in één oogopslag waar je vacatures openstaan en identificeer nieuwe kansen per regio
                 </p>
               </div>
-              <MapPreview />
+              <LandingMapWithData />
             </div>
 
             <a href="#dashboard" className="flex justify-center mt-12 animate-bounce">
