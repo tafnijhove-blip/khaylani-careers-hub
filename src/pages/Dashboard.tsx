@@ -69,7 +69,7 @@ const Dashboard = () => {
     try {
       const [bedrijvenResponse, vacaturesResponse, vacatureStatsResponse] = await Promise.all([
         supabase.from("bedrijven").select("*").eq("type", "klant").order("naam"),
-        supabase.from("vacatures").select("*").order("datum_toegevoegd", { ascending: false }),
+        supabase.from("vacatures").select("id, functietitel, status, prioriteit, aantal_posities, bedrijf_id, vereisten, beloning, opmerkingen, datum_toegevoegd").order("datum_toegevoegd", { ascending: false }),
         supabase.from("vacature_stats").select("*"),
       ]);
 
@@ -378,10 +378,21 @@ const Dashboard = () => {
                                 return (
                                 <div 
                                   key={vacature.id} 
-                                  className="p-2 bg-muted/50 rounded-lg text-sm group/vacature cursor-pointer hover:bg-muted transition-colors"
-                                  onClick={() => {
+                                  className="p-2 bg-muted/50 rounded-lg text-sm group/vacature cursor-pointer hover:bg-muted/80 hover:shadow-md transition-all"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    console.log('Vacature clicked:', vacature);
                                     setSelectedVacature(vacature);
                                     setDialogOpen(true);
+                                  }}
+                                  role="button"
+                                  tabIndex={0}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault();
+                                      setSelectedVacature(vacature);
+                                      setDialogOpen(true);
+                                    }
                                   }}
                                 >
                                   <div className="flex items-center justify-between mb-1">
