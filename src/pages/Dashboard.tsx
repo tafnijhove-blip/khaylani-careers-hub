@@ -12,6 +12,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import MapView from "@/components/MapView";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
+import { VacatureDetailDialog } from "@/components/VacatureDetailDialog";
 
 interface Bedrijf {
   id: string;
@@ -32,6 +33,9 @@ interface Vacature {
   aantal_posities: number;
   bedrijf_id: string;
   vereisten: string[] | null;
+  beloning: string | null;
+  opmerkingen: string | null;
+  datum_toegevoegd: string;
 }
 
 interface VacatureStat {
@@ -54,6 +58,8 @@ const Dashboard = () => {
   const [vacatureStats, setVacatureStats] = useState<VacatureStat[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedVacature, setSelectedVacature] = useState<Vacature | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -370,7 +376,14 @@ const Dashboard = () => {
                                 const open = stat?.posities_open || vacature.aantal_posities;
                                 
                                 return (
-                                <div key={vacature.id} className="p-2 bg-muted/50 rounded-lg text-sm group/vacature">
+                                <div 
+                                  key={vacature.id} 
+                                  className="p-2 bg-muted/50 rounded-lg text-sm group/vacature cursor-pointer hover:bg-muted transition-colors"
+                                  onClick={() => {
+                                    setSelectedVacature(vacature);
+                                    setDialogOpen(true);
+                                  }}
+                                >
                                   <div className="flex items-center justify-between mb-1">
                                     <span className="font-medium truncate">{vacature.functietitel}</span>
                                     <div className="flex items-center gap-1">
@@ -425,6 +438,14 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      <VacatureDetailDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        vacature={selectedVacature}
+        bedrijf={selectedVacature ? bedrijven.find(b => b.id === selectedVacature.bedrijf_id) || null : null}
+        stats={selectedVacature ? vacatureStats.find(vs => vs.id === selectedVacature.id) || null : null}
+      />
     </DashboardLayout>
   );
 };
