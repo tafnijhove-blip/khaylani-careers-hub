@@ -69,18 +69,32 @@ const SuperAdminDashboard = () => {
   const { data: users, isLoading: usersLoading, refetch: refetchUsers } = useQuery({
     queryKey: ["users-all"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Fetch profiles with company info
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
         .select(`
           *,
-          user_roles(role),
           bedrijven:company_id(naam)
         `)
         .order("naam");
-      if (error) throw error;
-      console.log("🔍 Raw users data:", data);
-      console.log("🔍 Number of users:", data?.length);
-      return data;
+      
+      if (profilesError) throw profilesError;
+      if (!profiles) return [];
+
+      // Fetch all user roles
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("user_id, role");
+      
+      if (rolesError) throw rolesError;
+
+      // Combine profiles with their roles
+      const usersWithRoles = profiles.map(profile => ({
+        ...profile,
+        user_roles: roles?.filter(r => r.user_id === profile.id) || []
+      }));
+
+      return usersWithRoles;
     },
   });
 
@@ -201,21 +215,8 @@ const SuperAdminDashboard = () => {
       ? (u.user_roles[0] as any)?.role 
       : null;
     const matchesRole = userRoleFilter === "all" || userRole === userRoleFilter;
-    
-    console.log(`🔍 Filtering user ${u.email}:`, {
-      naam: u.naam,
-      email: u.email,
-      user_roles: u.user_roles,
-      userRole,
-      matchesSearch,
-      matchesRole,
-      willShow: matchesSearch && matchesRole
-    });
-    
     return matchesSearch && matchesRole;
   }) || [];
-  
-  console.log("🔍 Total filtered users:", filteredUsers.length);
   
   const totalBureaus = filteredDetacheringbureaus.length;
   const totalKlanten = filteredKlantbedrijven.length;
