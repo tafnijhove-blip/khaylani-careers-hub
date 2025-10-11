@@ -514,13 +514,13 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="aantalMedewerkers">Aantal medewerkers *</Label>
+                  <Label htmlFor="aantalMedewerkers">Hoeveel gebruikers krijgen toegang tot Khaylani? *</Label>
                   <Input
                     id="aantalMedewerkers"
                     required
                     value={formData.aantalMedewerkers}
                     onChange={(e) => setFormData({ ...formData, aantalMedewerkers: e.target.value })}
-                    placeholder="Voor een accurate prijsindicatie"
+                    placeholder="Bijvoorbeeld: 5 recruiters, 2 accountmanagers, 1 CEO"
                     className={`h-12 ${formErrors.aantalMedewerkers ? 'border-destructive' : ''}`}
                   />
                   {formErrors.aantalMedewerkers && (
