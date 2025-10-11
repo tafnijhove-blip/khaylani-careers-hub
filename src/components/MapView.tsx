@@ -43,6 +43,8 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
   const [mapboxToken, setMapboxToken] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   // Fetch Mapbox token
   useEffect(() => {
@@ -103,44 +105,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
         console.log('✓ MapView: Map loaded successfully');
         currentMap.scrollZoom.disable();
         currentMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
-        
-        // Add markers
-        bedrijven.forEach((bedrijf) => {
-          if (bedrijf.lat && bedrijf.lng) {
-            console.log('MapView: Adding marker for', bedrijf.naam);
-            
-            const el = document.createElement('div');
-            el.style.width = '32px';
-            el.style.height = '32px';
-            el.style.borderRadius = '50%';
-            el.style.backgroundColor = '#3B82F6';
-            el.style.border = '3px solid white';
-            el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
-            el.style.cursor = 'pointer';
-            el.style.display = 'flex';
-            el.style.alignItems = 'center';
-            el.style.justifyContent = 'center';
-            el.style.color = 'white';
-            el.style.fontWeight = 'bold';
-            el.style.fontSize = '14px';
-            el.textContent = bedrijf.naam.charAt(0).toUpperCase();
-
-            const popup = new mapboxgl.Popup({ offset: 25 })
-              .setHTML(`
-                <div style="padding: 12px;">
-                  <h3 style="font-weight: 600; margin-bottom: 6px;">${bedrijf.naam}</h3>
-                  <p style="color: #666; font-size: 12px; margin: 0;">
-                    ${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}
-                  </p>
-                </div>
-              `);
-
-            new mapboxgl.Marker(el)
-              .setLngLat([bedrijf.lng, bedrijf.lat])
-              .setPopup(popup)
-              .addTo(currentMap);
-          }
-        });
+        setMapLoaded(true);
       });
 
       currentMap.on('error', (e) => {
@@ -150,15 +115,85 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
 
       return () => {
         console.log('MapView: Cleanup');
+        try {
+          markersRef.current.forEach(m => m.remove());
+          markersRef.current = [];
+        } catch (e) { /* ignore */ }
         currentMap.remove();
         map.current = null;
+        setMapLoaded(false);
       };
     } catch (err: any) {
       console.error('✗ MapView: Initialization error:', err);
       setError(`Fout bij aanmaken kaart: ${err.message}`);
     }
-  }, [mapboxToken, loading, bedrijven]);
+  }, [mapboxToken, loading]);
 
+  // Create or update markers when data or map state changes
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+    console.log('MapView: Rendering markers for', bedrijven.length, 'bedrijven');
+
+    // Remove existing markers
+    try {
+      markersRef.current.forEach(m => m.remove());
+    } catch (e) { /* ignore */ }
+    markersRef.current = [];
+
+    const bounds = new mapboxgl.LngLatBounds();
+    let added = 0;
+
+    bedrijven.forEach((bedrijf) => {
+      if (bedrijf.lat && bedrijf.lng) {
+        const el = document.createElement('div');
+        el.style.width = '32px';
+        el.style.height = '32px';
+        el.style.borderRadius = '50%';
+        el.style.backgroundColor = '#3B82F6';
+        el.style.border = '3px solid white';
+        el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
+        el.style.cursor = 'pointer';
+        el.style.display = 'flex';
+        el.style.alignItems = 'center';
+        el.style.justifyContent = 'center';
+        el.style.color = 'white';
+        el.style.fontWeight = 'bold';
+        el.style.fontSize = '14px';
+        el.textContent = bedrijf.naam.charAt(0).toUpperCase();
+
+        if (onBedrijfClick) {
+          el.addEventListener('click', () => onBedrijfClick(bedrijf));
+        }
+
+        const popup = new mapboxgl.Popup({ offset: 25 })
+          .setHTML(`
+            <div style="padding: 12px;">
+              <h3 style="font-weight: 600; margin-bottom: 6px;">${bedrijf.naam}</h3>
+              <p style="color: #666; font-size: 12px; margin: 0;">
+                ${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}
+              </p>
+            </div>
+          `);
+
+        const marker = new mapboxgl.Marker(el)
+          .setLngLat([bedrijf.lng, bedrijf.lat])
+          .setPopup(popup)
+          .addTo(map.current!);
+
+        markersRef.current.push(marker);
+        bounds.extend([bedrijf.lng, bedrijf.lat]);
+        added++;
+      }
+    });
+
+    if (added > 0) {
+      try {
+        map.current!.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 800 });
+      } catch (e) {
+        console.warn('MapView: fitBounds failed', e);
+      }
+    }
+  }, [bedrijven, mapLoaded]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
