@@ -8,12 +8,14 @@ import { Building2, MapPin, Briefcase, Users, Plus } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useUserRole } from "@/hooks/useUserRole";
+import { usePermissions } from "@/hooks/usePermissions";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
 
 const CompanyDashboard = () => {
   const navigate = useNavigate();
   const { companyId } = useParams<{ companyId: string }>();
   const { data: userRole } = useUserRole();
+  const permissions = usePermissions();
   
   // Get company_id from URL or user profile
   const { data: userProfile } = useQuery({
@@ -135,10 +137,12 @@ const CompanyDashboard = () => {
               <span>{company.regio}{company.plaats && ` • ${company.plaats}`}</span>
             </div>
           </div>
-          <Button onClick={() => navigate("/vacatures")} className="gap-2">
-            <Plus className="h-5 w-5" />
-            Nieuwe Vacature
-          </Button>
+          {permissions.canCreateVacancies && (
+            <Button onClick={() => navigate("/vacatures")} className="gap-2">
+              <Plus className="h-5 w-5" />
+              Nieuwe Vacature
+            </Button>
+          )}
         </div>
 
         {/* Stats */}
@@ -177,11 +181,17 @@ const CompanyDashboard = () => {
             {totalVacatures === 0 ? (
               <div className="text-center py-12">
                 <Briefcase className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground mb-4">Nog geen vacatures voor dit bedrijf</p>
-                <Button onClick={() => navigate("/vacatures")} className="gap-2">
-                  <Plus className="h-5 w-5" />
-                  Eerste Vacature Toevoegen
-                </Button>
+                <p className="text-muted-foreground mb-4">
+                  {permissions.canCreateVacancies 
+                    ? "Nog geen vacatures voor dit bedrijf" 
+                    : "Nog geen vacatures beschikbaar"}
+                </p>
+                {permissions.canCreateVacancies && (
+                  <Button onClick={() => navigate("/vacatures")} className="gap-2">
+                    <Plus className="h-5 w-5" />
+                    Eerste Vacature Toevoegen
+                  </Button>
+                )}
               </div>
             ) : (
               <div className="space-y-3">

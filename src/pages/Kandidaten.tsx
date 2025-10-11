@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getKandidaatStatusClass, getKandidaatStatusLabel } from "@/lib/statusUtils";
+import { usePermissions } from "@/hooks/usePermissions";
 
 interface Vacature {
   id: string;
@@ -57,6 +58,7 @@ interface Kandidaat {
 
 const Kandidaten = () => {
   const { toast } = useToast();
+  const permissions = usePermissions();
   const [loading, setLoading] = useState(false);
   const [kandidaten, setKandidaten] = useState<Kandidaat[]>([]);
   const [vacatures, setVacatures] = useState<Vacature[]>([]);
@@ -186,9 +188,14 @@ const Kandidaten = () => {
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Kandidatenbeheer</h1>
-            <p className="text-muted-foreground">Beheer geplaatste kandidaten en hun status</p>
+            <p className="text-muted-foreground">
+              {permissions.canCreateCandidates 
+                ? "Beheer geplaatste kandidaten en hun status" 
+                : "Bekijk geplaatste kandidaten"}
+            </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          {permissions.canCreateCandidates && (
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2 shadow-md">
                 <Plus className="h-4 w-4" />
@@ -307,6 +314,7 @@ const Kandidaten = () => {
               </form>
             </DialogContent>
           </Dialog>
+          )}
         </header>
 
         {/* Stats */}

@@ -33,11 +33,13 @@ import {
 } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getVacatureStatusClass, getPriorityClass, getVacatureStatusLabel, getPriorityLabel } from "@/lib/statusUtils";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const regios = ["Noord-Holland", "Zuid-Holland", "Utrecht", "Gelderland", "Noord-Brabant", "Limburg", "Zeeland", "Friesland", "Groningen", "Drenthe", "Overijssel", "Flevoland"];
 
 const Vacatures = () => {
   const { toast } = useToast();
+  const permissions = usePermissions();
   const [loading, setLoading] = useState(false);
   const [isNewBedrijf, setIsNewBedrijf] = useState(true);
   const [bestaandeBedrijven, setBestaandeBedrijven] = useState<any[]>([]);
@@ -430,19 +432,24 @@ const Vacatures = () => {
       <div className="max-w-4xl mx-auto space-y-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Vacaturebeheer</h1>
-          <p className="text-muted-foreground">Voeg nieuwe bedrijven en vacatures toe aan het systeem</p>
+          <p className="text-muted-foreground">
+            {permissions.canCreateVacancies 
+              ? "Voeg nieuwe bedrijven en vacatures toe aan het systeem" 
+              : "Bekijk openstaande vacatures"}
+          </p>
         </div>
 
-        <Card className="border-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-primary" />
-              Nieuwe Vacature Toevoegen
-            </CardTitle>
-            <CardDescription>Vul alle benodigde informatie in om een vacature aan te maken</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+        {permissions.canCreateVacancies && (
+          <Card className="border-2">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                Nieuwe Vacature Toevoegen
+              </CardTitle>
+              <CardDescription>Vul alle benodigde informatie in om een vacature aan te maken</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
               {/* Bedrijf Selection */}
               <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
                 <div className="flex items-center gap-4">
@@ -709,6 +716,7 @@ const Vacatures = () => {
             </form>
           </CardContent>
         </Card>
+        )}
 
         {/* Bestaande Vacatures */}
         {alleVacatures.length > 0 && (
@@ -777,24 +785,28 @@ const Vacatures = () => {
                        <TableCell>{vacature.aantal_posities}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-primary/10 hover:text-primary"
-                            onClick={() => openEditDialog(vacature)}
-                            title="Bewerk vacature"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-orange-100 hover:text-orange-800"
-                            onClick={() => deleteVacature(vacature.id, vacature.functietitel)}
-                            title="Verwijder vacature (bedrijf blijft behouden)"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {permissions.canEditVacancies && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="hover:bg-primary/10 hover:text-primary"
+                              onClick={() => openEditDialog(vacature)}
+                              title="Bewerk vacature"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {permissions.canDeleteVacancies && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="hover:bg-orange-100 hover:text-orange-800"
+                              onClick={() => deleteVacature(vacature.id, vacature.functietitel)}
+                              title="Verwijder vacature (bedrijf blijft behouden)"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
