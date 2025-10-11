@@ -11,6 +11,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 
 // Lazy load pages for better performance
+const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Vacatures = lazy(() => import("./pages/Vacatures"));
 const Kandidaten = lazy(() => import("./pages/Kandidaten"));
@@ -45,7 +46,7 @@ const App = () => (
             }
           >
             <Routes>
-              <Route path="/" element={<Navigate to="/auth" replace />} />
+              <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/superadmin" element={
                 <SidebarProvider>
