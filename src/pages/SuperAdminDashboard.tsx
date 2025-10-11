@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, Trash2, UserPlus } from "lucide-react";
+import { Building2, Users, Trash2, UserPlus, Edit, Plus } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -17,9 +17,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import AddCompanyDialog from "@/components/superadmin/AddCompanyDialog";
+import EditCompanyDialog from "@/components/superadmin/EditCompanyDialog";
+import AddUserDialog from "@/components/superadmin/AddUserDialog";
+import EditUserDialog from "@/components/superadmin/EditUserDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const SuperAdminDashboard = () => {
   const { toast } = useToast();
+  const [addCompanyDialogOpen, setAddCompanyDialogOpen] = useState(false);
+  const [addCompanyType, setAddCompanyType] = useState<"detacheringbureau" | "klant">("detacheringbureau");
+  const [editCompanyDialogOpen, setEditCompanyDialogOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
+  const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "company" | "user"; id: string; name: string } | null>(null);
 
   // Fetch all companies
   const { data: bedrijven, isLoading: bedrijvenLoading, refetch: refetchBedrijven } = useQuery({
@@ -51,32 +74,60 @@ const SuperAdminDashboard = () => {
     },
   });
 
-  const handleDeleteBedrijf = async (bedrijfId: string, naam: string) => {
-    if (!confirm(`Weet je zeker dat je "${naam}" wilt verwijderen?\n\nAlle gebruikers, vacatures en data van dit bedrijf worden permanent verwijderd.`)) {
-      return;
-    }
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
 
     try {
-      const { error } = await supabase
-        .from("bedrijven")
-        .delete()
-        .eq("id", bedrijfId);
+      if (deleteTarget.type === "company") {
+        const { error } = await supabase
+          .from("bedrijven")
+          .delete()
+          .eq("id", deleteTarget.id);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      toast({
-        title: "Bedrijf verwijderd",
-        description: `${naam} is succesvol verwijderd`,
-      });
-      refetchBedrijven();
-      refetchUsers();
+        toast({
+          title: "Bedrijf verwijderd",
+          description: `${deleteTarget.name} is succesvol verwijderd`,
+        });
+        refetchBedrijven();
+        refetchUsers();
+      } else {
+        const { error } = await supabase.auth.admin.deleteUser(deleteTarget.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Gebruiker verwijderd",
+          description: `${deleteTarget.name} is succesvol verwijderd`,
+        });
+        refetchUsers();
+      }
     } catch (error: any) {
       toast({
         title: "Fout bij verwijderen",
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setDeleteDialogOpen(false);
+      setDeleteTarget(null);
     }
+  };
+
+  const openDeleteDialog = (type: "company" | "user", id: string, name: string) => {
+    setDeleteTarget({ type, id, name });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleEditCompany = (company: any) => {
+    setSelectedCompany(company);
+    setEditCompanyDialogOpen(true);
+  };
+
+  const handleEditUser = (user: any) => {
+    setSelectedUser(user);
+    setEditUserDialogOpen(true);
   };
 
   const getRoleBadgeColor = (role: string) => {
@@ -173,10 +224,22 @@ const SuperAdminDashboard = () => {
             {/* Detacheringbureaus */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-primary" />
-                  Detacheringbureaus ({totalBureaus})
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    Detacheringbureaus ({totalBureaus})
+                  </CardTitle>
+                  <Button
+                    onClick={() => {
+                      setAddCompanyType("detacheringbureau");
+                      setAddCompanyDialogOpen(true);
+                    }}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Toevoegen
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -184,9 +247,9 @@ const SuperAdminDashboard = () => {
                     <TableRow>
                       <TableHead>Naam</TableHead>
                       <TableHead>Regio</TableHead>
+                      <TableHead>Contact</TableHead>
                       <TableHead>Gebruikers</TableHead>
-                      <TableHead>Vacatures</TableHead>
-                      <TableHead className="w-[100px]">Acties</TableHead>
+                      <TableHead className="w-[120px]">Acties</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -196,21 +259,33 @@ const SuperAdminDashboard = () => {
                         <TableRow key={bedrijf.id}>
                           <TableCell className="font-medium">{bedrijf.naam}</TableCell>
                           <TableCell>{bedrijf.regio}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {bedrijf.contactpersoon && <div>{bedrijf.contactpersoon}</div>}
+                            {bedrijf.email && <div>{bedrijf.email}</div>}
+                            {bedrijf.telefoon && <div>{bedrijf.telefoon}</div>}
+                          </TableCell>
                           <TableCell>
                             <Badge variant="secondary">{userCount}</Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="secondary">-</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteBedrijf(bedrijf.id, bedrijf.naam)}
-                              className="hover:bg-destructive hover:text-destructive-foreground"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <div className="flex gap-1">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditCompany(bedrijf)}
+                                className="hover:bg-primary hover:text-primary-foreground"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => openDeleteDialog("company", bedrijf.id, bedrijf.naam)}
+                                className="hover:bg-destructive hover:text-destructive-foreground"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );
@@ -223,10 +298,22 @@ const SuperAdminDashboard = () => {
             {/* Klantbedrijven */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-accent-cyan" />
-                  Klantbedrijven ({totalKlanten})
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5 text-accent-cyan" />
+                    Klantbedrijven ({totalKlanten})
+                  </CardTitle>
+                  <Button
+                    onClick={() => {
+                      setAddCompanyType("klant");
+                      setAddCompanyDialogOpen(true);
+                    }}
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Toevoegen
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -234,7 +321,8 @@ const SuperAdminDashboard = () => {
                     <TableRow>
                       <TableHead>Naam</TableHead>
                       <TableHead>Regio</TableHead>
-                      <TableHead className="w-[100px]">Acties</TableHead>
+                      <TableHead>Contact</TableHead>
+                      <TableHead className="w-[120px]">Acties</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -242,15 +330,30 @@ const SuperAdminDashboard = () => {
                       <TableRow key={bedrijf.id}>
                         <TableCell className="font-medium">{bedrijf.naam}</TableCell>
                         <TableCell>{bedrijf.regio}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {bedrijf.contactpersoon && <div>{bedrijf.contactpersoon}</div>}
+                          {bedrijf.email && <div>{bedrijf.email}</div>}
+                          {bedrijf.telefoon && <div>{bedrijf.telefoon}</div>}
+                        </TableCell>
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleDeleteBedrijf(bedrijf.id, bedrijf.naam)}
-                            className="hover:bg-destructive hover:text-destructive-foreground"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditCompany(bedrijf)}
+                              className="hover:bg-primary hover:text-primary-foreground"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openDeleteDialog("company", bedrijf.id, bedrijf.naam)}
+                              className="hover:bg-destructive hover:text-destructive-foreground"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -263,10 +366,16 @@ const SuperAdminDashboard = () => {
           <TabsContent value="gebruikers">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-accent-purple" />
-                  Alle Gebruikers ({totalUsers})
-                </CardTitle>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-accent-purple" />
+                    Alle Gebruikers ({totalUsers})
+                  </CardTitle>
+                  <Button onClick={() => setAddUserDialogOpen(true)} size="sm">
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Toevoegen
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -275,8 +384,9 @@ const SuperAdminDashboard = () => {
                       <TableHead>Naam</TableHead>
                       <TableHead>Rol</TableHead>
                       <TableHead>Email</TableHead>
+                      <TableHead>Telefoon</TableHead>
                       <TableHead>Bedrijf</TableHead>
-                      <TableHead className="w-[100px]">Acties</TableHead>
+                      <TableHead className="w-[120px]">Acties</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -289,6 +399,9 @@ const SuperAdminDashboard = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{user.email}</TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {user.telefoon || "-"}
+                        </TableCell>
                         <TableCell>
                           {user.bedrijven?.naam ? (
                             <Badge variant="outline">{user.bedrijven.naam}</Badge>
@@ -297,9 +410,24 @@ const SuperAdminDashboard = () => {
                           )}
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">
-                            Beheren
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditUser(user)}
+                              className="hover:bg-primary hover:text-primary-foreground"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openDeleteDialog("user", user.id, user.naam)}
+                              className="hover:bg-destructive hover:text-destructive-foreground"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -310,6 +438,63 @@ const SuperAdminDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Dialogs */}
+      <AddCompanyDialog
+        open={addCompanyDialogOpen}
+        onOpenChange={setAddCompanyDialogOpen}
+        type={addCompanyType}
+        onSuccess={() => {
+          refetchBedrijven();
+        }}
+      />
+
+      <EditCompanyDialog
+        open={editCompanyDialogOpen}
+        onOpenChange={setEditCompanyDialogOpen}
+        company={selectedCompany}
+        onSuccess={() => {
+          refetchBedrijven();
+          setSelectedCompany(null);
+        }}
+      />
+
+      <AddUserDialog
+        open={addUserDialogOpen}
+        onOpenChange={setAddUserDialogOpen}
+        onSuccess={() => {
+          refetchUsers();
+        }}
+      />
+
+      <EditUserDialog
+        open={editUserDialogOpen}
+        onOpenChange={setEditUserDialogOpen}
+        user={selectedUser}
+        onSuccess={() => {
+          refetchUsers();
+          setSelectedUser(null);
+        }}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Weet je het zeker?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget?.type === "company"
+                ? `Alle gebruikers, vacatures en data van "${deleteTarget.name}" worden permanent verwijderd. Deze actie kan niet ongedaan worden gemaakt.`
+                : `Gebruiker "${deleteTarget?.name}" wordt permanent verwijderd. Deze actie kan niet ongedaan worden gemaakt.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuleren</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-destructive hover:bg-destructive/90">
+              Verwijderen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </SuperAdminLayout>
   );
 };

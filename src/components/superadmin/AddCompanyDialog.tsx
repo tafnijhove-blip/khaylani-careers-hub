@@ -1,0 +1,193 @@
+import { useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
+
+interface AddCompanyDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  type: "detacheringbureau" | "klant";
+  onSuccess: () => void;
+}
+
+const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDialogProps) => {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    naam: "",
+    adres: "",
+    plaats: "",
+    regio: "",
+    email: "",
+    telefoon: "",
+    contactpersoon: "",
+    opmerkingen: "",
+    beloning: "",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.from("bedrijven").insert({
+        ...formData,
+        type,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Bedrijf toegevoegd",
+        description: `${formData.naam} is succesvol toegevoegd`,
+      });
+
+      setFormData({
+        naam: "",
+        adres: "",
+        plaats: "",
+        regio: "",
+        email: "",
+        telefoon: "",
+        contactpersoon: "",
+        opmerkingen: "",
+        beloning: "",
+      });
+      onSuccess();
+      onOpenChange(false);
+    } catch (error: any) {
+      toast({
+        title: "Fout bij toevoegen",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            Nieuw {type === "detacheringbureau" ? "Detacheringbureau" : "Klantbedrijf"} Toevoegen
+          </DialogTitle>
+          <DialogDescription>
+            Voeg de gegevens van het nieuwe bedrijf in
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="naam">Bedrijfsnaam *</Label>
+              <Input
+                id="naam"
+                value={formData.naam}
+                onChange={(e) => setFormData({ ...formData, naam: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contactpersoon">Contactpersoon</Label>
+              <Input
+                id="contactpersoon"
+                value={formData.contactpersoon}
+                onChange={(e) => setFormData({ ...formData, contactpersoon: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="telefoon">Telefoon</Label>
+              <Input
+                id="telefoon"
+                value={formData.telefoon}
+                onChange={(e) => setFormData({ ...formData, telefoon: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="adres">Adres</Label>
+            <Input
+              id="adres"
+              value={formData.adres}
+              onChange={(e) => setFormData({ ...formData, adres: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="plaats">Plaats</Label>
+              <Input
+                id="plaats"
+                value={formData.plaats}
+                onChange={(e) => setFormData({ ...formData, plaats: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="regio">Regio *</Label>
+              <Input
+                id="regio"
+                value={formData.regio}
+                onChange={(e) => setFormData({ ...formData, regio: e.target.value })}
+                required
+              />
+            </div>
+          </div>
+
+          {type === "detacheringbureau" && (
+            <div className="space-y-2">
+              <Label htmlFor="beloning">Beloning/Provisie</Label>
+              <Input
+                id="beloning"
+                value={formData.beloning}
+                onChange={(e) => setFormData({ ...formData, beloning: e.target.value })}
+                placeholder="Bijv. 15% van jaarsalaris"
+              />
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="opmerkingen">Opmerkingen</Label>
+            <Textarea
+              id="opmerkingen"
+              value={formData.opmerkingen}
+              onChange={(e) => setFormData({ ...formData, opmerkingen: e.target.value })}
+              rows={3}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Annuleren
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Toevoegen
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default AddCompanyDialog;
