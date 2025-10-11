@@ -9,6 +9,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import Auth from "./pages/Auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
+import BackgroundEffect from "./components/BackgroundEffect";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -35,6 +36,7 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <BackgroundEffect />
         <Toaster />
         <Sonner />
         <BrowserRouter>

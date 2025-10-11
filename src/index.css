@@ -58,6 +58,11 @@ All colors MUST be HSL.
     --gradient-border: linear-gradient(135deg, hsl(213 94% 58%), hsl(186 100% 45%));
     --gradient-cyber: linear-gradient(135deg, hsl(213 94% 58%) 0%, hsl(186 100% 45%) 25%, hsl(250 85% 65%) 50%, hsl(186 100% 45%) 75%, hsl(213 94% 58%) 100%);
     --gradient-animated: linear-gradient(45deg, hsl(213 94% 58%) 0%, hsl(186 100% 45%) 25%, hsl(250 85% 65%) 50%, hsl(213 94% 58%) 75%, hsl(186 100% 45%) 100%);
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(213 94% 58% / 0.3) 0px, transparent 50%),
+                     radial-gradient(at 80% 0%, hsl(186 100% 45% / 0.25) 0px, transparent 50%),
+                     radial-gradient(at 0% 50%, hsl(250 85% 65% / 0.2) 0px, transparent 50%),
+                     radial-gradient(at 80% 80%, hsl(213 94% 58% / 0.25) 0px, transparent 50%),
+                     radial-gradient(at 0% 100%, hsl(186 100% 45% / 0.2) 0px, transparent 50%);
     
     /* Premium Shadows - Blue Glow Effects */
     --shadow-sm: 0 2px 8px rgba(37, 99, 235, 0.08);
@@ -253,6 +258,68 @@ All colors MUST be HSL.
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
+  }
+
+  @keyframes float-slow {
+    0%, 100% { 
+      transform: translate(0, 0) scale(1);
+    }
+    33% { 
+      transform: translate(30px, -30px) scale(1.05);
+    }
+    66% { 
+      transform: translate(-20px, 20px) scale(0.95);
+    }
+  }
+
+  @keyframes float-medium {
+    0%, 100% { 
+      transform: translate(0, 0) rotate(0deg);
+    }
+    50% { 
+      transform: translate(-40px, 40px) rotate(5deg);
+    }
+  }
+
+  @keyframes float-fast {
+    0%, 100% { 
+      transform: translate(0, 0) scale(1);
+    }
+    25% { 
+      transform: translate(20px, -40px) scale(1.1);
+    }
+    50% { 
+      transform: translate(-30px, -20px) scale(0.9);
+    }
+    75% { 
+      transform: translate(25px, 30px) scale(1.05);
+    }
+  }
+
+  .animate-float-slow {
+    animation: float-slow 30s ease-in-out infinite;
+  }
+
+  .animate-float-medium {
+    animation: float-medium 20s ease-in-out infinite;
+  }
+
+  .animate-float-fast {
+    animation: float-fast 15s ease-in-out infinite;
+  }
+
+  .bg-mesh-gradient {
+    background: var(--gradient-mesh);
+    background-size: 200% 200%;
+    animation: gradient-shift 20s ease infinite;
+  }
+
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+
+  .bg-radial-fade {
+    background: radial-gradient(circle at 50% 50%, transparent 0%, hsl(var(--background)) 100%);
   }
 }
 
