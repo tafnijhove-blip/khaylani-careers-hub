@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle, Trash2, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { usePermissions } from "@/hooks/usePermissions";
 import MapView from "@/components/MapView";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
@@ -47,6 +48,7 @@ interface VacatureStat {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const permissions = usePermissions();
   const [bedrijven, setBedrijven] = useState<Bedrijf[]>([]);
   const [vacatures, setVacatures] = useState<Vacature[]>([]);
   const [vacatureStats, setVacatureStats] = useState<VacatureStat[]>([]);
@@ -206,10 +208,12 @@ const Dashboard = () => {
             <h1 className="text-4xl font-bold text-gradient mb-2">Kaartoverzicht</h1>
             <p className="text-muted-foreground text-lg">Interactief overzicht van alle bedrijven en vacatures</p>
           </div>
-          <Button onClick={() => navigate("/vacatures")} className="gap-2 shadow-glow">
-            <Plus className="h-5 w-5" />
-            Nieuwe Vacature
-          </Button>
+          {permissions.canCreateVacancies && (
+            <Button onClick={() => navigate("/vacatures")} className="gap-2 shadow-glow">
+              <Plus className="h-5 w-5" />
+              Nieuwe Vacature
+            </Button>
+          )}
         </header>
 
         {/* Stats */}
@@ -300,11 +304,17 @@ const Dashboard = () => {
                   <AlertCircle className="h-12 w-12 text-primary" />
                 </div>
                 <p className="text-xl font-semibold text-foreground mb-2">Geen bedrijven gevonden</p>
-                <p className="text-sm text-muted-foreground mb-6">Begin met het toevoegen van een bedrijf en vacature</p>
-                <Button onClick={() => navigate("/vacatures")} className="gap-2">
-                  <Plus className="h-5 w-5" />
-                  Nieuwe Vacature Toevoegen
-                </Button>
+                <p className="text-sm text-muted-foreground mb-6">
+                  {permissions.canCreateVacancies 
+                    ? "Begin met het toevoegen van een bedrijf en vacature"
+                    : "Nog geen bedrijven beschikbaar"}
+                </p>
+                {permissions.canCreateVacancies && (
+                  <Button onClick={() => navigate("/vacatures")} className="gap-2">
+                    <Plus className="h-5 w-5" />
+                    Nieuwe Vacature Toevoegen
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ) : (
