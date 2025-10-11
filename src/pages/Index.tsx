@@ -27,6 +27,9 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import logoImage from "@/assets/logo-khaylani.png";
+import DashboardPreview from "@/components/landing/DashboardPreview";
+import MapPreview from "@/components/landing/MapPreview";
+import VacaturePreview from "@/components/landing/VacaturePreview";
 
 const Index = () => {
   const { toast } = useToast();
@@ -222,18 +225,9 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Dashboard Preview */}
+            {/* Dashboard Preview - Real Component */}
             <div className="mt-20 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <Card className="glass-card p-6 hover-glow shadow-2xl">
-                <div className="aspect-video rounded-xl bg-gradient-card border-2 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
-                  <div className="text-center space-y-4 relative z-10">
-                    <BarChart3 className="h-24 w-24 mx-auto text-primary animate-pulse" />
-                    <p className="text-lg font-semibold">Interactive Dashboard Preview</p>
-                    <p className="text-sm text-muted-foreground">Real-time vacature tracking & analytics</p>
-                  </div>
-                </div>
-              </Card>
+              <DashboardPreview />
             </div>
 
             <a href="#features" className="flex justify-center mt-12 animate-bounce">
@@ -265,8 +259,40 @@ const Index = () => {
           </div>
         </section>
 
+        {/* Map Preview Section */}
+        <section className="py-24 px-6 bg-muted/30">
+          <div className="container mx-auto max-w-6xl">
+            <div className="text-center mb-12 space-y-4">
+              <Badge variant="secondary" className="mb-2">Live Tracking</Badge>
+              <h2 className="text-4xl md:text-6xl font-bold">
+                Geografisch <span className="text-gradient">vacature-overzicht</span>
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Zie in één oogopslag waar je vacatures openstaan en identificeer nieuwe kansen per regio.
+              </p>
+            </div>
+            <MapPreview />
+          </div>
+        </section>
+
+        {/* Vacature Preview Section */}
+        <section className="py-24 px-6">
+          <div className="container mx-auto max-w-5xl">
+            <div className="text-center mb-12 space-y-4">
+              <Badge variant="secondary" className="mb-2">Vacature Management</Badge>
+              <h2 className="text-4xl md:text-6xl font-bold">
+                Beheer al je <span className="text-gradient">vacatures</span> centraal
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Van intake tot plaatsing - volg elke stap in het recruitmentproces.
+              </p>
+            </div>
+            <VacaturePreview />
+          </div>
+        </section>
+
         {/* Benefits Section */}
-        <section id="features" className="py-24 px-6">
+        <section id="features" className="py-24 px-6 bg-muted/30">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-16 space-y-4">
               <Badge variant="secondary" className="mb-2">Features</Badge>
