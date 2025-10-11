@@ -514,7 +514,7 @@ const Index = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="aantalMedewerkers">Aantal recruiters *</Label>
+                  <Label htmlFor="aantalMedewerkers">Aantal medewerkers *</Label>
                   <Input
                     id="aantalMedewerkers"
                     required
