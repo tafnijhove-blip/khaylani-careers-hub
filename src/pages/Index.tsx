@@ -220,8 +220,15 @@ const Index = () => {
 
         {/* Hero Section */}
         <section className="relative pt-32 pb-24 px-6 overflow-hidden">
+          {/* Animated gradient background */}
+          <div className="absolute inset-0 bg-gradient-animated opacity-30" />
           <div className="cyber-grid absolute inset-0 opacity-20" />
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+          
+          {/* Floating orbs */}
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-cyan/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-accent-purple/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
           
           <main className="container mx-auto max-w-6xl relative z-10">
             <div className="text-center space-y-8 animate-fade-in">
@@ -242,19 +249,6 @@ const Index = () => {
                 CEO's zien real-time waar de omzet zit. Sneller schakelen = sneller plaatsen.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-                <a href="#offerte">
-                  <Button size="lg" className="gap-2 hover-lift text-lg px-8 py-6">
-                    Start gratis trial
-                    <ArrowRight className="h-5 w-5" />
-                  </Button>
-                </a>
-                <Link to="/auth">
-                  <Button variant="outline" size="lg" className="hover-lift text-lg px-8 py-6">
-                    Bekijk demo
-                  </Button>
-                </Link>
-              </div>
 
               <div className="flex items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">

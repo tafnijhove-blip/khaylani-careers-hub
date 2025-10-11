@@ -63,6 +63,7 @@ export default {
         'gradient-shine': 'var(--gradient-shine)',
         'gradient-border': 'var(--gradient-border)',
         'gradient-cyber': 'var(--gradient-cyber)',
+        'gradient-animated': 'var(--gradient-animated)',
       },
       boxShadow: {
         'sm': 'var(--shadow-sm)',
