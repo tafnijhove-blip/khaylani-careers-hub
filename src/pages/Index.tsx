@@ -51,8 +51,8 @@ const Index = () => {
       <nav className="fixed top-0 w-full z-50 glass-card border-b">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logoImage} alt="Keylani Logo" className="h-8 w-auto" />
-            <span className="text-xl font-bold text-gradient">Keylani</span>
+            <img src={logoImage} alt="Khaylani Logo" className="h-8 w-auto" />
+            <span className="text-xl font-bold text-gradient">Khaylani</span>
           </div>
           <div className="flex items-center gap-4">
             <Link to="/auth">
@@ -77,7 +77,7 @@ const Index = () => {
           <div className="text-center space-y-8 animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold leading-tight">
               Maak je recruitmentdata{" "}
-              <span className="text-gradient">inzichtelijk</span> met Keylani
+              <span className="text-gradient">inzichtelijk</span> met Khaylani
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto">
               Ontdek waar je vacatures openstaan, welke bedrijven actief zijn en geef je recruiters 
@@ -158,11 +158,11 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h2 className="text-4xl md:text-5xl font-bold">
-                Waarom Keylani voor jou werkt
-              </h2>
-              <p className="text-xl text-muted-foreground">
-                Als detacheerder wil je overzicht, snelheid en inzicht. 
-                Keylani brengt alle data van je recruiters samen in één overzichtelijk platform.
+              Waarom Khaylani voor jou werkt
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Als detacheerder wil je overzicht, snelheid en inzicht. 
+              Khaylani brengt alle data van je recruiters samen in één overzichtelijk platform.
               </p>
               <ul className="space-y-4">
                 {[
@@ -187,7 +187,7 @@ const Index = () => {
                 </div>
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground italic">
-                    "Sinds we Keylani gebruiken, besparen we 30% tijd op rapportages en hebben we eindelijk realtime inzicht in onze recruitment activiteiten."
+                    "Sinds we Khaylani gebruiken, besparen we 30% tijd op rapportages en hebben we eindelijk realtime inzicht in onze recruitment activiteiten."
                   </p>
                   <p className="mt-4 font-semibold">— CEO, Detacheringsbureau</p>
                 </div>
@@ -280,9 +280,9 @@ const Index = () => {
         <div className="container mx-auto max-w-6xl">
           <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex items-center gap-3">
-              <img src={logoImage} alt="Keylani Logo" className="h-8 w-auto" />
+              <img src={logoImage} alt="Khaylani Logo" className="h-8 w-auto" />
               <div>
-                <div className="text-xl font-bold">Keylani</div>
+                <div className="text-xl font-bold">Khaylani</div>
                 <div className="text-sm text-muted-foreground">Inzicht in je recruitmentdata</div>
               </div>
             </div>
@@ -306,7 +306,7 @@ const Index = () => {
           </div>
           
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Keylani. Alle rechten voorbehouden.
+            © {new Date().getFullYear()} Khaylani. Alle rechten voorbehouden.
           </div>
         </div>
       </footer>
