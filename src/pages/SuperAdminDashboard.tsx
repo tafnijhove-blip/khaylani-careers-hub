@@ -21,6 +21,8 @@ import AddCompanyDialog from "@/components/superadmin/AddCompanyDialog";
 import EditCompanyDialog from "@/components/superadmin/EditCompanyDialog";
 import AddUserDialog from "@/components/superadmin/AddUserDialog";
 import EditUserDialog from "@/components/superadmin/EditUserDialog";
+import { SearchBar } from "@/components/search/SearchBar";
+import { FilterSelect } from "@/components/search/FilterSelect";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,6 +45,12 @@ const SuperAdminDashboard = () => {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ type: "company" | "user"; id: string; name: string } | null>(null);
+  
+  // Search and filter states
+  const [companySearch, setCompanySearch] = useState("");
+  const [companyRegioFilter, setCompanyRegioFilter] = useState("all");
+  const [userSearch, setUserSearch] = useState("");
+  const [userRoleFilter, setUserRoleFilter] = useState("all");
 
   // Fetch all companies
   const { data: bedrijven, isLoading: bedrijvenLoading, refetch: refetchBedrijven } = useQuery({
@@ -167,9 +175,36 @@ const SuperAdminDashboard = () => {
 
   const detacheringbureaus = bedrijven?.filter(b => b.type === "detacheringbureau") || [];
   const klantbedrijven = bedrijven?.filter(b => b.type === "klant") || [];
-  const totalBureaus = detacheringbureaus.length;
-  const totalKlanten = klantbedrijven.length;
-  const totalUsers = users?.length || 0;
+  
+  // Filter bedrijven
+  const filteredDetacheringbureaus = detacheringbureaus.filter(b => {
+    const matchesSearch = b.naam.toLowerCase().includes(companySearch.toLowerCase()) ||
+                         (b.plaats && b.plaats.toLowerCase().includes(companySearch.toLowerCase()));
+    const matchesRegio = companyRegioFilter === "all" || b.regio === companyRegioFilter;
+    return matchesSearch && matchesRegio;
+  });
+  
+  const filteredKlantbedrijven = klantbedrijven.filter(b => {
+    const matchesSearch = b.naam.toLowerCase().includes(companySearch.toLowerCase()) ||
+                         (b.plaats && b.plaats.toLowerCase().includes(companySearch.toLowerCase()));
+    const matchesRegio = companyRegioFilter === "all" || b.regio === companyRegioFilter;
+    return matchesSearch && matchesRegio;
+  });
+  
+  // Filter users
+  const filteredUsers = users?.filter(u => {
+    const matchesSearch = u.naam.toLowerCase().includes(userSearch.toLowerCase()) ||
+                         u.email.toLowerCase().includes(userSearch.toLowerCase());
+    const matchesRole = userRoleFilter === "all" || u.user_roles?.[0]?.role === userRoleFilter;
+    return matchesSearch && matchesRole;
+  }) || [];
+  
+  const totalBureaus = filteredDetacheringbureaus.length;
+  const totalKlanten = filteredKlantbedrijven.length;
+  const totalUsers = filteredUsers.length;
+  
+  // Get unique regions for filter
+  const uniqueRegios = [...new Set(bedrijven?.map(b => b.regio) || [])].sort();
 
   return (
     <SuperAdminLayout>
@@ -221,6 +256,22 @@ const SuperAdminDashboard = () => {
           </TabsList>
 
           <TabsContent value="bedrijven" className="space-y-6">
+            {/* Search and Filter */}
+            <div className="flex gap-4 items-center">
+              <SearchBar
+                value={companySearch}
+                onChange={setCompanySearch}
+                placeholder="Zoek op naam of plaats..."
+                className="flex-1"
+              />
+              <FilterSelect
+                value={companyRegioFilter}
+                onChange={setCompanyRegioFilter}
+                options={uniqueRegios.map(r => ({ value: r, label: r }))}
+                placeholder="Filter op regio"
+              />
+            </div>
+
             {/* Detacheringbureaus */}
             <Card>
               <CardHeader>
@@ -253,7 +304,14 @@ const SuperAdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {detacheringbureaus.map((bedrijf) => {
+                    {filteredDetacheringbureaus.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground">
+                          Geen bedrijven gevonden
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredDetacheringbureaus.map((bedrijf) => {
                       const userCount = users?.filter(u => u.company_id === bedrijf.id).length || 0;
                       return (
                         <TableRow key={bedrijf.id}>
@@ -326,7 +384,14 @@ const SuperAdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {klantbedrijven.map((bedrijf) => (
+                    {filteredKlantbedrijven.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-center text-muted-foreground">
+                          Geen bedrijven gevonden
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredKlantbedrijven.map((bedrijf) => (
                       <TableRow key={bedrijf.id}>
                         <TableCell className="font-medium">{bedrijf.naam}</TableCell>
                         <TableCell>{bedrijf.regio}</TableCell>
@@ -364,6 +429,27 @@ const SuperAdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="gebruikers">
+            {/* Search and Filter */}
+            <div className="flex gap-4 items-center mb-6">
+              <SearchBar
+                value={userSearch}
+                onChange={setUserSearch}
+                placeholder="Zoek op naam of email..."
+                className="flex-1"
+              />
+              <FilterSelect
+                value={userRoleFilter}
+                onChange={setUserRoleFilter}
+                options={[
+                  { value: "superadmin", label: "Superadmin" },
+                  { value: "ceo", label: "CEO" },
+                  { value: "accountmanager", label: "Account Manager" },
+                  { value: "recruiter", label: "Recruiter" },
+                ]}
+                placeholder="Filter op rol"
+              />
+            </div>
+            
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -390,7 +476,14 @@ const SuperAdminDashboard = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {users?.map((user) => (
+                    {filteredUsers.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-muted-foreground">
+                          Geen gebruikers gevonden
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      filteredUsers.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.naam}</TableCell>
                         <TableCell>

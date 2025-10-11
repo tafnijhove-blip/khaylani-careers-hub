@@ -7,6 +7,8 @@ import { lazy, Suspense } from "react";
 import ErrorBoundary from "./components/ErrorBoundary";
 import LoadingSpinner from "./components/LoadingSpinner";
 import Auth from "./pages/Auth";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "./components/app-sidebar";
 
 // Lazy load pages for better performance
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -45,13 +47,86 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Navigate to="/auth" replace />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/superadmin" element={<SuperAdminDashboard />} />
-              <Route path="/bedrijf/:companyId" element={<CompanyDashboard />} />
+              <Route path="/superadmin" element={
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full">
+                    <AppSidebar />
+                    <main className="flex-1">
+                      <header className="h-14 border-b flex items-center px-4">
+                        <SidebarTrigger />
+                      </header>
+                      <div className="p-6">
+                        <SuperAdminDashboard />
+                      </div>
+                    </main>
+                  </div>
+                </SidebarProvider>
+              } />
+              <Route path="/bedrijf/:companyId" element={
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full">
+                    <AppSidebar />
+                    <main className="flex-1">
+                      <header className="h-14 border-b flex items-center px-4">
+                        <SidebarTrigger />
+                      </header>
+                      <div className="p-6">
+                        <CompanyDashboard />
+                      </div>
+                    </main>
+                  </div>
+                </SidebarProvider>
+              } />
+              <Route path="/bedrijf/:companyId/vacatures" element={
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full">
+                    <AppSidebar />
+                    <main className="flex-1">
+                      <header className="h-14 border-b flex items-center px-4">
+                        <SidebarTrigger />
+                      </header>
+                      <div className="p-6">
+                        <Vacatures />
+                      </div>
+                    </main>
+                  </div>
+                </SidebarProvider>
+              } />
+              <Route path="/bedrijf/:companyId/kandidaten" element={
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full">
+                    <AppSidebar />
+                    <main className="flex-1">
+                      <header className="h-14 border-b flex items-center px-4">
+                        <SidebarTrigger />
+                      </header>
+                      <div className="p-6">
+                        <Kandidaten />
+                      </div>
+                    </main>
+                  </div>
+                </SidebarProvider>
+              } />
+              <Route path="/bedrijf/:companyId/analytics" element={
+                <SidebarProvider>
+                  <div className="min-h-screen flex w-full">
+                    <AppSidebar />
+                    <main className="flex-1">
+                      <header className="h-14 border-b flex items-center px-4">
+                        <SidebarTrigger />
+                      </header>
+                      <div className="p-6">
+                        <Analytics />
+                      </div>
+                    </main>
+                  </div>
+                </SidebarProvider>
+              } />
+              {/* Fallback routes for backwards compatibility */}
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/vacatures" element={<Vacatures />} />
               <Route path="/kandidaten" element={<Kandidaten />} />
               <Route path="/analytics" element={<Analytics />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

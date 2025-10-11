@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { companySchema, type CompanyFormData } from "@/lib/validationSchemas";
+import { z } from "zod";
 
 interface AddCompanyDialogProps {
   open: boolean;
@@ -19,7 +20,8 @@ interface AddCompanyDialogProps {
 const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDialogProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [errors, setErrors] = useState<Partial<Record<keyof CompanyFormData, string>>>({});
+  const [formData, setFormData] = useState<CompanyFormData>({
     naam: "",
     adres: "",
     plaats: "",
@@ -33,11 +35,15 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
     setLoading(true);
 
     try {
+      // Validate form data
+      const validated = companySchema.parse(formData);
+
       const { error } = await supabase.from("bedrijven").insert({
-        ...formData,
+        ...validated,
         type,
       });
 
@@ -62,11 +68,26 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
       onSuccess();
       onOpenChange(false);
     } catch (error: any) {
-      toast({
-        title: "Fout bij toevoegen",
-        description: error.message,
-        variant: "destructive",
-      });
+      if (error instanceof z.ZodError) {
+        const fieldErrors: Partial<Record<keyof CompanyFormData, string>> = {};
+        error.issues.forEach((issue) => {
+          if (issue.path[0]) {
+            fieldErrors[issue.path[0] as keyof CompanyFormData] = issue.message;
+          }
+        });
+        setErrors(fieldErrors);
+        toast({
+          title: "Validatiefout",
+          description: "Controleer de ingevoerde gegevens",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Fout bij toevoegen",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -93,6 +114,7 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
                 onChange={(e) => setFormData({ ...formData, naam: e.target.value })}
                 required
               />
+              {errors.naam && <p className="text-sm text-destructive">{errors.naam}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="contactpersoon">Contactpersoon</Label>
@@ -113,6 +135,7 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
+              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="telefoon">Telefoon</Label>
@@ -120,7 +143,9 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
                 id="telefoon"
                 value={formData.telefoon}
                 onChange={(e) => setFormData({ ...formData, telefoon: e.target.value })}
+                placeholder="+31612345678"
               />
+              {errors.telefoon && <p className="text-sm text-destructive">{errors.telefoon}</p>}
             </div>
           </div>
 
@@ -150,6 +175,7 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
                 onChange={(e) => setFormData({ ...formData, regio: e.target.value })}
                 required
               />
+              {errors.regio && <p className="text-sm text-destructive">{errors.regio}</p>}
             </div>
           </div>
 
