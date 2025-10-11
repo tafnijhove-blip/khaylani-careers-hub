@@ -53,19 +53,24 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     try {
       map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style: 'https://demotiles.maplibre.org/style.json',
+        style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
         center: [5.2913, 52.1326],
         zoom: 6.5,
       });
 
       const currentMap = map.current;
+      const handleResize = () => currentMap.resize();
 
       currentMap.on('load', () => {
         console.log('✓ MapView: Map loaded successfully');
         currentMap.scrollZoom.disable();
         currentMap.addControl(new maplibregl.NavigationControl(), 'top-right');
         setMapLoaded(true);
+        // Ensure proper sizing after initial render
+        setTimeout(handleResize, 0);
       });
+
+      window.addEventListener('resize', handleResize);
 
       currentMap.on('error', (e) => {
         console.error('✗ MapView: Map error:', e);
@@ -78,6 +83,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           markersRef.current.forEach(m => m.remove());
           markersRef.current = [];
         } catch (e) { /* ignore */ }
+        window.removeEventListener('resize', handleResize);
         currentMap.remove();
         map.current = null;
         setMapLoaded(false);
@@ -181,9 +187,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
   }
 
   return (
-    <div className="relative w-full h-[480px]">
-      <div ref={mapContainer} className="absolute inset-0 rounded-lg" />
-    </div>
+    <div ref={mapContainer} className="w-full h-[480px] rounded-lg overflow-hidden" />
   );
 };
 
