@@ -62,7 +62,7 @@ const Dashboard = () => {
   const fetchData = async () => {
     try {
       const [bedrijvenResponse, vacaturesResponse, vacatureStatsResponse] = await Promise.all([
-        supabase.from("bedrijven").select("*").order("naam"),
+        supabase.from("bedrijven").select("*").eq("type", "klant").order("naam"),
         supabase.from("vacatures").select("*").order("datum_toegevoegd", { ascending: false }),
         supabase.from("vacature_stats").select("*"),
       ]);
