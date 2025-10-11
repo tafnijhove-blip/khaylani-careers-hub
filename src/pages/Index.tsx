@@ -27,7 +27,7 @@ import {
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import logoImage from "@/assets/logo-khaylani.png";
+
 import DashboardPreview from "@/components/landing/DashboardPreview";
 import LandingMapWithData from "@/components/landing/LandingMapWithData";
 import VacaturePreview from "@/components/landing/VacaturePreview";
@@ -202,7 +202,10 @@ const Index = () => {
         <nav className={`fixed top-0 w-full z-50 glass-card border-b transition-all duration-300 ${showStickyNav ? 'shadow-lg' : ''}`}>
           <div className="container mx-auto px-6 py-4 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
-              <img src={logoImage} alt="Khaylani Logo - Recruitment Dashboard" className="h-8 w-auto transition-transform group-hover:scale-105" />
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-full border border-primary/20">
+                <TrendingUp className="h-4 w-4 text-primary" />
+                <span className="text-xs font-semibold text-primary">500+ Actieve Vacatures</span>
+              </div>
               <span className="text-xl font-bold text-gradient">Khaylani</span>
             </Link>
             <div className="flex items-center gap-4">
