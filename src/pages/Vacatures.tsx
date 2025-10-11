@@ -430,14 +430,16 @@ const Vacatures = () => {
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Vacaturebeheer</h1>
-          <p className="text-muted-foreground">
-            {permissions.canCreateVacancies 
-              ? "Voeg nieuwe bedrijven en vacatures toe aan het systeem" 
-              : "Bekijk openstaande vacatures"}
-          </p>
-        </div>
+        {!permissions.isRecruiter && (
+          <div>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Vacaturebeheer</h1>
+            <p className="text-muted-foreground">
+              {permissions.canCreateVacancies 
+                ? "Voeg nieuwe bedrijven en vacatures toe aan het systeem" 
+                : "Bekijk openstaande vacatures"}
+            </p>
+          </div>
+        )}
 
         {permissions.canCreateVacancies && (
           <Card className="border-2">

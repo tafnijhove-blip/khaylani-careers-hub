@@ -75,10 +75,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const baseNavItems = [
     { icon: MapPin, label: "Kaartoverzicht", path: "/dashboard" },
-    { icon: FileText, label: "Vacaturebeheer", path: "/vacatures" },
+    ...(userRole !== 'recruiter' ? [{ icon: FileText, label: "Vacaturebeheer", path: "/vacatures" }] : []),
     { icon: Users, label: "Kandidaten", path: "/kandidaten" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
-    { icon: Settings, label: "Instellingen", path: "/instellingen" },
   ];
   const navItems = userRole === 'superadmin'
     ? [{ icon: Shield, label: 'Superadmin', path: '/superadmin' }, ...baseNavItems]
@@ -148,10 +147,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-primary/10" />
-                <DropdownMenuItem onClick={() => navigate("/instellingen")} className="cursor-pointer">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profiel</span>
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Uitloggen</span>
