@@ -195,7 +195,10 @@ const SuperAdminDashboard = () => {
   const filteredUsers = users?.filter(u => {
     const matchesSearch = u.naam.toLowerCase().includes(userSearch.toLowerCase()) ||
                          u.email.toLowerCase().includes(userSearch.toLowerCase());
-    const matchesRole = userRoleFilter === "all" || u.user_roles?.[0]?.role === userRoleFilter;
+    const userRole = Array.isArray(u.user_roles) && u.user_roles.length > 0 
+      ? (u.user_roles[0] as any)?.role 
+      : null;
+    const matchesRole = userRoleFilter === "all" || userRole === userRoleFilter;
     return matchesSearch && matchesRole;
   }) || [];
   
@@ -347,7 +350,7 @@ const SuperAdminDashboard = () => {
                           </TableCell>
                         </TableRow>
                       );
-                    })}
+                    }))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -421,7 +424,7 @@ const SuperAdminDashboard = () => {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )))}
                   </TableBody>
                 </Table>
               </CardContent>
@@ -487,8 +490,8 @@ const SuperAdminDashboard = () => {
                       <TableRow key={user.id}>
                         <TableCell className="font-medium">{user.naam}</TableCell>
                         <TableCell>
-                          <Badge className={getRoleBadgeColor(user.user_roles?.[0]?.role || "")}>
-                            {getRoleLabel(user.user_roles?.[0]?.role || "")}
+                          <Badge className={getRoleBadgeColor((user.user_roles as any)?.[0]?.role || "")}>
+                            {getRoleLabel((user.user_roles as any)?.[0]?.role || "")}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-muted-foreground">{user.email}</TableCell>
@@ -523,7 +526,7 @@ const SuperAdminDashboard = () => {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
+                    )))}
                   </TableBody>
                 </Table>
               </CardContent>

@@ -227,7 +227,7 @@ const CompanyDashboard = () => {
                       <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
                     <Badge variant="outline">
-                      {user.user_roles?.[0]?.role || "Geen rol"}
+                      {(user.user_roles as any)?.[0]?.role || "Geen rol"}
                     </Badge>
                   </div>
                 ))}
