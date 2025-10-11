@@ -48,6 +48,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
+              <Route path="/login" element={<Auth />} />
               <Route path="/superadmin" element={
                 <SidebarProvider>
                   <div className="min-h-screen flex w-full">

@@ -2,7 +2,7 @@ import { Auth as SupabaseAuth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Building2, MapPin, Users, TrendingUp } from "lucide-react";
 
 const Auth = () => {
@@ -70,7 +70,7 @@ const Auth = () => {
             <div className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl shadow-glow">
               <MapPin className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold text-white">Khaylani</h1>
+            <Link to="/" className="text-4xl font-bold text-white hover:text-white/90 transition-colors">Khaylani</Link>
           </div>
           <p className="text-xl text-white/90 max-w-md">
             Professionele vacaturekaart voor detacheringsbureaus
@@ -109,7 +109,7 @@ const Auth = () => {
               <div className="p-2 bg-primary/10 rounded-xl">
                 <MapPin className="h-6 w-6 text-primary" />
               </div>
-              <h1 className="text-3xl font-bold text-foreground">Khaylani</h1>
+              <Link to="/" className="text-3xl font-bold text-foreground hover:text-primary transition-colors">Khaylani</Link>
             </div>
           </div>
 
