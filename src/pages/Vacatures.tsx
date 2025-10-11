@@ -962,8 +962,8 @@ const Vacatures = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Bestaande Bedrijven */}
-        {bestaandeBedrijven.length > 0 && (
+        {/* Bestaande Bedrijven - Alleen voor Superadmin */}
+        {permissions.isSuperAdmin && bestaandeBedrijven.length > 0 && (
           <Card className="border-2 border-destructive/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-destructive">
