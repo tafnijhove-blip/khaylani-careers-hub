@@ -295,7 +295,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="p-0">
             <div className="h-[500px]" role="region" aria-label="Interactieve kaart met bedrijfslocaties">
-              <MapView bedrijven={bedrijven} vacatures={vacatures} vacatureStats={vacatureStats} />
+              <MapView bedrijven={bedrijven} vacatures={vacatures} vacatureStats={vacatureStats} onVacatureClick={(v) => { setSelectedVacature(v); setDialogOpen(true); }} />
             </div>
           </CardContent>
         </Card>

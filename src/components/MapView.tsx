@@ -21,6 +21,9 @@ interface Vacature {
   aantal_posities: number;
   bedrijf_id: string;
   vereisten: string[] | null;
+  beloning: string | null;
+  opmerkingen: string | null;
+  datum_toegevoegd: string;
 }
 
 interface VacatureStat {
@@ -34,9 +37,10 @@ interface MapViewProps {
   vacatures?: Vacature[];
   vacatureStats?: VacatureStat[];
   onBedrijfClick?: (bedrijf: Bedrijf) => void;
+  onVacatureClick?: (vacature: Vacature) => void;
 }
 
-const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick }: MapViewProps) => {
+const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick, onVacatureClick }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [loading, setLoading] = useState(false);
@@ -130,15 +134,53 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           el.addEventListener('click', () => onBedrijfClick(bedrijf));
         }
 
-        const popup = new maplibregl.Popup({ offset: 25 })
-          .setHTML(`
-            <div style="padding: 12px;">
-              <h3 style="font-weight: 600; margin-bottom: 6px;">${bedrijf.naam}</h3>
-              <p style="color: #666; font-size: 12px; margin: 0;">
+        const bedrijfVacatures = vacatures.filter(v => v.bedrijf_id === bedrijf.id);
+
+        const popupHtml = `
+            <div style="padding:12px;max-width:280px">
+              <h3 style="font-weight:600;margin-bottom:4px;">${bedrijf.naam}</h3>
+              <p style="color:#666;font-size:12px;margin:0;">
                 ${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}
               </p>
+              <div style="margin-top:8px;border-top:1px solid #eee;padding-top:8px;">
+                <div style="font-size:12px;color:#666;margin-bottom:6px;">Vacatures (${bedrijfVacatures.length})</div>
+                ${bedrijfVacatures.length ? `
+                  <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px;">
+                    ${bedrijfVacatures.map(v => {
+                      const stat = vacatureStats.find(s => s.id === v.id);
+                      const open = (stat?.posities_open ?? v.aantal_posities);
+                      return `
+                        <li>
+                          <a href="#" class="mv-vacature-item" data-id="${v.id}" style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#f6f7f9;text-decoration:none;color:inherit;">
+                            <span style="font-size:13px;font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.functietitel}</span>
+                            <span style="font-size:12px;background:#eef2ff;color:#1d4ed8;padding:2px 6px;border-radius:999px;">${open} open</span>
+                          </a>
+                        </li>
+                      `;
+                    }).join('')}
+                  </ul>
+                ` : `<div style="font-size:12px;color:#999;">Geen vacatures</div>`}
+              </div>
             </div>
-          `);
+          `;
+
+        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(popupHtml);
+
+        popup.on('open', () => {
+          const el = popup.getElement();
+          if (!el) return;
+          el.querySelectorAll('.mv-vacature-item').forEach((item) => {
+            item.addEventListener('click', (e) => {
+              e.preventDefault();
+              const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+              const vac = bedrijfVacatures.find(v => v.id === id);
+              if (vac && onVacatureClick) {
+                onVacatureClick(vac);
+                popup.remove();
+              }
+            }, { once: true });
+          });
+        });
 
         const marker = new maplibregl.Marker(el)
           .setLngLat([bedrijf.lng, bedrijf.lat])
@@ -158,7 +200,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
         console.warn('MapView: fitBounds failed', e);
       }
     }
-  }, [bedrijven, mapLoaded]);
+  }, [bedrijven, vacatures, vacatureStats, mapLoaded]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
