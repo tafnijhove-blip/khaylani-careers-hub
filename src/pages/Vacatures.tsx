@@ -345,7 +345,7 @@ const Vacatures = () => {
           .from("bedrijven")
           .insert({
             naam: bedrijfNaam,
-            type: 'klant',
+            type: 'klant' as const,
             regio,
             plaats: plaats || null,
             adres: adres || null,
