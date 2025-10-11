@@ -1,64 +1,180 @@
+import { useEffect, useRef, useState } from 'react';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin } from "lucide-react";
+import { MapPin, Building2 } from "lucide-react";
 
 const MapPreview = () => {
-  const locations = [
-    { name: "Amsterdam", left: "52%", top: "35%", count: 34, color: "bg-blue-500" },
-    { name: "Rotterdam", left: "48%", top: "55%", count: 28, color: "bg-purple-500" },
-    { name: "Utrecht", left: "54%", top: "45%", count: 21, color: "bg-green-500" },
-    { name: "Den Haag", left: "46%", top: "52%", count: 18, color: "bg-orange-500" },
-    { name: "Eindhoven", left: "58%", top: "68%", count: 15, color: "bg-pink-500" },
-    { name: "Groningen", left: "62%", top: "18%", count: 11, color: "bg-cyan-500" }
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<maplibregl.Map | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
+
+  // Fictieve locaties voor demo
+  const demoLocations = [
+    { name: "TechCorp Amsterdam", city: "Amsterdam", lat: 52.3676, lng: 4.9041, count: 34, color: "#3b82f6" },
+    { name: "InnovatieHub Rotterdam", city: "Rotterdam", lat: 51.9225, lng: 4.4792, count: 28, color: "#a855f7" },
+    { name: "Digital Solutions Utrecht", city: "Utrecht", lat: 52.0907, lng: 5.1214, count: 21, color: "#22c55e" },
+    { name: "StartUp Den Haag", city: "Den Haag", lat: 52.0705, lng: 4.3007, count: 18, color: "#f97316" },
+    { name: "FinTech Eindhoven", city: "Eindhoven", lat: 51.4416, lng: 5.4697, count: 15, color: "#ec4899" },
+    { name: "AI Labs Groningen", city: "Groningen", lat: 53.2194, lng: 6.5665, count: 11, color: "#06b6d4" }
   ];
+
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainer.current || map.current) return;
+
+    try {
+      map.current = new maplibregl.Map({
+        container: mapContainer.current,
+        style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+        center: [5.2913, 52.1326], // Center of Netherlands
+        zoom: 6.5,
+      });
+
+      const currentMap = map.current;
+
+      currentMap.on('load', () => {
+        setMapLoaded(true);
+        currentMap.scrollZoom.disable();
+        currentMap.addControl(new maplibregl.NavigationControl(), 'top-right');
+      });
+
+      return () => {
+        currentMap.remove();
+      };
+    } catch (error) {
+      console.error('Map initialization error:', error);
+    }
+  }, []);
+
+  // Add markers
+  useEffect(() => {
+    if (!map.current || !mapLoaded) return;
+
+    // Clear existing markers
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    demoLocations.forEach((location, index) => {
+      // Create custom marker element
+      const el = document.createElement('div');
+      el.className = 'custom-marker';
+      el.style.cssText = `
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: ${location.color};
+        border: 3px solid white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 14px;
+        cursor: pointer;
+        position: relative;
+        transition: transform 0.3s ease;
+        animation: markerFadeIn 0.5s ease forwards;
+        animation-delay: ${index * 0.1}s;
+        opacity: 0;
+      `;
+      el.textContent = location.count.toString();
+
+      // Add hover effect
+      el.addEventListener('mouseenter', () => {
+        el.style.transform = 'scale(1.2)';
+      });
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'scale(1)';
+      });
+
+      // Create popup with more info
+      const popup = new maplibregl.Popup({ 
+        offset: 25,
+        closeButton: false,
+        className: 'custom-popup'
+      }).setHTML(`
+        <div style="padding: 12px; min-width: 200px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 8px; background: ${location.color}; display: flex; align-items: center; justify-content: center;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="9" y1="9" x2="15" y2="9"></line>
+                <line x1="9" y1="15" x2="15" y2="15"></line>
+              </svg>
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 14px; line-height: 1.2;">${location.name}</div>
+              <div style="color: #666; font-size: 12px;">${location.city}</div>
+            </div>
+          </div>
+          <div style="border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${location.color}" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span style="font-weight: 500;">${location.count} openstaande vacatures</span>
+            </div>
+          </div>
+        </div>
+      `);
+
+      // Create marker
+      const marker = new maplibregl.Marker(el)
+        .setLngLat([location.lng, location.lat])
+        .setPopup(popup)
+        .addTo(map.current!);
+
+      markersRef.current.push(marker);
+    });
+
+    // Add animation keyframes
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes markerFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.5) translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      .custom-popup .maplibregl-popup-content {
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        padding: 0;
+      }
+      .custom-popup .maplibregl-popup-tip {
+        border-top-color: white;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      markersRef.current.forEach(marker => marker.remove());
+      markersRef.current = [];
+      if (style.parentNode) {
+        style.parentNode.removeChild(style);
+      }
+    };
+  }, [mapLoaded]);
+
+  const totalVacatures = demoLocations.reduce((sum, loc) => sum + loc.count, 0);
 
   return (
     <Card className="relative h-[600px] glass-card overflow-hidden group">
-      {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-accent/5" />
-      
-      {/* Netherlands SVG Map */}
-      <div className="absolute inset-0 flex items-center justify-center p-12">
-        <svg 
-          viewBox="0 0 300 400" 
-          className="w-full h-full opacity-20 group-hover:opacity-30 transition-opacity"
-          style={{ filter: 'drop-shadow(0 0 20px hsl(var(--primary) / 0.3))' }}
-        >
-          {/* Simplified Netherlands shape */}
-          <path
-            d="M 150 40 
-               L 170 45 L 185 50 L 195 60 L 200 75 
-               L 205 90 L 208 110 L 210 130 
-               L 212 150 L 213 170 L 214 190 
-               L 213 210 L 210 230 L 205 250 
-               L 198 270 L 188 285 L 175 295 
-               L 160 300 L 145 302 L 130 300 
-               L 115 295 L 100 285 L 90 270 
-               L 83 250 L 78 230 L 75 210 
-               L 74 190 L 75 170 L 77 150 
-               L 80 130 L 85 110 L 92 90 
-               L 100 75 L 110 60 L 125 50 
-               L 140 45 Z"
-            fill="hsl(var(--primary) / 0.1)"
-            stroke="hsl(var(--primary) / 0.5)"
-            strokeWidth="2"
-            className="transition-all duration-300"
-          />
-        </svg>
-      </div>
+      {/* Map container */}
+      <div ref={mapContainer} className="absolute inset-0" />
 
-      {/* Grid overlay for depth */}
-      <div className="absolute inset-0 opacity-10" style={{
-        backgroundImage: `
-          linear-gradient(to right, hsl(var(--foreground)) 1px, transparent 1px),
-          linear-gradient(to bottom, hsl(var(--foreground)) 1px, transparent 1px)
-        `,
-        backgroundSize: '30px 30px'
-      }} />
-
-      {/* Map title */}
+      {/* Map title overlay */}
       <div className="absolute top-6 left-6 z-10">
-        <Badge variant="secondary" className="text-sm shadow-lg">
+        <Badge variant="secondary" className="text-sm shadow-lg backdrop-blur-sm bg-background/95">
           <MapPin className="h-4 w-4 mr-2" />
           Nederland - Live Vacature Tracking
         </Badge>
@@ -70,61 +186,17 @@ const MapPreview = () => {
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <div className="h-3 w-3 rounded-full bg-gradient-primary animate-pulse" />
-            <span>Actieve vacatures</span>
+            <span>Actieve vacatures per bedrijf</span>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" />
-            <span>Locatie marker</span>
+            <span>Klik op een marker voor details</span>
           </div>
         </div>
       </div>
 
-      {/* Location markers */}
-      {locations.map((location, index) => (
-        <div
-          key={index}
-          className="absolute z-20 animate-fade-in"
-          style={{ 
-            left: location.left, 
-            top: location.top,
-            animationDelay: `${index * 0.15}s`
-          }}
-        >
-          <div className="relative group/marker">
-            {/* Pulse rings */}
-            <div className={`absolute inset-0 ${location.color} rounded-full opacity-40 animate-ping`} 
-                 style={{ animationDuration: '2s', animationDelay: `${index * 0.3}s` }} />
-            <div className={`absolute inset-0 ${location.color} rounded-full opacity-20 animate-ping`} 
-                 style={{ animationDuration: '3s', animationDelay: `${index * 0.3}s` }} />
-            
-            {/* Main marker */}
-            <div className={`relative ${location.color} h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-2xl cursor-pointer hover:scale-125 transition-all duration-300 border-2 border-white`}>
-              {location.count}
-            </div>
-
-            {/* Connecting line to center */}
-            <div className={`absolute top-1/2 left-1/2 w-px h-4 ${location.color} opacity-30 -translate-x-1/2`} />
-
-            {/* Tooltip on hover */}
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 opacity-0 group-hover/marker:opacity-100 transition-all duration-300 pointer-events-none scale-95 group-hover/marker:scale-100">
-              <div className="bg-background border-2 shadow-2xl rounded-xl px-4 py-3 whitespace-nowrap">
-                <div className="text-sm font-bold mb-1">{location.name}</div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {location.count} openstaande vacatures
-                </div>
-              </div>
-              {/* Arrow */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                <div className="border-8 border-transparent border-t-background" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
-              </div>
-            </div>
-          </div>
-        </div>
-      ))}
-
-      {/* Info overlay */}
-      <div className="absolute top-6 right-6 bg-background/95 backdrop-blur-md rounded-xl p-5 border shadow-xl max-w-[220px]">
+      {/* Stats overlay */}
+      <div className="absolute top-6 right-6 bg-background/95 backdrop-blur-md rounded-xl p-5 border shadow-xl max-w-[220px] z-10">
         <div className="text-sm font-bold mb-4 flex items-center gap-2">
           <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
           Live overzicht
@@ -132,12 +204,12 @@ const MapPreview = () => {
         <div className="space-y-2.5">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Bedrijven:</span>
-            <span className="font-bold">127</span>
+            <span className="font-bold">{demoLocations.length}</span>
           </div>
           <div className="h-px bg-border" />
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Vacatures:</span>
-            <span className="font-bold text-primary">127</span>
+            <span className="font-bold text-primary">{totalVacatures}</span>
           </div>
           <div className="h-px bg-border" />
           <div className="flex justify-between text-sm">
@@ -152,9 +224,15 @@ const MapPreview = () => {
         </div>
       </div>
 
-      {/* Decorative elements */}
-      <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '4s' }} />
-      <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-accent/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
+      {/* Loading state */}
+      {!mapLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-20">
+          <div className="text-center space-y-3">
+            <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto" />
+            <p className="text-sm text-muted-foreground">Kaart laden...</p>
+          </div>
+        </div>
+      )}
     </Card>
   );
 };
