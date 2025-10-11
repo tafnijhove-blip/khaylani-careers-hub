@@ -253,15 +253,15 @@ const Index = () => {
               <div className="flex items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Geen creditcard nodig</span>
+                  <span>Live data uit heel Nederland</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Setup in 5 minuten</span>
+                  <span>Direct inzicht in alle vacatures</span>
                 </div>
                 <div className="flex items-center gap-2 hidden sm:flex">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>Cancel anytime</span>
+                  <span>Team werkt uit één systeem</span>
                 </div>
               </div>
             </div>
