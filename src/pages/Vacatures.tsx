@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Loader2, Trash2, XCircle, Pencil } from "lucide-react";
+import { Building2, Plus, Loader2, Trash2, XCircle, Pencil, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -45,6 +45,7 @@ const Vacatures = () => {
   const [bestaandeBedrijven, setBestaandeBedrijven] = useState<any[]>([]);
   const [alleVacatures, setAlleVacatures] = useState<any[]>([]);
   const [vereistenInput, setVereistenInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   
   // Edit state
   const [editDialogOpen, setEditDialogOpen] = useState(false);
@@ -105,6 +106,21 @@ const Vacatures = () => {
       setAlleVacatures(data);
     }
   };
+
+  // Filter vacatures based on search term
+  const filteredVacatures = useMemo(() => {
+    if (!searchTerm.trim()) return alleVacatures;
+    
+    const search = searchTerm.toLowerCase();
+    return alleVacatures.filter(v => 
+      v.functietitel?.toLowerCase().includes(search) ||
+      v.bedrijven?.naam?.toLowerCase().includes(search) ||
+      v.bedrijven?.plaats?.toLowerCase().includes(search) ||
+      v.bedrijven?.regio?.toLowerCase().includes(search) ||
+      v.status?.toLowerCase().includes(search) ||
+      v.prioriteit?.toLowerCase().includes(search)
+    );
+  }, [alleVacatures, searchTerm]);
 
   const deleteVacature = async (vacatureId: string, functietitel: string) => {
     if (!confirm(`Weet je zeker dat je de vacature "${functietitel}" wilt verwijderen?\n\nLET OP: Alleen de vacature wordt verwijderd, niet het bedrijf.`)) {
@@ -745,100 +761,119 @@ const Vacatures = () => {
         )}
 
         {/* Bestaande Vacatures */}
-        {alleVacatures.length > 0 && (
-          <Card className="border-2">
+        {!permissions.isRecruiter && alleVacatures.length > 0 && (
+          <Card className="border-2 border-orange-200">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Trash2 className="h-5 w-5 text-orange-600" />
-                Bestaande Vacatures
-              </CardTitle>
-              <CardDescription>Verwijder alleen de vacature - het bedrijf blijft behouden</CardDescription>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trash2 className="h-5 w-5 text-orange-600" />
+                    Bestaande Vacatures
+                  </CardTitle>
+                  <CardDescription>Verwijder alleen de vacature - het bedrijf blijft behouden</CardDescription>
+                </div>
+                <div className="relative w-full md:w-80">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Zoek op titel, bedrijf, locatie..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Functietitel</TableHead>
-                    <TableHead>Bedrijf</TableHead>
-                    <TableHead>Locatie</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Prioriteit</TableHead>
-                    <TableHead>Posities</TableHead>
-                    <TableHead className="text-right">Actie</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {alleVacatures.map((vacature) => (
-                    <TableRow key={vacature.id}>
-                      <TableCell className="font-medium">{vacature.functietitel}</TableCell>
-                      <TableCell>{vacature.bedrijven?.naam || '-'}</TableCell>
-                      <TableCell>
-                        {vacature.bedrijven?.plaats ? `${vacature.bedrijven.plaats}, ` : ''}
-                        {vacature.bedrijven?.regio || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            vacature.status === 'open'
-                              ? 'bg-green-100 text-green-800 border-green-200'
-                              : vacature.status === 'invulling'
-                              ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
-                              : vacature.status === 'on_hold'
-                              ? 'bg-orange-100 text-orange-800 border-orange-200'
-                              : 'bg-gray-100 text-gray-800 border-gray-200'
-                          }
-                        >
-                          {vacature.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={
-                            vacature.prioriteit === 'urgent'
-                              ? 'bg-red-100 text-red-800 border-red-200'
-                              : vacature.prioriteit === 'hoog'
-                              ? 'bg-orange-100 text-orange-800 border-orange-200'
-                              : vacature.prioriteit === 'normaal'
-                              ? 'bg-blue-100 text-blue-800 border-blue-200'
-                              : 'bg-gray-100 text-gray-800 border-gray-200'
-                          }
-                        >
-                          {vacature.prioriteit}
-                        </Badge>
-                      </TableCell>
-                       <TableCell>{vacature.aantal_posities}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {permissions.canEditVacancies && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="hover:bg-primary/10 hover:text-primary"
-                              onClick={() => openEditDialog(vacature)}
-                              title="Bewerk vacature"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                          )}
-                          {permissions.canDeleteVacancies && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="hover:bg-orange-100 hover:text-orange-800"
-                              onClick={() => deleteVacature(vacature.id, vacature.functietitel)}
-                              title="Verwijder vacature (bedrijf blijft behouden)"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
+              {filteredVacatures.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">
+                  {searchTerm ? 'Geen vacatures gevonden voor deze zoekopdracht' : 'Nog geen vacatures'}
+                </p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Functietitel</TableHead>
+                      <TableHead>Bedrijf</TableHead>
+                      <TableHead>Locatie</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Prioriteit</TableHead>
+                      <TableHead>Posities</TableHead>
+                      <TableHead className="text-right">Actie</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredVacatures.map((vacature) => (
+                      <TableRow key={vacature.id}>
+                        <TableCell className="font-medium">{vacature.functietitel}</TableCell>
+                        <TableCell>{vacature.bedrijven?.naam || '-'}</TableCell>
+                        <TableCell>
+                          {vacature.bedrijven?.plaats ? `${vacature.bedrijven.plaats}, ` : ''}
+                          {vacature.bedrijven?.regio || '-'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              vacature.status === 'open'
+                                ? 'bg-green-100 text-green-800 border-green-200'
+                                : vacature.status === 'invulling'
+                                ? 'bg-yellow-100 text-yellow-800 border-yellow-200'
+                                : vacature.status === 'on_hold'
+                                ? 'bg-orange-100 text-orange-800 border-orange-200'
+                                : 'bg-gray-100 text-gray-800 border-gray-200'
+                            }
+                          >
+                            {vacature.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={
+                              vacature.prioriteit === 'urgent'
+                                ? 'bg-red-100 text-red-800 border-red-200'
+                                : vacature.prioriteit === 'hoog'
+                                ? 'bg-orange-100 text-orange-800 border-orange-200'
+                                : vacature.prioriteit === 'normaal'
+                                ? 'bg-blue-100 text-blue-800 border-blue-200'
+                                : 'bg-gray-100 text-gray-800 border-gray-200'
+                            }
+                          >
+                            {vacature.prioriteit}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{vacature.aantal_posities}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {permissions.canEditVacancies && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hover:bg-primary/10 hover:text-primary"
+                                onClick={() => openEditDialog(vacature)}
+                                title="Bewerk vacature"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                            )}
+                            {permissions.canDeleteVacancies && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="hover:bg-orange-100 hover:text-orange-800"
+                                onClick={() => deleteVacature(vacature.id, vacature.functietitel)}
+                                title="Verwijder vacature (bedrijf blijft behouden)"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         )}

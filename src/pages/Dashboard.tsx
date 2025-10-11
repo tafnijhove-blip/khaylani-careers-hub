@@ -13,6 +13,7 @@ import MapView from "@/components/MapView";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
 import { VacatureDetailDialog } from "@/components/VacatureDetailDialog";
+import { ConfirmDialog } from "@/components/ui/alert-dialog-custom";
 
 interface Bedrijf {
   id: string;
@@ -60,6 +61,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedVacature, setSelectedVacature] = useState<Vacature | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [deleteVacatureDialog, setDeleteVacatureDialog] = useState<{open: boolean, id: string, titel: string}>({open: false, id: '', titel: ''});
+  const [deleteBedrijfDialog, setDeleteBedrijfDialog] = useState<{open: boolean, id: string, naam: string, vacatures: number}>({open: false, id: '', naam: '', vacatures: 0});
 
   useEffect(() => {
     fetchData();
@@ -93,18 +96,18 @@ const Dashboard = () => {
 
   const deleteVacature = async (vacatureId: string, functietitel: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (!confirm(`Weet je zeker dat je de vacature "${functietitel}" wilt verwijderen?\n\nLET OP: Alleen de vacature wordt verwijderd, niet het bedrijf.`)) {
-      return;
-    }
+    setDeleteVacatureDialog({open: true, id: vacatureId, titel: functietitel});
+  };
 
+  const confirmDeleteVacature = async () => {
     try {
-      const { error } = await supabase.from("vacatures").delete().eq("id", vacatureId);
+      const { error } = await supabase.from("vacatures").delete().eq("id", deleteVacatureDialog.id);
 
       if (error) throw error;
 
       toast({
         title: "✓ Vacature verwijderd",
-        description: `${functietitel} is succesvol verwijderd`,
+        description: `${deleteVacatureDialog.titel} is succesvol verwijderd`,
       });
 
       fetchData();
@@ -114,26 +117,22 @@ const Dashboard = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setDeleteVacatureDialog({open: false, id: '', titel: ''});
     }
   };
 
   const deleteBedrijf = async (bedrijfId: string, bedrijfNaam: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     
-    // Check if there are vacatures for this bedrijf
     const bedrijfVacatures = getVacaturesForBedrijf(bedrijfId);
-    
-    if (bedrijfVacatures.length > 0) {
-      if (!confirm(`LET OP: Dit bedrijf heeft ${bedrijfVacatures.length} actieve vacature(s).\n\nAls je "${bedrijfNaam}" verwijdert, worden ook alle bijbehorende vacatures en kandidaten permanent verwijderd.\n\nWeet je zeker dat je door wilt gaan?`)) {
-        return;
-      }
-    } else {
-      if (!confirm(`Weet je zeker dat je bedrijf "${bedrijfNaam}" wilt verwijderen?`)) {
-        return;
-      }
-    }
+    setDeleteBedrijfDialog({open: true, id: bedrijfId, naam: bedrijfNaam, vacatures: bedrijfVacatures.length});
+  };
 
+  const confirmDeleteBedrijf = async () => {
     try {
+      const bedrijfVacatures = getVacaturesForBedrijf(deleteBedrijfDialog.id);
+      
       // First delete all kandidaten for vacatures of this bedrijf
       const { error: kandidatenError } = await supabase
         .from("kandidaten")
@@ -146,7 +145,7 @@ const Dashboard = () => {
       const { error: vacaturesError } = await supabase
         .from("vacatures")
         .delete()
-        .eq("bedrijf_id", bedrijfId);
+        .eq("bedrijf_id", deleteBedrijfDialog.id);
 
       if (vacaturesError) throw vacaturesError;
 
@@ -154,13 +153,13 @@ const Dashboard = () => {
       const { error: bedrijfError } = await supabase
         .from("bedrijven")
         .delete()
-        .eq("id", bedrijfId);
+        .eq("id", deleteBedrijfDialog.id);
 
       if (bedrijfError) throw bedrijfError;
 
       toast({
         title: "✓ Bedrijf verwijderd",
-        description: `${bedrijfNaam} en alle bijbehorende vacatures zijn verwijderd`,
+        description: `${deleteBedrijfDialog.naam} en alle bijbehorende vacatures zijn verwijderd`,
       });
 
       fetchData();
@@ -170,6 +169,8 @@ const Dashboard = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setDeleteBedrijfDialog({open: false, id: '', naam: '', vacatures: 0});
     }
   };
 
@@ -456,6 +457,31 @@ const Dashboard = () => {
         vacature={selectedVacature}
         bedrijf={selectedVacature ? bedrijven.find(b => b.id === selectedVacature.bedrijf_id) || null : null}
         stats={selectedVacature ? vacatureStats.find(vs => vs.id === selectedVacature.id) || null : null}
+      />
+
+      {/* Delete Vacature Confirmation */}
+      <ConfirmDialog
+        open={deleteVacatureDialog.open}
+        onOpenChange={(open) => setDeleteVacatureDialog({...deleteVacatureDialog, open})}
+        title="Vacature verwijderen?"
+        description={`Weet je zeker dat je de vacature "${deleteVacatureDialog.titel}" wilt verwijderen?\n\nLET OP: Alleen de vacature wordt verwijderd, niet het bedrijf.`}
+        onConfirm={confirmDeleteVacature}
+        confirmText="Vacature verwijderen"
+        variant="destructive"
+      />
+
+      {/* Delete Bedrijf Confirmation */}
+      <ConfirmDialog
+        open={deleteBedrijfDialog.open}
+        onOpenChange={(open) => setDeleteBedrijfDialog({...deleteBedrijfDialog, open})}
+        title="Bedrijf verwijderen?"
+        description={deleteBedrijfDialog.vacatures > 0 
+          ? `LET OP: Dit bedrijf heeft ${deleteBedrijfDialog.vacatures} actieve vacature(s).\n\nAls je "${deleteBedrijfDialog.naam}" verwijdert, worden ook alle bijbehorende vacatures en kandidaten permanent verwijderd.\n\nWeet je zeker dat je door wilt gaan?`
+          : `Weet je zeker dat je bedrijf "${deleteBedrijfDialog.naam}" wilt verwijderen?`
+        }
+        onConfirm={confirmDeleteBedrijf}
+        confirmText="Bedrijf verwijderen"
+        variant="destructive"
       />
     </DashboardLayout>
   );

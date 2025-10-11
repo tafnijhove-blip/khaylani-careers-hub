@@ -1,20 +1,22 @@
 import { z } from "zod";
 
-// Company validation
+// Company validation (bedrijf)
 export const companySchema = z.object({
-  naam: z.string().min(2, "Naam moet minimaal 2 karakters zijn").max(100, "Naam mag maximaal 100 karakters zijn"),
-  email: z.string().email("Ongeldig emailadres").optional().or(z.literal("")),
+  naam: z.string().trim().min(2, "Naam moet minimaal 2 karakters zijn").max(100, "Naam mag maximaal 100 karakters zijn"),
+  email: z.string().trim().email("Ongeldig emailadres").max(255, "Email mag maximaal 255 karakters zijn").optional().or(z.literal("")),
   telefoon: z
     .string()
-    .regex(/^(\+31|0)?[0-9]{9,10}$/, "Ongeldig Nederlands telefoonnummer")
+    .trim()
+    .regex(/^[\d\s+()-]*$/, "Ongeldig telefoonnummer formaat")
+    .max(20, "Telefoonnummer mag maximaal 20 karakters zijn")
     .optional()
     .or(z.literal("")),
-  regio: z.string().min(1, "Regio is verplicht").max(50, "Regio mag maximaal 50 karakters zijn"),
-  adres: z.string().max(200, "Adres mag maximaal 200 karakters zijn").optional().or(z.literal("")),
-  plaats: z.string().max(100, "Plaats mag maximaal 100 karakters zijn").optional().or(z.literal("")),
-  contactpersoon: z.string().max(100, "Contactpersoon mag maximaal 100 karakters zijn").optional().or(z.literal("")),
-  opmerkingen: z.string().max(1000, "Opmerkingen mogen maximaal 1000 karakters zijn").optional().or(z.literal("")),
-  beloning: z.string().max(200, "Beloning mag maximaal 200 karakters zijn").optional().or(z.literal("")),
+  regio: z.string().min(1, "Regio is verplicht").max(100, "Regio mag maximaal 100 karakters zijn"),
+  adres: z.string().trim().max(200, "Adres mag maximaal 200 karakters zijn").optional().or(z.literal("")),
+  plaats: z.string().trim().max(100, "Plaats mag maximaal 100 karakters zijn").optional().or(z.literal("")),
+  contactpersoon: z.string().trim().max(100, "Contactpersoon mag maximaal 100 karakters zijn").optional().or(z.literal("")),
+  opmerkingen: z.string().trim().max(2000, "Opmerkingen mogen maximaal 2000 karakters zijn").optional().or(z.literal("")),
+  beloning: z.string().trim().max(500, "Beloning mag maximaal 500 karakters zijn").optional().or(z.literal("")),
 });
 
 export type CompanyFormData = z.infer<typeof companySchema>;
@@ -38,34 +40,41 @@ export const userUpdateSchema = userSchema.omit({ password: true, email: true })
 export type UserFormData = z.infer<typeof userSchema>;
 export type UserUpdateFormData = z.infer<typeof userUpdateSchema>;
 
-// Vacancy validation
+// Vacancy validation (updated to match database enums)
 export const vacancySchema = z.object({
-  functietitel: z.string().min(2, "Functietitel moet minimaal 2 karakters zijn").max(100),
-  aantal_posities: z.number().min(1, "Minimaal 1 positie").max(100, "Maximaal 100 posities"),
+  functietitel: z.string().trim().min(2, "Functietitel moet minimaal 2 karakters zijn").max(200, "Functietitel mag maximaal 200 karakters zijn"),
+  aantal_posities: z.number().int("Moet een geheel getal zijn").min(1, "Minimaal 1 positie").max(999, "Maximaal 999 posities"),
   bedrijf_id: z.string().uuid("Selecteer een geldig bedrijf"),
   prioriteit: z.enum(["laag", "normaal", "hoog", "urgent"]),
-  status: z.enum(["open", "gesloten", "vervuld"]),
-  vereisten: z.array(z.string()).optional(),
-  beloning: z.string().max(200).optional().or(z.literal("")),
-  opmerkingen: z.string().max(1000).optional().or(z.literal("")),
+  status: z.enum(["open", "invulling", "on_hold", "gesloten"]),
+  vereisten: z.array(z.string().trim().max(500)).max(50, "Maximaal 50 vereisten").optional(),
+  beloning: z.string().trim().max(500, "Beloning mag maximaal 500 karakters zijn").optional().or(z.literal("")),
+  opmerkingen: z.string().trim().max(2000, "Opmerkingen mogen maximaal 2000 karakters zijn").optional().or(z.literal("")),
 });
 
 export type VacancyFormData = z.infer<typeof vacancySchema>;
 
-// Candidate validation
+// Vacancy edit schema (without bedrijf_id since it doesn't change)
+export const vacancyEditSchema = vacancySchema.omit({ bedrijf_id: true });
+
+export type VacancyEditFormData = z.infer<typeof vacancyEditSchema>;
+
+// Candidate validation (updated to match database enums)
 export const candidateSchema = z.object({
-  naam: z.string().min(2, "Naam moet minimaal 2 karakters zijn").max(100),
-  email: z.string().email("Ongeldig emailadres").optional().or(z.literal("")),
+  naam: z.string().trim().min(2, "Naam moet minimaal 2 karakters zijn").max(100, "Naam mag maximaal 100 karakters zijn"),
+  email: z.string().trim().email("Ongeldig emailadres").max(255, "Email mag maximaal 255 karakters zijn").optional().or(z.literal("")),
   telefoon: z
     .string()
-    .regex(/^(\+31|0)?[0-9]{9,10}$/, "Ongeldig Nederlands telefoonnummer")
+    .trim()
+    .regex(/^[\d\s+()-]*$/, "Ongeldig telefoonnummer formaat")
+    .max(20, "Telefoonnummer mag maximaal 20 karakters zijn")
     .optional()
     .or(z.literal("")),
   vacature_id: z.string().uuid("Selecteer een geldige vacature"),
-  status: z.enum(["aangemeld", "in_gesprek", "geplaatst", "afgewezen"]),
-  startdatum: z.string().optional(),
-  einddatum: z.string().optional(),
-  opmerkingen: z.string().max(1000).optional().or(z.literal("")),
+  status: z.enum(["geplaatst", "gestart", "afgerond", "gestopt"]),
+  startdatum: z.string().optional().or(z.literal("")),
+  einddatum: z.string().optional().or(z.literal("")),
+  opmerkingen: z.string().trim().max(2000, "Opmerkingen mogen maximaal 2000 karakters zijn").optional().or(z.literal("")),
 });
 
 export type CandidateFormData = z.infer<typeof candidateSchema>;
