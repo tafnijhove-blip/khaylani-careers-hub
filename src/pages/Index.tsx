@@ -66,32 +66,32 @@ const Index = () => {
   };
 
   const stats = [
-    { value: "500+", label: "Actieve vacatures", icon: Target },
-    { value: "50+", label: "Tevreden klanten", icon: Award },
-    { value: "30%", label: "Tijdsbesparing", icon: Clock },
-    { value: "24/7", label: "Realtime inzicht", icon: Zap }
+    { value: "500+", label: "Actieve vacatures gesynchroniseerd", icon: Target },
+    { value: "50+", label: "Bureaus die sneller plaatsen", icon: Award },
+    { value: "30%", label: "Minder overhead meetings", icon: Clock },
+    { value: "24/7", label: "Sales & recruiters in sync", icon: Zap }
   ];
 
   const benefits = [
     { 
       icon: MapPin, 
-      title: "Geografisch overzicht", 
-      description: "Zie in één oogopslag waar al je vacatures openstaan en identificeer nieuwe kansen per regio."
+      title: "Sales ziet waar recruiters bezig zijn", 
+      description: "Geen gezeik meer over 'wat doet jouw team eigenlijk?'. Elke regio, elke vacature, direct zichtbaar."
     },
     { 
       icon: Clock, 
-      title: "Realtime updates", 
-      description: "Monitor live de status van elke vacature en recruiter-activiteit voor directe beslissingen."
+      title: "Recruiters zien live wat sales binnenhaalt", 
+      description: "Nieuwe klant? Recruiter weet het meteen. Kandidaat geplaatst? Sales ziet het direct. Échte samenwerking."
     },
     { 
       icon: Users, 
-      title: "Team management", 
-      description: "Voeg eenvoudig nieuwe recruiters toe en beheer toegangsrechten per bedrijf of regio."
+      title: "CEO's weten precies waar de omzet zit", 
+      description: "Stop met raden. Zie exact welke regio's, klanten en recruiters presteren. Data die telt."
     },
     { 
       icon: BarChart3, 
-      title: "Smart analytics", 
-      description: "Automatische rapportages met KPI's, trends en voorspellingen om je strategie te optimaliseren."
+      title: "Minder meetings, meer doen", 
+      description: "Je team werkt uit hetzelfde systeem. Iedereen weet wat er speelt. 30% minder overhead, direct meetbaar."
     }
   ];
 
@@ -184,15 +184,15 @@ const Index = () => {
               </Badge>
               
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight">
-                Maak je recruitmentdata{" "}
+                Recruiters en sales,{" "}
                 <span className="text-gradient animate-shimmer bg-[length:200%_100%]">
-                  inzichtelijk
+                  eindelijk gesynchroniseerd
                 </span>
               </h1>
               
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Het enige dashboard dat je nodig hebt. Ontdek waar je vacatures openstaan, 
-                welke bedrijven actief zijn en geef je recruiters <strong>directe toegang</strong> tot realtime inzichten.
+                Stop met mailen en bellen. Geef je recruiters en accountmanagers <strong>direct inzicht</strong> in elkaars werk. 
+                CEO's zien real-time waar de omzet zit. Sneller schakelen = sneller plaatsen.
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
@@ -233,10 +233,10 @@ const Index = () => {
                   Live Tracking
                 </Badge>
                 <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                  Geografisch <span className="text-gradient">vacature-overzicht</span>
+                  Waar zitten je kansen? <span className="text-gradient">Zie het in 3 seconden</span>
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Zie in één oogopslag waar je vacatures openstaan en identificeer nieuwe kansen per regio
+                  Stuur je recruiters naar de hotspots. Sales ziet direct waar ze moeten bellen. CEO's zien de spread.
                 </p>
               </div>
               <LandingMapWithData />
@@ -252,12 +252,12 @@ const Index = () => {
         <section id="vacatures" className="py-24 px-6 bg-muted/30">
           <div className="container mx-auto max-w-5xl">
             <div className="text-center mb-12 space-y-4">
-              <Badge variant="secondary" className="mb-2">Vacature Management</Badge>
+              <Badge variant="secondary" className="mb-2">Vacature Sync</Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                Beheer al je <span className="text-gradient">vacatures</span> centraal
+                Iedereen weet <span className="text-gradient">exact wat er speelt</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Van intake tot plaatsing - volg elke stap in het recruitmentproces.
+                Accountmanager belt klant? Recruiter ziet het. Kandidaat op gesprek? Sales weet het. Geen verrassingen meer.
               </p>
             </div>
             <VacaturePreview />
@@ -268,12 +268,12 @@ const Index = () => {
         <section id="dashboard" className="py-24 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12 space-y-4">
-              <Badge variant="secondary" className="mb-2">Dashboard</Badge>
+              <Badge variant="secondary" className="mb-2">CEO Dashboard</Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                Al je data <span className="text-gradient">in één overzicht</span>
+                Eindelijk weten <span className="text-gradient">wat er echt gebeurt</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Realtime inzicht in je recruitment KPI's en team activiteit
+                Zie in één blik welke recruiters draaien, waar je omzet zit en waar je moet bijsturen. No bullshit.
               </p>
             </div>
             <DashboardPreview />
@@ -307,12 +307,12 @@ const Index = () => {
         <section id="features" className="py-24 px-6 bg-muted/30">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-16 space-y-4">
-              <Badge variant="secondary" className="mb-2">Features</Badge>
+              <Badge variant="secondary" className="mb-2">Waarom Khaylani?</Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                Alles wat je nodig hebt, <span className="text-gradient">in één dashboard</span>
+                Sneller schakelen = <span className="text-gradient">sneller plaatsen</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Khaylani centraliseert je volledige recruitment workflow en geeft je het inzicht dat je nodig hebt om sneller te plaatsen.
+                Minder vergaderingen, minder mails, minder gedoe. Meer transparantie tussen recruiters, sales én management.
               </p>
             </div>
             
