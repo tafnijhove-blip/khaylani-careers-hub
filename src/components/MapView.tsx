@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, memo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { AlertCircle } from 'lucide-react';
@@ -233,4 +233,4 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
   );
 };
 
-export default MapView;
+export default memo(MapView);
