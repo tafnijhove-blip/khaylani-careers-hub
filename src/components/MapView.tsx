@@ -50,27 +50,32 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
   useEffect(() => {
     const fetchMapboxToken = async () => {
       try {
-        console.log('MapView: Fetching Mapbox token...');
+        console.log('🗺️ MapView: Starting token fetch...');
         const { data, error } = await supabase.functions.invoke('get-mapbox-token');
         
+        console.log('🗺️ MapView: Response received', { data, error });
+        
         if (error) {
-          console.error('MapView: Error fetching token:', error);
+          console.error('❌ MapView: Error fetching token:', error);
           throw error;
         }
         if (data?.token) {
-          console.log('MapView: Token received:', data.token.substring(0, 20) + '...');
+          console.log('✅ MapView: Token received successfully:', data.token.substring(0, 20) + '...');
           setMapboxToken(data.token);
         } else {
+          console.error('❌ MapView: No token in response');
           throw new Error('Geen token ontvangen');
         }
       } catch (err: any) {
-        console.error('MapView: Token fetch error:', err);
-        setError('Fout bij ophalen van Mapbox token');
+        console.error('❌ MapView: Token fetch error:', err);
+        setError(`Fout bij ophalen van Mapbox token: ${err.message || 'Onbekende fout'}`);
       } finally {
+        console.log('🗺️ MapView: Token fetch completed');
         setLoading(false);
       }
     };
 
+    console.log('🗺️ MapView: Component mounted, starting fetch...');
     fetchMapboxToken();
   }, []);
 
