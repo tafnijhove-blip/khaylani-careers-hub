@@ -242,14 +242,30 @@ const Index = () => {
               <LandingMapWithData />
             </div>
 
-            <a href="#dashboard" className="flex justify-center mt-12 animate-bounce">
+            <a href="#vacatures" className="flex justify-center mt-12 animate-bounce">
               <ChevronDown className="h-8 w-8 text-muted-foreground" />
             </a>
           </main>
         </section>
 
+        {/* Vacature Preview Section */}
+        <section id="vacatures" className="py-24 px-6 bg-muted/30">
+          <div className="container mx-auto max-w-5xl">
+            <div className="text-center mb-12 space-y-4">
+              <Badge variant="secondary" className="mb-2">Vacature Management</Badge>
+              <h2 className="text-4xl md:text-6xl font-bold">
+                Beheer al je <span className="text-gradient">vacatures</span> centraal
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Van intake tot plaatsing - volg elke stap in het recruitmentproces.
+              </p>
+            </div>
+            <VacaturePreview />
+          </div>
+        </section>
+
         {/* Dashboard Preview Section */}
-        <section id="dashboard" className="py-24 px-6 bg-muted/30">
+        <section id="dashboard" className="py-24 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12 space-y-4">
               <Badge variant="secondary" className="mb-2">Dashboard</Badge>
@@ -284,22 +300,6 @@ const Index = () => {
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* Vacature Preview Section */}
-        <section className="py-24 px-6">
-          <div className="container mx-auto max-w-5xl">
-            <div className="text-center mb-12 space-y-4">
-              <Badge variant="secondary" className="mb-2">Vacature Management</Badge>
-              <h2 className="text-4xl md:text-6xl font-bold">
-                Beheer al je <span className="text-gradient">vacatures</span> centraal
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Van intake tot plaatsing - volg elke stap in het recruitmentproces.
-              </p>
-            </div>
-            <VacaturePreview />
           </div>
         </section>
 
