@@ -115,7 +115,7 @@ const Auth = () => {
 
           <div className="bg-card p-8 rounded-3xl shadow-xl border border-border">
             <h2 className="text-2xl font-bold mb-2 text-card-foreground">Welkom terug</h2>
-            <p className="text-muted-foreground mb-6">Log in op je account of maak een nieuw account aan</p>
+            <p className="text-muted-foreground mb-6">Log in op je account</p>
             
             <SupabaseAuth
               supabaseClient={supabase}
