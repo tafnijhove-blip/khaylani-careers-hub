@@ -88,7 +88,7 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
 
       toast({
         title: "Gebruiker bijgewerkt",
-        description: `${formData.naam} is succesvol bijgewerkt`,
+        description: `${formData.naam} is succesvol bijgewerkt. De gebruiker moet uitloggen en opnieuw inloggen om de nieuwe rol te activeren.`,
       });
 
       onSuccess();
