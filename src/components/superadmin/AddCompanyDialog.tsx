@@ -42,12 +42,38 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
       // Validate form data
       const validated = companySchema.parse(formData);
 
-      const { error } = await supabase.from("bedrijven").insert({
+      // Get current user's profile to link the customer company
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Niet ingelogd");
+
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("company_id")
+        .eq("id", user.id)
+        .single();
+
+      // Insert the company
+      const { data: newCompany, error: companyError } = await supabase.from("bedrijven").insert({
         ...validated,
         type,
-      });
+        created_by: user.id,
+      }).select().single();
 
-      if (error) throw error;
+      if (companyError) throw companyError;
+
+      // If this is a customer company and user has a company_id, create the relationship
+      if (type === "klant" && userProfile?.company_id && newCompany) {
+        const { error: relationError } = await supabase.from("bedrijf_relaties").insert({
+          detacheringbureau_id: userProfile.company_id,
+          klant_id: newCompany.id,
+          created_by: user.id,
+        });
+
+        if (relationError) {
+          console.error("Failed to create relationship:", relationError);
+          // Don't fail the whole operation if relationship creation fails
+        }
+      }
 
       toast({
         title: "Bedrijf toegevoegd",

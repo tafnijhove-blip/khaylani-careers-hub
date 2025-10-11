@@ -345,6 +345,7 @@ const Vacatures = () => {
           .from("bedrijven")
           .insert({
             naam: bedrijfNaam,
+            type: 'klant',
             regio,
             plaats: plaats || null,
             adres: adres || null,
@@ -362,6 +363,29 @@ const Vacatures = () => {
 
         if (bedrijfError) throw bedrijfError;
         bedrijfId = newBedrijf.id;
+
+        // Get user's company_id to create relationship
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("company_id")
+          .eq("id", user.id)
+          .single();
+
+        // Create relationship between detacheringsbureau and klant
+        if (userProfile?.company_id) {
+          const { error: relationError } = await supabase
+            .from("bedrijf_relaties")
+            .insert({
+              detacheringbureau_id: userProfile.company_id,
+              klant_id: bedrijfId,
+              created_by: user.id,
+            });
+
+          if (relationError) {
+            console.error("Failed to create relationship:", relationError);
+            // Don't fail the whole operation if relationship creation fails
+          }
+        }
 
         // Log activity
         await supabase.from("activity_log").insert({
