@@ -21,7 +21,8 @@ import {
   Target,
   Star,
   Award,
-  ChevronDown
+  ChevronDown,
+  Loader2
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -30,10 +31,16 @@ import logoImage from "@/assets/logo-khaylani.png";
 import DashboardPreview from "@/components/landing/DashboardPreview";
 import LandingMapWithData from "@/components/landing/LandingMapWithData";
 import VacaturePreview from "@/components/landing/VacaturePreview";
+import Footer from "@/components/landing/Footer";
+import { contactFormSchema } from "@/lib/validationSchemas";
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
 const Index = () => {
   const { toast } = useToast();
   const [showStickyNav, setShowStickyNav] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     naam: "",
     bedrijfsnaam: "",
@@ -50,19 +57,59 @@ const Index = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Offerte aangevraagd! ✅",
-      description: "Binnen 24 uur nemen we contact met je op met een persoonlijk voorstel.",
-    });
-    setFormData({
-      naam: "",
-      bedrijfsnaam: "",
-      email: "",
-      aantalMedewerkers: "",
-      bericht: ""
-    });
+    setFormErrors({});
+    setIsSubmitting(true);
+
+    try {
+      // Validate form data
+      const validated = contactFormSchema.parse(formData);
+
+      // Call edge function to send emails
+      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+        body: validated,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Offerte aangevraagd! ✅",
+        description: "Binnen 24 uur nemen we contact met je op met een persoonlijk voorstel.",
+      });
+
+      setFormData({
+        naam: "",
+        bedrijfsnaam: "",
+        email: "",
+        aantalMedewerkers: "",
+        bericht: ""
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const errors: Record<string, string> = {};
+        error.issues.forEach((err) => {
+          if (err.path[0]) {
+            errors[err.path[0] as string] = err.message;
+          }
+        });
+        setFormErrors(errors);
+        toast({
+          title: "Formulier bevat fouten",
+          description: "Controleer de velden en probeer opnieuw.",
+          variant: "destructive",
+        });
+      } else {
+        console.error("Error submitting form:", error);
+        toast({
+          title: "Er ging iets mis",
+          description: "Probeer het later opnieuw of mail ons op info@khaylani.nl",
+          variant: "destructive",
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const stats = [
@@ -433,8 +480,11 @@ const Index = () => {
                       value={formData.naam}
                       onChange={(e) => setFormData({ ...formData, naam: e.target.value })}
                       placeholder="Je volledige naam"
-                      className="h-12"
+                      className={`h-12 ${formErrors.naam ? 'border-destructive' : ''}`}
                     />
+                    {formErrors.naam && (
+                      <p className="text-sm text-destructive">{formErrors.naam}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -445,8 +495,11 @@ const Index = () => {
                       value={formData.bedrijfsnaam}
                       onChange={(e) => setFormData({ ...formData, bedrijfsnaam: e.target.value })}
                       placeholder="Naam van je bedrijf"
-                      className="h-12"
+                      className={`h-12 ${formErrors.bedrijfsnaam ? 'border-destructive' : ''}`}
                     />
+                    {formErrors.bedrijfsnaam && (
+                      <p className="text-sm text-destructive">{formErrors.bedrijfsnaam}</p>
+                    )}
                   </div>
                 </div>
 
@@ -459,36 +512,62 @@ const Index = () => {
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="je@bedrijf.nl"
-                    className="h-12"
+                    className={`h-12 ${formErrors.email ? 'border-destructive' : ''}`}
                   />
+                  {formErrors.email && (
+                    <p className="text-sm text-destructive">{formErrors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="aantalMedewerkers">Aantal recruiters</Label>
+                  <Label htmlFor="aantalMedewerkers">Aantal recruiters *</Label>
                   <Input
                     id="aantalMedewerkers"
+                    required
                     value={formData.aantalMedewerkers}
                     onChange={(e) => setFormData({ ...formData, aantalMedewerkers: e.target.value })}
                     placeholder="Voor een accurate prijsindicatie"
-                    className="h-12"
+                    className={`h-12 ${formErrors.aantalMedewerkers ? 'border-destructive' : ''}`}
                   />
+                  {formErrors.aantalMedewerkers && (
+                    <p className="text-sm text-destructive">{formErrors.aantalMedewerkers}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="bericht">Eventuele vragen of opmerkingen</Label>
+                  <Label htmlFor="bericht">Eventuele vragen of opmerkingen *</Label>
                   <Textarea
                     id="bericht"
+                    required
                     value={formData.bericht}
                     onChange={(e) => setFormData({ ...formData, bericht: e.target.value })}
                     placeholder="Vertel ons meer over je situatie..."
                     rows={4}
+                    className={formErrors.bericht ? 'border-destructive' : ''}
                   />
+                  {formErrors.bericht && (
+                    <p className="text-sm text-destructive">{formErrors.bericht}</p>
+                  )}
                 </div>
 
-                <Button type="submit" size="lg" className="w-full gap-2 h-14 text-lg">
-                  <Shield className="h-5 w-5" />
-                  Vraag gratis offerte aan
-                  <ArrowRight className="h-5 w-5" />
+                <Button 
+                  type="submit" 
+                  size="lg" 
+                  className="w-full gap-2 h-14 text-lg" 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Verzenden...
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="h-5 w-5" />
+                      Vraag gratis offerte aan
+                      <ArrowRight className="h-5 w-5" />
+                    </>
+                  )}
                 </Button>
 
                 <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground pt-4">
@@ -507,66 +586,7 @@ const Index = () => {
         </section>
 
         {/* Footer */}
-        <footer className="py-16 px-6 border-t bg-muted/20">
-          <div className="container mx-auto max-w-6xl">
-            <div className="grid md:grid-cols-4 gap-12 mb-12">
-              <div className="md:col-span-2">
-                <div className="flex items-center gap-3 mb-4">
-                  <img src={logoImage} alt="Khaylani Logo" className="h-10 w-auto" />
-                  <div>
-                    <div className="text-2xl font-bold">Khaylani</div>
-                    <div className="text-sm text-muted-foreground">Recruitment data inzicht</div>
-                  </div>
-                </div>
-                <p className="text-muted-foreground leading-relaxed mb-6">
-                  Het moderne recruitment dashboard voor detacheringsbureaus. 
-                  Centraliseer je data, monitor realtime en plaats sneller.
-                </p>
-                <div className="flex gap-4">
-                  <a 
-                    href="https://linkedin.com" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="h-11 w-11 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-all hover:scale-110"
-                    aria-label="LinkedIn"
-                  >
-                    <Linkedin className="h-5 w-5" />
-                  </a>
-                  <a 
-                    href="mailto:info@khaylani.nl"
-                    className="h-11 w-11 rounded-full bg-muted flex items-center justify-center hover:bg-primary hover:text-white transition-all hover:scale-110"
-                    aria-label="Email"
-                  >
-                    <Mail className="h-5 w-5" />
-                  </a>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-4 text-lg">Product</h3>
-                <ul className="space-y-3">
-                  <li><a href="#features" className="text-muted-foreground hover:text-primary transition-colors">Features</a></li>
-                  <li><a href="#offerte" className="text-muted-foreground hover:text-primary transition-colors">Prijzen</a></li>
-                  <li><Link to="/auth" className="text-muted-foreground hover:text-primary transition-colors">Demo</Link></li>
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="font-semibold mb-4 text-lg">Support</h3>
-                <ul className="space-y-3">
-                  <li><a href="#offerte" className="text-muted-foreground hover:text-primary transition-colors">Contact</a></li>
-                  <li><Link to="/auth" className="text-muted-foreground hover:text-primary transition-colors">Inloggen</Link></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-primary transition-colors">Privacy</a></li>
-                </ul>
-              </div>
-            </div>
-            
-            <div className="pt-8 border-t text-center text-sm text-muted-foreground">
-              <p>© {new Date().getFullYear()} Khaylani. Alle rechten voorbehouden.</p>
-              <p className="mt-2">Gemaakt met ❤️ voor recruitment professionals</p>
-            </div>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
   );

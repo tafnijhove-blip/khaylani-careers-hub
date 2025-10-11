@@ -78,3 +78,14 @@ export const candidateSchema = z.object({
 });
 
 export type CandidateFormData = z.infer<typeof candidateSchema>;
+
+// Contact form schema
+export const contactFormSchema = z.object({
+  naam: z.string().trim().min(2, "Naam moet minimaal 2 karakters zijn").max(100, "Naam te lang"),
+  bedrijfsnaam: z.string().trim().min(2, "Bedrijfsnaam moet minimaal 2 karakters zijn").max(150, "Bedrijfsnaam te lang"),
+  email: z.string().trim().email("Ongeldig e-mailadres").max(255, "E-mailadres te lang"),
+  aantalMedewerkers: z.string().trim().min(1, "Aantal medewerkers is verplicht").max(50, "Te veel karakters"),
+  bericht: z.string().trim().min(10, "Bericht moet minimaal 10 karakters zijn").max(2000, "Bericht te lang"),
+});
+
+export type ContactFormData = z.infer<typeof contactFormSchema>;
