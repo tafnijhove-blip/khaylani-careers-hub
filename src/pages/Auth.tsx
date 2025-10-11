@@ -9,7 +9,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     const checkUserAndRedirect = async (session: any) => {
@@ -127,6 +127,20 @@ const Auth = () => {
               supabaseClient={supabase}
               view="sign_in"
               showLinks={false}
+              localization={{
+                variables: {
+                  sign_in: {
+                    email_label: language === 'nl' ? 'E-mailadres' : 'Email address',
+                    password_label: language === 'nl' ? 'Wachtwoord' : 'Password',
+                    email_input_placeholder: language === 'nl' ? 'Jouw e-mailadres' : 'Your email address',
+                    password_input_placeholder: language === 'nl' ? 'Jouw wachtwoord' : 'Your password',
+                    button_label: language === 'nl' ? 'Inloggen' : 'Sign in',
+                    loading_button_label: language === 'nl' ? 'Inloggen...' : 'Signing in ...',
+                    social_provider_text: language === 'nl' ? 'Inloggen met {{provider}}' : 'Sign in with {{provider}}',
+                    link_text: language === 'nl' ? 'Heb je al een account? Inloggen' : 'Already have an account? Sign in',
+                  },
+                },
+              }}
               appearance={{
                 theme: ThemeSupa,
                 variables: {
