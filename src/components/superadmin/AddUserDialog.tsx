@@ -173,12 +173,17 @@ const AddUserDialog = ({ open, onOpenChange, onSuccess }: AddUserDialogProps) =>
 
           <div className="space-y-2">
             <Label htmlFor="company">Bedrijf</Label>
-            <Select value={formData.company_id} onValueChange={(value) => setFormData({ ...formData, company_id: value })}>
+            <Select
+              value={formData.company_id || "none"}
+              onValueChange={(value) =>
+                setFormData({ ...formData, company_id: value === "none" ? "" : value })
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Selecteer bedrijf (optioneel)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Geen bedrijf</SelectItem>
+                <SelectItem value="none">Geen bedrijf</SelectItem>
                 {bedrijven?.map((bedrijf) => (
                   <SelectItem key={bedrijf.id} value={bedrijf.id}>
                     {bedrijf.naam}
