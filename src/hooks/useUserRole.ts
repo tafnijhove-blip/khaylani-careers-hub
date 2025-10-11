@@ -14,11 +14,14 @@ export const useUserRole = () => {
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", user.id)
-        .maybeSingle();
+        .eq("user_id", user.id);
 
       if (error) throw error;
-      return data?.role as UserRole;
+      const roles = (data as { role: string }[]) || [];
+      const priority = ["superadmin", "ceo", "accountmanager", "recruiter"];
+      const selected = roles
+        .sort((a, b) => priority.indexOf(a.role) - priority.indexOf(b.role))[0]?.role || null;
+      return selected as UserRole;
     },
   });
 };

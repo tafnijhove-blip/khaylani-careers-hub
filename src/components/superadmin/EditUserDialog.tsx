@@ -78,13 +78,17 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
 
       if (profileError) throw profileError;
 
-      // Update role
-      const { error: roleError } = await supabase
+      // Replace existing roles to enforce a single role per user
+      const { error: delError } = await supabase
         .from("user_roles")
-        .update({ role: formData.role as any })
+        .delete()
         .eq("user_id", user.id);
+      if (delError) throw delError;
 
-      if (roleError) throw roleError;
+      const { error: insertError } = await supabase
+        .from("user_roles")
+        .insert({ user_id: user.id, role: formData.role as any });
+      if (insertError) throw insertError;
 
       toast({
         title: "Gebruiker bijgewerkt",
