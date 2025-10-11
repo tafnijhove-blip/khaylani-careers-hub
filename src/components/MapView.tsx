@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import { supabase } from '@/integrations/supabase/client';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { AlertCircle } from 'lucide-react';
 
 interface Bedrijf {
@@ -39,83 +38,38 @@ interface MapViewProps {
 
 const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick }: MapViewProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const map = useRef<maplibregl.Map | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [mapLoaded, setMapLoaded] = useState(false);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
-
-  // Fetch Mapbox token
-  useEffect(() => {
-    const fetchMapboxToken = async () => {
-      try {
-        console.log('🗺️ MapView: Starting token fetch...');
-        const { data, error } = await supabase.functions.invoke('get-mapbox-token');
-        
-        console.log('🗺️ MapView: Response received', { data, error });
-        
-        if (error) {
-          console.error('❌ MapView: Error fetching token:', error);
-          throw error;
-        }
-        if (data?.token) {
-          console.log('✅ MapView: Token received successfully:', data.token.substring(0, 20) + '...');
-          setMapboxToken(data.token);
-        } else {
-          console.error('❌ MapView: No token in response');
-          throw new Error('Geen token ontvangen');
-        }
-      } catch (err: any) {
-        console.error('❌ MapView: Token fetch error:', err);
-        setError(`Fout bij ophalen van Mapbox token: ${err.message || 'Onbekende fout'}`);
-      } finally {
-        console.log('🗺️ MapView: Token fetch completed');
-        setLoading(false);
-      }
-    };
-
-    console.log('🗺️ MapView: Component mounted, starting fetch...');
-    fetchMapboxToken();
-  }, []);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || loading || !mapboxToken || map.current) {
-      console.log('MapView: Skip init', { 
-        hasContainer: !!mapContainer.current, 
-        loading, 
-        hasToken: !!mapboxToken,
-        hasMap: !!map.current 
-      });
-      return;
-    }
+    if (!mapContainer.current || map.current) return;
 
-    console.log('MapView: Initializing map...');
+    console.log('MapView: Initializing MapLibre...');
     
     try {
-      mapboxgl.accessToken = mapboxToken;
-      
-      map.current = new mapboxgl.Map({
+      map.current = new maplibregl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
+        style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
         center: [5.2913, 52.1326],
         zoom: 6.5,
       });
 
       const currentMap = map.current;
-      console.log('MapView: Map instance created');
 
       currentMap.on('load', () => {
         console.log('✓ MapView: Map loaded successfully');
         currentMap.scrollZoom.disable();
-        currentMap.addControl(new mapboxgl.NavigationControl(), 'top-right');
+        currentMap.addControl(new maplibregl.NavigationControl(), 'top-right');
         setMapLoaded(true);
       });
 
       currentMap.on('error', (e) => {
-        console.error('✗ MapView: Mapbox error:', e);
-        setError(`Mapbox fout: ${e.error?.message || 'Onbekende fout'}`);
+        console.error('✗ MapView: Map error:', e);
+        setError(`Kaart fout: ${e.error?.message || 'Onbekende fout'}`);
       });
 
       return () => {
@@ -132,7 +86,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       console.error('✗ MapView: Initialization error:', err);
       setError(`Fout bij aanmaken kaart: ${err.message}`);
     }
-  }, [mapboxToken, loading]);
+  }, []);
 
   // Create or update markers when data or map state changes
   useEffect(() => {
@@ -145,7 +99,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     } catch (e) { /* ignore */ }
     markersRef.current = [];
 
-    const bounds = new mapboxgl.LngLatBounds();
+    const bounds = new maplibregl.LngLatBounds();
     let added = 0;
 
     bedrijven.forEach((bedrijf) => {
@@ -170,7 +124,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           el.addEventListener('click', () => onBedrijfClick(bedrijf));
         }
 
-        const popup = new mapboxgl.Popup({ offset: 25 })
+        const popup = new maplibregl.Popup({ offset: 25 })
           .setHTML(`
             <div style="padding: 12px;">
               <h3 style="font-weight: 600; margin-bottom: 6px;">${bedrijf.naam}</h3>
@@ -180,7 +134,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
             </div>
           `);
 
-        const marker = new mapboxgl.Marker(el)
+        const marker = new maplibregl.Marker(el)
           .setLngLat([bedrijf.lng, bedrijf.lat])
           .setPopup(popup)
           .addTo(map.current!);
