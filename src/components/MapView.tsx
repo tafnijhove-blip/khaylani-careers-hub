@@ -50,6 +50,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
   const [currentZoom, setCurrentZoom] = useState(6.5);
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const clusterIndex = useRef<Supercluster | null>(null);
+  const zoomTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -78,9 +79,14 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
         setTimeout(handleResize, 0);
       });
 
-      // Listen to zoom changes for dynamic pin scaling
+      // Listen to zoom changes for dynamic pin scaling with debounce
       currentMap.on('zoom', () => {
-        setCurrentZoom(currentMap.getZoom());
+        if (zoomTimeoutRef.current) {
+          clearTimeout(zoomTimeoutRef.current);
+        }
+        zoomTimeoutRef.current = setTimeout(() => {
+          setCurrentZoom(currentMap.getZoom());
+        }, 100);
       });
 
       window.addEventListener('resize', handleResize);
@@ -109,10 +115,9 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
 
   // Calculate dynamic pin scale based on zoom level (subtle scaling only)
   const getPinScale = useCallback((zoom: number): number => {
-    const minScale = 0.85;
-    const maxScale = 1.0;
-    const scale = minScale + ((zoom - 4) / 10) * (maxScale - minScale);
-    return Math.max(minScale, Math.min(maxScale, scale));
+    if (zoom < 6) return 0.85;
+    if (zoom > 9) return 1.0;
+    return 0.85 + ((zoom - 6) / 3) * 0.15;
   }, []);
 
   // Calculate fixed sizes based on viewport only (not affected by zoom)
@@ -160,29 +165,29 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
 
   // Update markers when zoom changes
   const updateMarkerStyles = useCallback(() => {
-    if (!map.current || !mapLoaded) return;
+    if (!map.current || !mapLoaded || markersRef.current.length === 0) return;
     
     const zoom = currentZoom;
-    const sizes = getFixedSizes();
     const scale = getPinScale(zoom);
     
     markersRef.current.forEach((marker) => {
       const el = marker.getElement();
       const companyName = el.getAttribute('data-company-name');
+      const currentText = el.textContent;
+      
       if (el && companyName) {
-        const text = getCompanyText(companyName, zoom);
-        el.textContent = text;
-        // Fixed max width, slight scale on zoom for emphasis only
-        el.style.maxWidth = `${sizes.maxWidth}px`;
-        el.style.width = `fit-content`;
-        el.style.height = `${sizes.height}px`;
-        el.style.padding = `0 ${sizes.padding}px`;
-        el.style.fontSize = `${sizes.fontSize}px`;
-        el.style.borderRadius = `${sizes.borderRadius}px`;
+        const newText = getCompanyText(companyName, zoom);
+        
+        // Only update if text actually changed
+        if (currentText !== newText) {
+          el.textContent = newText;
+        }
+        
+        // Only update transform
         el.style.transform = `scale(${scale})`;
       }
     });
-  }, [currentZoom, mapLoaded, getFixedSizes, getPinScale, getCompanyText]);
+  }, [currentZoom, mapLoaded, getPinScale, getCompanyText]);
 
   // Apply marker style updates when zoom changes
   useEffect(() => {
