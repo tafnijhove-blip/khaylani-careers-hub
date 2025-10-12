@@ -9,7 +9,6 @@ import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle, Trash2, XCircl
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
-import MapView from "@/components/MapView";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
 import { VacatureDetailDialog } from "@/components/VacatureDetailDialog";
@@ -279,27 +278,6 @@ const Dashboard = () => {
             aria-label="Zoek bedrijven"
           />
         </div>
-
-        {/* Interactive Map */}
-        <Card className="border-2 border-primary/30 overflow-hidden shadow-xl hover:shadow-glow transition-all duration-500">
-          <CardHeader className="bg-gradient-primary text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-shine opacity-20" aria-hidden="true"></div>
-            <CardTitle className="flex items-center gap-3 relative z-10">
-              <div className="h-10 w-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center" aria-hidden="true">
-                <MapPin className="h-6 w-6" />
-              </div>
-              Interactieve Kaart Nederland
-            </CardTitle>
-            <CardDescription className="text-white/90 relative z-10">
-              Visueel overzicht van alle bedrijfslocaties en vacatures
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="h-[500px]" role="region" aria-label="Interactieve kaart met bedrijfslocaties">
-              <MapView bedrijven={bedrijven} vacatures={vacatures} vacatureStats={vacatureStats} onVacatureClick={(v) => { setSelectedVacature(v); setDialogOpen(true); }} />
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Bedrijven List */}
         <div className="animate-fade-in-up">

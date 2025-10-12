@@ -29,7 +29,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
 import DashboardPreview from "@/components/landing/DashboardPreview";
-import MapSection from "@/components/landing/MapSection";
+import InteractiveJobMap from "@/components/landing/InteractiveJobMap";
 import VacaturePreview from "@/components/landing/VacaturePreview";
 import Footer from "@/components/landing/Footer";
 import CookieBanner from "@/components/CookieBanner";
@@ -269,9 +269,9 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Map Section - Analytics Dashboard */}
+            {/* Interactive Job Map */}
             <div className="mt-24 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <MapSection />
+              <InteractiveJobMap />
             </div>
 
             <a href="#vacatures" className="flex justify-center mt-16 animate-bounce">
