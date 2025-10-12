@@ -56,68 +56,55 @@ const MapPreview = () => {
     }
   }, []);
 
-  // Calculate dynamic pin scale based on zoom
+  // Calculate dynamic pin scale based on zoom (subtle scaling only)
   const getPinScale = useCallback((zoom: number): number => {
-    const baseZoom = 7;
-    const minScale = 0.6;
-    const maxScale = 1.5;
+    const minScale = 0.85;
+    const maxScale = 1.0;
     const scale = minScale + ((zoom - 4) / 10) * (maxScale - minScale);
     return Math.max(minScale, Math.min(maxScale, scale));
   }, []);
 
-  // Calculate dynamic sizes based on zoom and viewport
-  const getDynamicSizes = useCallback((zoom: number) => {
-    const isMobile = window.innerWidth < 768;
-    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+  // Calculate fixed sizes based on viewport only (not affected by zoom)
+  const getFixedSizes = useCallback(() => {
+    const width = window.innerWidth;
     
-    const scale = getPinScale(zoom);
-    
-    const baseSizes = {
-      maxWidth: isMobile ? 60 : isTablet ? 80 : 120,
-      minWidth: isMobile ? 36 : isTablet ? 40 : 44,
-      padding: isMobile ? 4 : isTablet ? 5 : 6,
-      fontSize: isMobile ? 9 : isTablet ? 10 : 11,
-      borderRadius: isMobile ? 14 : isTablet ? 16 : 20,
-    };
+    // Fixed maximum widths that never exceed these values
+    if (width < 360) {
+      return { maxWidth: 50, height: 28, padding: 6, fontSize: 9, borderRadius: 14 };
+    } else if (width < 768) {
+      return { maxWidth: 60, height: 32, padding: 6, fontSize: 10, borderRadius: 16 };
+    } else if (width < 1024) {
+      return { maxWidth: 80, height: 36, padding: 8, fontSize: 11, borderRadius: 18 };
+    } else {
+      return { maxWidth: 120, height: 40, padding: 10, fontSize: 12, borderRadius: 20 };
+    }
+  }, []);
 
-    return {
-      maxWidth: Math.round(baseSizes.maxWidth * scale),
-      minWidth: Math.round(baseSizes.minWidth * scale),
-      padding: Math.round(baseSizes.padding * scale),
-      fontSize: Math.round(baseSizes.fontSize * scale),
-      borderRadius: Math.round(baseSizes.borderRadius * scale),
-    };
-  }, [getPinScale]);
-
-  // Get company text based on zoom level
+  // Get company text based on zoom level and viewport
   const getCompanyText = useCallback((name: string, zoom: number): string => {
-    const isMobile = window.innerWidth < 768;
+    const width = window.innerWidth;
+    const isMobile = width < 768;
     
-    if (zoom < 6) {
-      const words = name.trim().split(/\s+/);
-      return words.length === 1 
-        ? name.substring(0, 2).toUpperCase()
-        : words.slice(0, 2).map(w => w.charAt(0)).join('').toUpperCase();
-    }
-    
-    if (zoom < 8) {
-      const words = name.trim().split(/\s+/);
-      const maxLength = isMobile ? 2 : 3;
-      return words.length === 1
-        ? name.substring(0, Math.min(maxLength + 1, 4)).toUpperCase()
-        : words.slice(0, maxLength).map(w => w.charAt(0)).join('').toUpperCase();
-    }
-    
-    if (zoom >= 9) {
-      const maxChars = isMobile ? 8 : 12;
-      return name.length > maxChars ? name.substring(0, maxChars) + '…' : name;
-    }
-    
+    // Generate abbreviation from company name
     const words = name.trim().split(/\s+/);
-    const maxLength = isMobile ? 3 : 4;
-    return words.length === 1
-      ? name.substring(0, Math.min(maxLength, 4)).toUpperCase()
-      : words.slice(0, maxLength).map(w => w.charAt(0)).join('').toUpperCase();
+    const abbreviation = words.length === 1 
+      ? name.substring(0, 2).toUpperCase()
+      : words.slice(0, 2).map(w => w.charAt(0)).join('').toUpperCase();
+    
+    // At very low zoom or mobile, always show abbreviation
+    if (zoom < 6 || (isMobile && zoom < 7)) {
+      return abbreviation;
+    }
+    
+    // At medium zoom, show slightly longer abbreviation or short name
+    if (zoom < 8) {
+      const maxChars = isMobile ? 3 : 5;
+      return name.length <= maxChars ? name : abbreviation;
+    }
+    
+    // At higher zoom, show full name with truncation
+    const maxChars = isMobile ? 6 : width < 1024 ? 8 : 12;
+    return name.length > maxChars ? name.substring(0, maxChars) + '…' : name;
   }, []);
 
   // Update marker styles when zoom changes
@@ -125,7 +112,8 @@ const MapPreview = () => {
     if (!map.current || !mapLoaded) return;
     
     const zoom = currentZoom;
-    const sizes = getDynamicSizes(zoom);
+    const sizes = getFixedSizes();
+    const scale = getPinScale(zoom);
     
     markersRef.current.forEach((marker) => {
       const el = marker.getElement();
@@ -133,14 +121,17 @@ const MapPreview = () => {
       if (el && companyName) {
         const text = getCompanyText(companyName, zoom);
         el.textContent = text;
+        // Fixed max width, slight scale on zoom for emphasis only
         el.style.maxWidth = `${sizes.maxWidth}px`;
-        el.style.minWidth = `${sizes.minWidth}px`;
-        el.style.padding = `${sizes.padding}px ${sizes.padding * 2}px`;
+        el.style.width = `fit-content`;
+        el.style.height = `${sizes.height}px`;
+        el.style.padding = `0 ${sizes.padding}px`;
         el.style.fontSize = `${sizes.fontSize}px`;
         el.style.borderRadius = `${sizes.borderRadius}px`;
+        el.style.transform = `scale(${scale})`;
       }
     });
-  }, [currentZoom, mapLoaded, getDynamicSizes, getCompanyText]);
+  }, [currentZoom, mapLoaded, getFixedSizes, getPinScale, getCompanyText]);
 
   // Apply updates when zoom changes
   useEffect(() => {
@@ -172,18 +163,22 @@ const MapPreview = () => {
       }
       
       .landing-pin-badge {
-        /* Dynamic sizing controlled via inline styles */
-        height: auto;
+        /* Fixed sizing - never stretches */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: fit-content;
+        box-sizing: border-box;
         
         /* Badge styling */
         background: hsl(211 84% 31%);
         color: white;
         font-weight: 600;
         letter-spacing: 0.3px;
-        line-height: 1.4;
+        line-height: 1;
         text-align: center;
         
-        /* Text handling */
+        /* Text handling - strict truncation */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -195,6 +190,7 @@ const MapPreview = () => {
         transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
                     transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
                     box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-origin: center;
         
         /* Typography */
         font-family: 'Inter', -apple-system, sans-serif;
@@ -207,8 +203,9 @@ const MapPreview = () => {
       
       .landing-pin-badge:hover {
         background: hsl(16 100% 60%);
-        transform: translateY(-3px) scale(1.06);
+        transform: translateY(-3px) scale(1.08);
         box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3), 0 3px 6px rgba(0, 0, 0, 0.12);
+        z-index: 1;
       }
       
       .landing-popup .maplibregl-popup-content {
@@ -229,22 +226,25 @@ const MapPreview = () => {
     `;
     document.head.appendChild(style);
 
-    // Get initial dynamic sizes
-    const sizes = getDynamicSizes(currentZoom);
+    // Get fixed sizes based on viewport
+    const sizes = getFixedSizes();
+    const scale = getPinScale(currentZoom);
 
     demoLocations.forEach((location, index) => {
       // Get zoom-aware company text
       const displayText = getCompanyText(location.name, currentZoom);
       
-      // Create zoom-aware badge marker
+      // Create fixed-size badge marker
       const el = document.createElement('div');
       el.className = 'landing-pin-badge';
       el.style.animationDelay = `${index * 0.1}s`;
       el.style.maxWidth = `${sizes.maxWidth}px`;
-      el.style.minWidth = `${sizes.minWidth}px`;
-      el.style.padding = `${sizes.padding}px ${sizes.padding * 2}px`;
+      el.style.width = 'fit-content';
+      el.style.height = `${sizes.height}px`;
+      el.style.padding = `0 ${sizes.padding}px`;
       el.style.fontSize = `${sizes.fontSize}px`;
       el.style.borderRadius = `${sizes.borderRadius}px`;
+      el.style.transform = `scale(${scale})`;
       el.textContent = displayText;
       el.setAttribute('data-company-name', location.name);
       el.setAttribute('title', location.name);
@@ -330,7 +330,7 @@ const MapPreview = () => {
         style.parentNode.removeChild(style);
       }
     };
-  }, [mapLoaded, currentZoom, getDynamicSizes, getCompanyText]);
+  }, [mapLoaded, currentZoom, getFixedSizes, getPinScale, getCompanyText]);
 
   const totalVacatures = demoLocations.reduce((sum, loc) => sum + loc.count, 0);
 
