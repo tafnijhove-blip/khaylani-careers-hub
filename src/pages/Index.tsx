@@ -29,7 +29,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
 import DashboardPreview from "@/components/landing/DashboardPreview";
-import LandingMapWithData from "@/components/landing/LandingMapWithData";
+import MapSection from "@/components/landing/MapSection";
 import VacaturePreview from "@/components/landing/VacaturePreview";
 import Footer from "@/components/landing/Footer";
 import CookieBanner from "@/components/CookieBanner";
@@ -269,21 +269,9 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Map Preview - Geografisch overzicht */}
+            {/* Map Section - Analytics Dashboard */}
             <div className="mt-24 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <div className="text-center mb-10">
-                <Badge variant="secondary" className="mb-4 shadow-sm">
-                  <MapPin className="h-4 w-4 mr-2 inline" />
-                  {t('landing.map.badge')}
-                </Badge>
-                <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
-                  {t('landing.map.title')} <span className="text-gradient">{t('landing.map.highlight')}</span>
-                </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                  {t('landing.map.description')}
-                </p>
-              </div>
-              <LandingMapWithData />
+              <MapSection />
             </div>
 
             <a href="#vacatures" className="flex justify-center mt-16 animate-bounce">
