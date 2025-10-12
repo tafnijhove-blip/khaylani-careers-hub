@@ -78,17 +78,13 @@ const EditUserDialog = ({ open, onOpenChange, user, onSuccess }: EditUserDialogP
 
       if (profileError) throw profileError;
 
-      // Replace existing roles to enforce a single role per user
-      const { error: delError } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", user.id);
-      if (delError) throw delError;
-
-      const { error: insertError } = await supabase
-        .from("user_roles")
-        .insert({ user_id: user.id, role: formData.role as any });
-      if (insertError) throw insertError;
+      // Update role using secure RPC
+      const { error: roleError } = await supabase
+        .rpc("manage_user_role", {
+          target_user_id: user.id,
+          new_role: formData.role as any
+        });
+      if (roleError) throw roleError;
 
       toast({
         title: "Gebruiker bijgewerkt",

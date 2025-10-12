@@ -7,6 +7,18 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// HTML encode function to prevent XSS attacks
+function escapeHtml(text: string): string {
+  const map: { [key: string]: string } = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
 interface ContactRequest {
   naam: string;
   bedrijfsnaam: string;
@@ -33,15 +45,15 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "Khaylani <onboarding@resend.dev>",
         to: ["info@khaylani.nl"],
-        subject: `Nieuwe offerte aanvraag van ${bedrijfsnaam}`,
+        subject: `Nieuwe offerte aanvraag van ${escapeHtml(bedrijfsnaam)}`,
         html: `
           <h2>Nieuwe offerte aanvraag</h2>
-          <p><strong>Naam:</strong> ${naam}</p>
-          <p><strong>Bedrijfsnaam:</strong> ${bedrijfsnaam}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Aantal medewerkers:</strong> ${aantalMedewerkers}</p>
+          <p><strong>Naam:</strong> ${escapeHtml(naam)}</p>
+          <p><strong>Bedrijfsnaam:</strong> ${escapeHtml(bedrijfsnaam)}</p>
+          <p><strong>Email:</strong> ${escapeHtml(email)}</p>
+          <p><strong>Aantal medewerkers:</strong> ${escapeHtml(aantalMedewerkers)}</p>
           <p><strong>Bericht:</strong></p>
-          <p>${bericht}</p>
+          <p>${escapeHtml(bericht)}</p>
         `,
       }),
     });
@@ -63,12 +75,12 @@ const handler = async (req: Request): Promise<Response> => {
         to: [email],
         subject: "Bedankt voor je interesse in Khaylani",
         html: `
-          <h1>Bedankt voor je interesse, ${naam}!</h1>
+          <h1>Bedankt voor je interesse, ${escapeHtml(naam)}!</h1>
           <p>We hebben je offerte aanvraag ontvangen en nemen binnen 24 uur contact met je op.</p>
           <h2>Je aanvraag details:</h2>
           <ul>
-            <li><strong>Bedrijf:</strong> ${bedrijfsnaam}</li>
-            <li><strong>Aantal medewerkers:</strong> ${aantalMedewerkers}</li>
+            <li><strong>Bedrijf:</strong> ${escapeHtml(bedrijfsnaam)}</li>
+            <li><strong>Aantal medewerkers:</strong> ${escapeHtml(aantalMedewerkers)}</li>
           </ul>
           <p>Heb je nog vragen? Mail ons op info@khaylani.nl</p>
           <p>Met vriendelijke groet,<br>Team Khaylani</p>

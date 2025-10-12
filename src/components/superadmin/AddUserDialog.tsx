@@ -70,11 +70,12 @@ const AddUserDialog = ({ open, onOpenChange, onSuccess }: AddUserDialogProps) =>
 
       if (profileError) throw profileError;
 
-      // Update role
+      // Assign role using secure RPC
       const { error: roleError } = await supabase
-        .from("user_roles")
-        .update({ role: formData.role as any })
-        .eq("user_id", authData.user.id);
+        .rpc("manage_user_role", {
+          target_user_id: authData.user.id,
+          new_role: formData.role as any
+        });
 
       if (roleError) throw roleError;
 
