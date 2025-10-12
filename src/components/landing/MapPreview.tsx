@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { Card } from "@/components/ui/card";
@@ -9,6 +9,7 @@ const MapPreview = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [currentZoom, setCurrentZoom] = useState(6.5);
   const markersRef = useRef<maplibregl.Marker[]>([]);
 
   // Fictieve locaties voor demo
@@ -37,8 +38,14 @@ const MapPreview = () => {
 
       currentMap.on('load', () => {
         setMapLoaded(true);
-        currentMap.scrollZoom.disable();
+        setCurrentZoom(currentMap.getZoom());
+        currentMap.scrollZoom.enable();
         currentMap.addControl(new maplibregl.NavigationControl(), 'top-right');
+      });
+
+      // Listen to zoom changes
+      currentMap.on('zoom', () => {
+        setCurrentZoom(currentMap.getZoom());
       });
 
       return () => {
@@ -49,19 +56,96 @@ const MapPreview = () => {
     }
   }, []);
 
-  // Helper function to create company abbreviation (responsive)
-  const getCompanyAbbreviation = (name: string, maxLength: number = 4): string => {
-    const words = name.trim().split(/\s+/);
-    if (words.length === 1) {
-      return name.substring(0, Math.min(maxLength, 4)).toUpperCase();
+  // Calculate dynamic pin scale based on zoom
+  const getPinScale = useCallback((zoom: number): number => {
+    const baseZoom = 7;
+    const minScale = 0.6;
+    const maxScale = 1.5;
+    const scale = minScale + ((zoom - 4) / 10) * (maxScale - minScale);
+    return Math.max(minScale, Math.min(maxScale, scale));
+  }, []);
+
+  // Calculate dynamic sizes based on zoom and viewport
+  const getDynamicSizes = useCallback((zoom: number) => {
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+    
+    const scale = getPinScale(zoom);
+    
+    const baseSizes = {
+      maxWidth: isMobile ? 60 : isTablet ? 80 : 120,
+      minWidth: isMobile ? 36 : isTablet ? 40 : 44,
+      padding: isMobile ? 4 : isTablet ? 5 : 6,
+      fontSize: isMobile ? 9 : isTablet ? 10 : 11,
+      borderRadius: isMobile ? 14 : isTablet ? 16 : 20,
+    };
+
+    return {
+      maxWidth: Math.round(baseSizes.maxWidth * scale),
+      minWidth: Math.round(baseSizes.minWidth * scale),
+      padding: Math.round(baseSizes.padding * scale),
+      fontSize: Math.round(baseSizes.fontSize * scale),
+      borderRadius: Math.round(baseSizes.borderRadius * scale),
+    };
+  }, [getPinScale]);
+
+  // Get company text based on zoom level
+  const getCompanyText = useCallback((name: string, zoom: number): string => {
+    const isMobile = window.innerWidth < 768;
+    
+    if (zoom < 6) {
+      const words = name.trim().split(/\s+/);
+      return words.length === 1 
+        ? name.substring(0, 2).toUpperCase()
+        : words.slice(0, 2).map(w => w.charAt(0)).join('').toUpperCase();
     }
-    // Take first letter of words based on maxLength
-    const numWords = Math.min(words.length, maxLength);
-    return words.slice(0, numWords)
-      .map(w => w.charAt(0))
-      .join('')
-      .toUpperCase();
-  };
+    
+    if (zoom < 8) {
+      const words = name.trim().split(/\s+/);
+      const maxLength = isMobile ? 2 : 3;
+      return words.length === 1
+        ? name.substring(0, Math.min(maxLength + 1, 4)).toUpperCase()
+        : words.slice(0, maxLength).map(w => w.charAt(0)).join('').toUpperCase();
+    }
+    
+    if (zoom >= 9) {
+      const maxChars = isMobile ? 8 : 12;
+      return name.length > maxChars ? name.substring(0, maxChars) + '…' : name;
+    }
+    
+    const words = name.trim().split(/\s+/);
+    const maxLength = isMobile ? 3 : 4;
+    return words.length === 1
+      ? name.substring(0, Math.min(maxLength, 4)).toUpperCase()
+      : words.slice(0, maxLength).map(w => w.charAt(0)).join('').toUpperCase();
+  }, []);
+
+  // Update marker styles when zoom changes
+  const updateMarkerStyles = useCallback(() => {
+    if (!map.current || !mapLoaded) return;
+    
+    const zoom = currentZoom;
+    const sizes = getDynamicSizes(zoom);
+    
+    markersRef.current.forEach((marker) => {
+      const el = marker.getElement();
+      const companyName = el.getAttribute('data-company-name');
+      if (el && companyName) {
+        const text = getCompanyText(companyName, zoom);
+        el.textContent = text;
+        el.style.maxWidth = `${sizes.maxWidth}px`;
+        el.style.minWidth = `${sizes.minWidth}px`;
+        el.style.padding = `${sizes.padding}px ${sizes.padding * 2}px`;
+        el.style.fontSize = `${sizes.fontSize}px`;
+        el.style.borderRadius = `${sizes.borderRadius}px`;
+      }
+    });
+  }, [currentZoom, mapLoaded, getDynamicSizes, getCompanyText]);
+
+  // Apply updates when zoom changes
+  useEffect(() => {
+    updateMarkerStyles();
+  }, [currentZoom, updateMarkerStyles]);
 
   // Add markers
   useEffect(() => {
@@ -71,7 +155,7 @@ const MapPreview = () => {
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    // Add custom styles with fixed-size constraints
+    // Add custom styles with zoom awareness
     const styleId = 'landing-map-styles';
     const style = document.createElement('style');
     style.id = styleId;
@@ -88,18 +172,13 @@ const MapPreview = () => {
       }
       
       .landing-pin-badge {
-        /* Fixed size constraints - responsive */
-        max-width: 120px;
-        min-width: 44px;
+        /* Dynamic sizing controlled via inline styles */
         height: auto;
-        padding: 6px 12px;
         
         /* Badge styling */
-        border-radius: 20px;
         background: hsl(211 84% 31%);
         color: white;
         font-weight: 600;
-        font-size: 11px;
         letter-spacing: 0.3px;
         line-height: 1.4;
         text-align: center;
@@ -113,7 +192,9 @@ const MapPreview = () => {
         cursor: pointer;
         box-shadow: 0 3px 10px rgba(11, 61, 145, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08);
         border: 2px solid white;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         
         /* Typography */
         font-family: 'Inter', -apple-system, sans-serif;
@@ -122,29 +203,6 @@ const MapPreview = () => {
         /* Animation */
         animation: markerFadeIn 0.5s ease forwards;
         opacity: 0;
-      }
-      
-      /* Tablet breakpoint */
-      @media (max-width: 1024px) {
-        .landing-pin-badge {
-          max-width: 80px;
-          min-width: 40px;
-          padding: 5px 10px;
-          font-size: 10px;
-          border-radius: 16px;
-        }
-      }
-      
-      /* Mobile breakpoint */
-      @media (max-width: 768px) {
-        .landing-pin-badge {
-          max-width: 60px;
-          min-width: 36px;
-          padding: 4px 8px;
-          font-size: 9px;
-          border-radius: 14px;
-          border-width: 1.5px;
-        }
       }
       
       .landing-pin-badge:hover {
@@ -165,25 +223,30 @@ const MapPreview = () => {
         border-top-color: white;
       }
       
-      /* Marker container ensures proper centering */
       .maplibregl-marker {
         will-change: transform;
       }
     `;
     document.head.appendChild(style);
 
+    // Get initial dynamic sizes
+    const sizes = getDynamicSizes(currentZoom);
+
     demoLocations.forEach((location, index) => {
-      // Get responsive abbreviation (shorter on mobile)
-      const isMobile = window.innerWidth < 768;
-      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-      const maxLength = isMobile ? 2 : isTablet ? 3 : 4;
-      const abbreviation = getCompanyAbbreviation(location.name, maxLength);
+      // Get zoom-aware company text
+      const displayText = getCompanyText(location.name, currentZoom);
       
-      // Create fixed-size badge marker
+      // Create zoom-aware badge marker
       const el = document.createElement('div');
       el.className = 'landing-pin-badge';
       el.style.animationDelay = `${index * 0.1}s`;
-      el.textContent = abbreviation;
+      el.style.maxWidth = `${sizes.maxWidth}px`;
+      el.style.minWidth = `${sizes.minWidth}px`;
+      el.style.padding = `${sizes.padding}px ${sizes.padding * 2}px`;
+      el.style.fontSize = `${sizes.fontSize}px`;
+      el.style.borderRadius = `${sizes.borderRadius}px`;
+      el.textContent = displayText;
+      el.setAttribute('data-company-name', location.name);
       el.setAttribute('title', location.name);
       el.setAttribute('aria-label', `${location.name} - ${location.count} vacatures`);
 
@@ -196,22 +259,22 @@ const MapPreview = () => {
       }).setHTML(`
         <div style="padding: 18px;">
           <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 14px;">
-            <div style="
-              flex-shrink: 0;
-              width: 44px;
-              height: 44px;
-              border-radius: 12px;
-              background: linear-gradient(135deg, hsl(211 84% 31%), hsl(211 84% 45%));
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              font-weight: 700;
-              font-size: 15px;
-              box-shadow: 0 4px 12px rgba(11, 61, 145, 0.2);
-            ">
-              ${abbreviation}
-            </div>
+              <div style="
+                flex-shrink: 0;
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                background: linear-gradient(135deg, hsl(211 84% 31%), hsl(211 84% 45%));
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: 700;
+                font-size: 15px;
+                box-shadow: 0 4px 12px rgba(11, 61, 145, 0.2);
+              ">
+                ${displayText}
+              </div>
             <div style="flex: 1; min-width: 0;">
               <h3 style="font-weight: 700; font-size: 15px; margin: 0 0 4px 0; color: hsl(215 25% 15%); line-height: 1.3;">
                 ${location.name}
@@ -267,7 +330,7 @@ const MapPreview = () => {
         style.parentNode.removeChild(style);
       }
     };
-  }, [mapLoaded]);
+  }, [mapLoaded, currentZoom, getDynamicSizes, getCompanyText]);
 
   const totalVacatures = demoLocations.reduce((sum, loc) => sum + loc.count, 0);
 

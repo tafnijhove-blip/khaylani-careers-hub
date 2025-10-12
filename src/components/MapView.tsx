@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState, memo } from 'react';
+import { useEffect, useRef, useState, memo, useCallback } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import Supercluster from 'supercluster';
 import { AlertCircle } from 'lucide-react';
 
 interface Bedrijf {
@@ -46,7 +47,9 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [currentZoom, setCurrentZoom] = useState(6.5);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const clusterIndex = useRef<Supercluster | null>(null);
 
   // Initialize map
   useEffect(() => {
@@ -67,11 +70,17 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
 
       currentMap.on('load', () => {
         console.log('✓ MapView: Map loaded successfully');
-        currentMap.scrollZoom.disable();
+        currentMap.scrollZoom.enable();
         currentMap.addControl(new maplibregl.NavigationControl(), 'top-right');
         setMapLoaded(true);
+        setCurrentZoom(currentMap.getZoom());
         // Ensure proper sizing after initial render
         setTimeout(handleResize, 0);
+      });
+
+      // Listen to zoom changes for dynamic pin scaling
+      currentMap.on('zoom', () => {
+        setCurrentZoom(currentMap.getZoom());
       });
 
       window.addEventListener('resize', handleResize);
@@ -98,19 +107,101 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     }
   }, []);
 
-  // Helper function to create company abbreviation (responsive)
-  const getCompanyAbbreviation = (naam: string, maxLength: number = 4): string => {
-    const words = naam.trim().split(/\s+/);
-    if (words.length === 1) {
-      return naam.substring(0, Math.min(maxLength, 4)).toUpperCase();
+  // Calculate dynamic pin scale based on zoom level
+  const getPinScale = useCallback((zoom: number): number => {
+    // Base scale: 1.0 at zoom 7, scales between 0.6 and 1.5
+    const baseZoom = 7;
+    const minScale = 0.6;
+    const maxScale = 1.5;
+    const scale = minScale + ((zoom - 4) / 10) * (maxScale - minScale);
+    return Math.max(minScale, Math.min(maxScale, scale));
+  }, []);
+
+  // Calculate dynamic sizes based on zoom and viewport
+  const getDynamicSizes = useCallback((zoom: number) => {
+    const isMobile = window.innerWidth < 768;
+    const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+    
+    const scale = getPinScale(zoom);
+    
+    // Base sizes that scale with zoom
+    const baseSizes = {
+      maxWidth: isMobile ? 60 : isTablet ? 80 : 120,
+      minWidth: isMobile ? 36 : isTablet ? 40 : 44,
+      padding: isMobile ? 4 : isTablet ? 5 : 6,
+      fontSize: isMobile ? 9 : isTablet ? 10 : 11,
+      borderRadius: isMobile ? 14 : isTablet ? 16 : 20,
+    };
+
+    return {
+      maxWidth: Math.round(baseSizes.maxWidth * scale),
+      minWidth: Math.round(baseSizes.minWidth * scale),
+      padding: Math.round(baseSizes.padding * scale),
+      fontSize: Math.round(baseSizes.fontSize * scale),
+      borderRadius: Math.round(baseSizes.borderRadius * scale),
+    };
+  }, [getPinScale]);
+
+  // Helper to get company text based on zoom level
+  const getCompanyText = useCallback((naam: string, zoom: number): string => {
+    const isMobile = window.innerWidth < 768;
+    
+    // At lower zoom levels, use shorter abbreviations
+    if (zoom < 6) {
+      const words = naam.trim().split(/\s+/);
+      return words.length === 1 
+        ? naam.substring(0, 2).toUpperCase()
+        : words.slice(0, 2).map(w => w.charAt(0)).join('').toUpperCase();
     }
-    // Take first letter of first 2-4 words based on maxLength
-    const numWords = Math.min(words.length, maxLength);
-    return words.slice(0, numWords)
-      .map(w => w.charAt(0))
-      .join('')
-      .toUpperCase();
-  };
+    
+    if (zoom < 8) {
+      const words = naam.trim().split(/\s+/);
+      const maxLength = isMobile ? 2 : 3;
+      return words.length === 1
+        ? naam.substring(0, Math.min(maxLength + 1, 4)).toUpperCase()
+        : words.slice(0, maxLength).map(w => w.charAt(0)).join('').toUpperCase();
+    }
+    
+    // At higher zoom, show more of the name
+    if (zoom >= 9) {
+      const maxChars = isMobile ? 8 : 12;
+      return naam.length > maxChars ? naam.substring(0, maxChars) + '…' : naam;
+    }
+    
+    // Medium zoom: abbreviation
+    const words = naam.trim().split(/\s+/);
+    const maxLength = isMobile ? 3 : 4;
+    return words.length === 1
+      ? naam.substring(0, Math.min(maxLength, 4)).toUpperCase()
+      : words.slice(0, maxLength).map(w => w.charAt(0)).join('').toUpperCase();
+  }, []);
+
+  // Update markers when zoom changes
+  const updateMarkerStyles = useCallback(() => {
+    if (!map.current || !mapLoaded) return;
+    
+    const zoom = currentZoom;
+    const sizes = getDynamicSizes(zoom);
+    
+    markersRef.current.forEach((marker) => {
+      const el = marker.getElement();
+      const companyName = el.getAttribute('data-company-name');
+      if (el && companyName) {
+        const text = getCompanyText(companyName, zoom);
+        el.textContent = text;
+        el.style.maxWidth = `${sizes.maxWidth}px`;
+        el.style.minWidth = `${sizes.minWidth}px`;
+        el.style.padding = `${sizes.padding}px ${sizes.padding * 2}px`;
+        el.style.fontSize = `${sizes.fontSize}px`;
+        el.style.borderRadius = `${sizes.borderRadius}px`;
+      }
+    });
+  }, [currentZoom, mapLoaded, getDynamicSizes, getCompanyText]);
+
+  // Apply marker style updates when zoom changes
+  useEffect(() => {
+    updateMarkerStyles();
+  }, [currentZoom, updateMarkerStyles]);
 
   // Create or update markers when data or map state changes
   useEffect(() => {
@@ -126,25 +217,20 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     const bounds = new maplibregl.LngLatBounds();
     let added = 0;
 
-    // Add custom styles for markers and popups
+    // Add custom styles for zoom-aware markers
     const styleId = 'map-marker-styles';
     if (!document.getElementById(styleId)) {
       const style = document.createElement('style');
       style.id = styleId;
       style.textContent = `
         .map-pin-badge {
-          /* Fixed size constraints - responsive */
-          max-width: 120px;
-          min-width: 44px;
+          /* Dynamic sizing controlled via inline styles */
           height: auto;
-          padding: 6px 12px;
           
           /* Badge styling */
-          border-radius: 20px;
           background: hsl(211 84% 31%);
           color: white;
           font-weight: 600;
-          font-size: 11px;
           letter-spacing: 0.3px;
           line-height: 1.4;
           text-align: center;
@@ -158,35 +244,14 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           cursor: pointer;
           box-shadow: 0 3px 10px rgba(11, 61, 145, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08);
           border: 2px solid white;
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                      transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                      box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           
           /* Typography */
           font-family: 'Inter', -apple-system, sans-serif;
           -webkit-font-smoothing: antialiased;
-        }
-        
-        /* Tablet breakpoint */
-        @media (max-width: 1024px) {
-          .map-pin-badge {
-            max-width: 80px;
-            min-width: 40px;
-            padding: 5px 10px;
-            font-size: 10px;
-            border-radius: 16px;
-          }
-        }
-        
-        /* Mobile breakpoint */
-        @media (max-width: 768px) {
-          .map-pin-badge {
-            max-width: 60px;
-            min-width: 36px;
-            padding: 4px 8px;
-            font-size: 9px;
-            border-radius: 14px;
-            border-width: 1.5px;
-          }
         }
         
         .map-pin-badge:hover {
@@ -199,6 +264,26 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           background: hsl(16 100% 60%);
           transform: scale(1.04);
           box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35);
+        }
+        
+        .map-pin-cluster {
+          background: hsl(16 100% 60%);
+          color: white;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35), 0 2px 6px rgba(0, 0, 0, 0.15);
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          font-family: 'Inter', -apple-system, sans-serif;
+        }
+        
+        .map-pin-cluster:hover {
+          transform: scale(1.15);
+          box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4), 0 3px 8px rgba(0, 0, 0, 0.2);
         }
         
         .maplibregl-popup-content {
@@ -228,7 +313,6 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           color: hsl(211 84% 45%) !important;
         }
         
-        /* Marker container ensures proper centering */
         .maplibregl-marker {
           will-change: transform;
         }
@@ -236,18 +320,24 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       document.head.appendChild(style);
     }
 
+    // Get initial dynamic sizes based on current zoom
+    const sizes = getDynamicSizes(currentZoom);
+
     bedrijven.forEach((bedrijf) => {
       if (bedrijf.lat && bedrijf.lng) {
-        // Get responsive abbreviation (shorter on mobile)
-        const isMobile = window.innerWidth < 768;
-        const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
-        const maxLength = isMobile ? 2 : isTablet ? 3 : 4;
-        const abbreviation = getCompanyAbbreviation(bedrijf.naam, maxLength);
+        // Get zoom-aware company text
+        const displayText = getCompanyText(bedrijf.naam, currentZoom);
         
-        // Create fixed-size badge marker
+        // Create zoom-aware badge marker
         const el = document.createElement('div');
         el.className = 'map-pin-badge';
-        el.textContent = abbreviation;
+        el.textContent = displayText;
+        el.style.maxWidth = `${sizes.maxWidth}px`;
+        el.style.minWidth = `${sizes.minWidth}px`;
+        el.style.padding = `${sizes.padding}px ${sizes.padding * 2}px`;
+        el.style.fontSize = `${sizes.fontSize}px`;
+        el.style.borderRadius = `${sizes.borderRadius}px`;
+        el.setAttribute('data-company-name', bedrijf.naam);
         el.setAttribute('title', bedrijf.naam);
         el.setAttribute('aria-label', `${bedrijf.naam} - Klik voor details`);
 
@@ -266,7 +356,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           <div style="padding: 18px; max-width: 320px;">
             <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 14px;">
               <div style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, hsl(211 84% 31%), hsl(211 84% 45%)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; box-shadow: 0 4px 12px rgba(11, 61, 145, 0.2);">
-                ${abbreviation}
+                ${displayText}
               </div>
               <div style="flex: 1; min-width: 0;">
                 <h3 style="font-weight: 700; font-size: 16px; margin: 0 0 4px 0; color: hsl(215 25% 15%); line-height: 1.3;">
@@ -407,7 +497,7 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       const style = document.getElementById(styleId);
       if (style) style.remove();
     };
-  }, [bedrijven, vacatures, vacatureStats, mapLoaded, onBedrijfClick, onVacatureClick]);
+  }, [bedrijven, vacatures, vacatureStats, mapLoaded, onBedrijfClick, onVacatureClick, currentZoom, getDynamicSizes, getCompanyText]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
