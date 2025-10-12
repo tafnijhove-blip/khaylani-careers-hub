@@ -49,13 +49,15 @@ const MapPreview = () => {
     }
   }, []);
 
-  // Helper function to create company abbreviation
-  const getCompanyAbbreviation = (name: string): string => {
+  // Helper function to create company abbreviation (responsive)
+  const getCompanyAbbreviation = (name: string, maxLength: number = 4): string => {
     const words = name.trim().split(/\s+/);
     if (words.length === 1) {
-      return name.substring(0, 3).toUpperCase();
+      return name.substring(0, Math.min(maxLength, 4)).toUpperCase();
     }
-    return words.slice(0, Math.min(3, words.length))
+    // Take first letter of words based on maxLength
+    const numWords = Math.min(words.length, maxLength);
+    return words.slice(0, numWords)
       .map(w => w.charAt(0))
       .join('')
       .toUpperCase();
@@ -69,7 +71,7 @@ const MapPreview = () => {
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    // Add custom styles
+    // Add custom styles with fixed-size constraints
     const styleId = 'landing-map-styles';
     const style = document.createElement('style');
     style.id = styleId;
@@ -86,27 +88,69 @@ const MapPreview = () => {
       }
       
       .landing-pin-badge {
-        padding: 8px 14px;
-        border-radius: 12px;
+        /* Fixed size constraints - responsive */
+        max-width: 120px;
+        min-width: 44px;
+        height: auto;
+        padding: 6px 12px;
+        
+        /* Badge styling */
+        border-radius: 20px;
         background: hsl(211 84% 31%);
         color: white;
         font-weight: 600;
-        font-size: 12px;
-        letter-spacing: 0.5px;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(11, 61, 145, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
-        border: 2px solid white;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 11px;
+        letter-spacing: 0.3px;
+        line-height: 1.4;
+        text-align: center;
+        
+        /* Text handling */
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        
+        /* Visual effects */
+        cursor: pointer;
+        box-shadow: 0 3px 10px rgba(11, 61, 145, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08);
+        border: 2px solid white;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        /* Typography */
         font-family: 'Inter', -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        
+        /* Animation */
         animation: markerFadeIn 0.5s ease forwards;
         opacity: 0;
       }
       
+      /* Tablet breakpoint */
+      @media (max-width: 1024px) {
+        .landing-pin-badge {
+          max-width: 80px;
+          min-width: 40px;
+          padding: 5px 10px;
+          font-size: 10px;
+          border-radius: 16px;
+        }
+      }
+      
+      /* Mobile breakpoint */
+      @media (max-width: 768px) {
+        .landing-pin-badge {
+          max-width: 60px;
+          min-width: 36px;
+          padding: 4px 8px;
+          font-size: 9px;
+          border-radius: 14px;
+          border-width: 1.5px;
+        }
+      }
+      
       .landing-pin-badge:hover {
         background: hsl(16 100% 60%);
-        transform: translateY(-4px) scale(1.08);
-        box-shadow: 0 8px 24px rgba(255, 107, 53, 0.35), 0 4px 8px rgba(0, 0, 0, 0.15);
+        transform: translateY(-3px) scale(1.06);
+        box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3), 0 3px 6px rgba(0, 0, 0, 0.12);
       }
       
       .landing-popup .maplibregl-popup-content {
@@ -120,18 +164,28 @@ const MapPreview = () => {
       .landing-popup .maplibregl-popup-tip {
         border-top-color: white;
       }
+      
+      /* Marker container ensures proper centering */
+      .maplibregl-marker {
+        will-change: transform;
+      }
     `;
     document.head.appendChild(style);
 
     demoLocations.forEach((location, index) => {
-      const abbreviation = getCompanyAbbreviation(location.name);
+      // Get responsive abbreviation (shorter on mobile)
+      const isMobile = window.innerWidth < 768;
+      const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+      const maxLength = isMobile ? 2 : isTablet ? 3 : 4;
+      const abbreviation = getCompanyAbbreviation(location.name, maxLength);
       
-      // Create badge-style marker
+      // Create fixed-size badge marker
       const el = document.createElement('div');
       el.className = 'landing-pin-badge';
       el.style.animationDelay = `${index * 0.1}s`;
       el.textContent = abbreviation;
       el.setAttribute('title', location.name);
+      el.setAttribute('aria-label', `${location.name} - ${location.count} vacatures`);
 
       // Create enhanced popup
       const popup = new maplibregl.Popup({ 

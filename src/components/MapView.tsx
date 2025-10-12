@@ -98,14 +98,15 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     }
   }, []);
 
-  // Helper function to create company abbreviation
-  const getCompanyAbbreviation = (naam: string): string => {
+  // Helper function to create company abbreviation (responsive)
+  const getCompanyAbbreviation = (naam: string, maxLength: number = 4): string => {
     const words = naam.trim().split(/\s+/);
     if (words.length === 1) {
-      return naam.substring(0, 3).toUpperCase();
+      return naam.substring(0, Math.min(maxLength, 4)).toUpperCase();
     }
-    // Take first letter of first 2-3 words
-    return words.slice(0, Math.min(3, words.length))
+    // Take first letter of first 2-4 words based on maxLength
+    const numWords = Math.min(words.length, maxLength);
+    return words.slice(0, numWords)
       .map(w => w.charAt(0))
       .join('')
       .toUpperCase();
@@ -132,31 +133,72 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
       style.id = styleId;
       style.textContent = `
         .map-pin-badge {
-          padding: 8px 14px;
-          border-radius: 12px;
+          /* Fixed size constraints - responsive */
+          max-width: 120px;
+          min-width: 44px;
+          height: auto;
+          padding: 6px 12px;
+          
+          /* Badge styling */
+          border-radius: 20px;
           background: hsl(211 84% 31%);
           color: white;
           font-weight: 600;
-          font-size: 12px;
-          letter-spacing: 0.5px;
-          cursor: pointer;
-          box-shadow: 0 4px 12px rgba(11, 61, 145, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
-          border: 2px solid white;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          position: relative;
+          font-size: 11px;
+          letter-spacing: 0.3px;
+          line-height: 1.4;
+          text-align: center;
+          
+          /* Text handling */
           white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          
+          /* Visual effects */
+          cursor: pointer;
+          box-shadow: 0 3px 10px rgba(11, 61, 145, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08);
+          border: 2px solid white;
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          
+          /* Typography */
           font-family: 'Inter', -apple-system, sans-serif;
+          -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Tablet breakpoint */
+        @media (max-width: 1024px) {
+          .map-pin-badge {
+            max-width: 80px;
+            min-width: 40px;
+            padding: 5px 10px;
+            font-size: 10px;
+            border-radius: 16px;
+          }
+        }
+        
+        /* Mobile breakpoint */
+        @media (max-width: 768px) {
+          .map-pin-badge {
+            max-width: 60px;
+            min-width: 36px;
+            padding: 4px 8px;
+            font-size: 9px;
+            border-radius: 14px;
+            border-width: 1.5px;
+          }
         }
         
         .map-pin-badge:hover {
           background: hsl(16 100% 60%);
-          transform: translateY(-4px) scale(1.08);
-          box-shadow: 0 8px 24px rgba(255, 107, 53, 0.35), 0 4px 8px rgba(0, 0, 0, 0.15);
+          transform: translateY(-3px) scale(1.06);
+          box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3), 0 3px 6px rgba(0, 0, 0, 0.12);
         }
         
         .map-pin-badge.active {
           background: hsl(16 100% 60%);
-          transform: scale(1.05);
+          transform: scale(1.04);
+          box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35);
         }
         
         .maplibregl-popup-content {
@@ -185,19 +227,29 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
           background: white !important;
           color: hsl(211 84% 45%) !important;
         }
+        
+        /* Marker container ensures proper centering */
+        .maplibregl-marker {
+          will-change: transform;
+        }
       `;
       document.head.appendChild(style);
     }
 
     bedrijven.forEach((bedrijf) => {
       if (bedrijf.lat && bedrijf.lng) {
-        const abbreviation = getCompanyAbbreviation(bedrijf.naam);
+        // Get responsive abbreviation (shorter on mobile)
+        const isMobile = window.innerWidth < 768;
+        const isTablet = window.innerWidth >= 768 && window.innerWidth < 1024;
+        const maxLength = isMobile ? 2 : isTablet ? 3 : 4;
+        const abbreviation = getCompanyAbbreviation(bedrijf.naam, maxLength);
         
-        // Create badge-style marker
+        // Create fixed-size badge marker
         const el = document.createElement('div');
         el.className = 'map-pin-badge';
         el.textContent = abbreviation;
         el.setAttribute('title', bedrijf.naam);
+        el.setAttribute('aria-label', `${bedrijf.naam} - Klik voor details`);
 
         if (onBedrijfClick) {
           el.addEventListener('click', () => onBedrijfClick(bedrijf));
