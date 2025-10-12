@@ -21,6 +21,8 @@ const Analytics = lazy(() => import("./pages/Analytics"));
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const CompanyDashboard = lazy(() => import("./pages/CompanyDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,6 +135,9 @@ const App = () => (
               <Route path="/vacatures" element={<Vacatures />} />
               <Route path="/kandidaten" element={<Kandidaten />} />
               <Route path="/analytics" element={<Analytics />} />
+              {/* Legal pages */}
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/cookies" element={<CookiePolicy />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

@@ -32,6 +32,7 @@ import DashboardPreview from "@/components/landing/DashboardPreview";
 import LandingMapWithData from "@/components/landing/LandingMapWithData";
 import VacaturePreview from "@/components/landing/VacaturePreview";
 import Footer from "@/components/landing/Footer";
+import CookieBanner from "@/components/CookieBanner";
 import { contactFormSchema } from "@/lib/validationSchemas";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
@@ -584,6 +585,9 @@ const Index = () => {
 
         {/* Footer */}
         <Footer />
+
+        {/* Cookie Banner - GDPR Compliant */}
+        <CookieBanner />
       </div>
     </>
   );
