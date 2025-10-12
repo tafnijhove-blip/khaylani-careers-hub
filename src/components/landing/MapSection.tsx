@@ -45,6 +45,7 @@ const MapSection = () => {
   // Data state
   const [companies, setCompanies] = useState<CompanyWithVacancies[]>([]);
   const [regionStats, setRegionStats] = useState<RegionStats[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   // Filter state
   const [selectedRegio, setSelectedRegio] = useState<string>("all");
@@ -55,6 +56,7 @@ const MapSection = () => {
   // Fetch real data from Supabase
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         // Fetch bedrijven with coordinates
         const { data: bedrijvenData, error: bedrijvenError } = await supabase
@@ -105,6 +107,8 @@ const MapSection = () => {
         setRegionStats(stats);
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -176,116 +180,78 @@ const MapSection = () => {
 
       const color = getPinColor(company.openVacancies);
       
-      // Create pin element
+      // Create pin element - simplified for performance
       const el = document.createElement('div');
       el.className = 'company-pin';
       el.style.cssText = `
         background: ${color};
         color: white;
-        padding: 8px 14px;
-        border-radius: 20px;
+        padding: 6px 12px;
+        border-radius: 16px;
         font-weight: 600;
-        font-size: 13px;
+        font-size: 12px;
         cursor: pointer;
-        box-shadow: 0 4px 12px rgba(0, 119, 255, 0.25);
-        border: 2px solid white;
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 119, 255, 0.2);
+        border: 1px solid rgba(255,255,255,0.3);
+        transition: transform 0.2s ease;
         white-space: nowrap;
-        display: flex;
-        align-items: center;
-        gap: 6px;
       `;
       
-      el.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <rect x="3" y="3" width="18" height="18" rx="2"/>
-          <line x1="9" y1="3" x2="9" y2="21"/>
-        </svg>
-        <span>${company.naam.length > 15 ? company.naam.substring(0, 15) + '…' : company.naam}</span>
-      `;
+      el.textContent = company.naam.length > 12 ? company.naam.substring(0, 12) + '…' : company.naam;
 
       el.addEventListener('mouseenter', () => {
-        el.style.transform = 'translateY(-3px) scale(1.05)';
-        el.style.boxShadow = '0 6px 20px rgba(255, 107, 53, 0.35)';
-        el.style.background = '#FF6B35';
+        el.style.transform = 'translateY(-2px) scale(1.05)';
       });
 
       el.addEventListener('mouseleave', () => {
         el.style.transform = 'translateY(0) scale(1)';
-        el.style.boxShadow = '0 4px 12px rgba(0, 119, 255, 0.25)';
-        el.style.background = color;
       });
 
-      // Create popup
+      // Create popup - only when clicked for performance
       const popup = new maplibregl.Popup({ 
-        offset: 30,
+        offset: 25,
         closeButton: true,
-        maxWidth: '320px'
+        maxWidth: '280px'
       }).setHTML(`
-        <div style="padding: 20px; font-family: 'Inter', sans-serif;">
-          <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 16px;">
-            <div style="
-              flex-shrink: 0;
-              width: 48px;
-              height: 48px;
-              border-radius: 12px;
-              background: ${color};
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              color: white;
-              font-weight: 700;
-              font-size: 18px;
-            ">
+        <div style="padding: 16px; font-family: system-ui, -apple-system, sans-serif;">
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 8px; background: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 16px;">
               ${company.openVacancies}
             </div>
-            <div style="flex: 1; min-width: 0;">
-              <h3 style="font-weight: 700; font-size: 16px; margin: 0 0 6px 0; color: #1a1a1a;">
+            <div>
+              <h3 style="font-weight: 700; font-size: 14px; margin: 0 0 4px 0; color: #1a1a1a;">
                 ${company.naam}
               </h3>
-              <p style="color: #666; font-size: 13px; margin: 0; display: flex; align-items: center; gap: 6px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
+              <p style="color: #666; font-size: 12px; margin: 0;">
                 ${company.plaats || company.regio}
               </p>
             </div>
           </div>
-          
-          <div style="border-top: 1px solid #e5e5e5; padding-top: 14px; margin-bottom: 14px;">
-            <p style="font-size: 12px; font-weight: 600; color: #666; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-              Open Vacatures
-            </p>
-            ${company.topJobs.length > 0 ? `
-              <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px;">
+          ${company.topJobs.length > 0 ? `
+            <div style="border-top: 1px solid #e5e5e5; padding-top: 10px; margin-bottom: 10px;">
+              <p style="font-size: 11px; font-weight: 600; color: #666; margin: 0 0 6px 0; text-transform: uppercase;">
+                Vacatures
+              </p>
+              <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px;">
                 ${company.topJobs.map(job => `
-                  <li style="font-size: 13px; color: #333; display: flex; align-items: center; gap: 8px;">
-                    <span style="width: 4px; height: 4px; background: ${color}; border-radius: 50%; flex-shrink: 0;"></span>
-                    ${job}
-                  </li>
+                  <li style="font-size: 12px; color: #333;">• ${job}</li>
                 `).join('')}
               </ul>
-            ` : '<p style="font-size: 13px; color: #999;">Geen vacatures om te tonen</p>'}
-          </div>
-          
+            </div>
+          ` : ''}
           <a href="/auth" style="
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: ${color};
             color: white;
-            padding: 10px 16px;
-            border-radius: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             text-decoration: none;
-            transition: background 0.2s;
           ">
-            Bekijk alle vacatures
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
-            </svg>
+            Bekijk alle vacatures →
           </a>
         </div>
       `);
@@ -439,11 +405,13 @@ const MapSection = () => {
           </div>
 
           {/* Loading state */}
-          {!mapLoaded && (
+          {(!mapLoaded || isLoading) && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-20">
               <div className="text-center space-y-3">
                 <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mx-auto" />
-                <p className="text-sm text-muted-foreground">Kaart laden...</p>
+                <p className="text-sm text-muted-foreground">
+                  {isLoading ? 'Data laden...' : 'Kaart laden...'}
+                </p>
               </div>
             </div>
           )}
