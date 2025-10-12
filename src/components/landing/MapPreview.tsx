@@ -49,6 +49,18 @@ const MapPreview = () => {
     }
   }, []);
 
+  // Helper function to create company abbreviation
+  const getCompanyAbbreviation = (name: string): string => {
+    const words = name.trim().split(/\s+/);
+    if (words.length === 1) {
+      return name.substring(0, 3).toUpperCase();
+    }
+    return words.slice(0, Math.min(3, words.length))
+      .map(w => w.charAt(0))
+      .join('')
+      .toUpperCase();
+  };
+
   // Add markers
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
@@ -57,67 +69,129 @@ const MapPreview = () => {
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    demoLocations.forEach((location, index) => {
-      // Create custom marker element
-      const el = document.createElement('div');
-      el.className = 'custom-marker';
-      el.style.cssText = `
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: ${location.color};
-        border: 3px solid white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    // Add custom styles
+    const styleId = 'landing-map-styles';
+    const style = document.createElement('style');
+    style.id = styleId;
+    style.textContent = `
+      @keyframes markerFadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.7) translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      
+      .landing-pin-badge {
+        padding: 8px 14px;
+        border-radius: 12px;
+        background: hsl(211 84% 31%);
         color: white;
-        font-weight: bold;
-        font-size: 14px;
+        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 0.5px;
         cursor: pointer;
-        position: relative;
-        transition: transform 0.3s ease;
+        box-shadow: 0 4px 12px rgba(11, 61, 145, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: 2px solid white;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        white-space: nowrap;
+        font-family: 'Inter', -apple-system, sans-serif;
         animation: markerFadeIn 0.5s ease forwards;
-        animation-delay: ${index * 0.1}s;
         opacity: 0;
-      `;
-      el.textContent = location.count.toString();
+      }
+      
+      .landing-pin-badge:hover {
+        background: hsl(16 100% 60%);
+        transform: translateY(-4px) scale(1.08);
+        box-shadow: 0 8px 24px rgba(255, 107, 53, 0.35), 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+      
+      .landing-popup .maplibregl-popup-content {
+        border-radius: 16px;
+        padding: 0;
+        box-shadow: 0 12px 48px rgba(11, 61, 145, 0.18), 0 4px 12px rgba(0, 0, 0, 0.12);
+        border: 1px solid hsl(215 20% 88%);
+        font-family: 'Inter', -apple-system, sans-serif;
+      }
+      
+      .landing-popup .maplibregl-popup-tip {
+        border-top-color: white;
+      }
+    `;
+    document.head.appendChild(style);
 
-      // Add hover effect
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.2)';
-      });
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
-      });
+    demoLocations.forEach((location, index) => {
+      const abbreviation = getCompanyAbbreviation(location.name);
+      
+      // Create badge-style marker
+      const el = document.createElement('div');
+      el.className = 'landing-pin-badge';
+      el.style.animationDelay = `${index * 0.1}s`;
+      el.textContent = abbreviation;
+      el.setAttribute('title', location.name);
 
-      // Create popup with more info
+      // Create enhanced popup
       const popup = new maplibregl.Popup({ 
-        offset: 25,
-        closeButton: false,
-        className: 'custom-popup'
+        offset: 30,
+        closeButton: true,
+        className: 'landing-popup',
+        maxWidth: '280px'
       }).setHTML(`
-        <div style="padding: 12px; min-width: 200px;">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-            <div style="width: 32px; height: 32px; border-radius: 8px; background: ${location.color}; display: flex; align-items: center; justify-content: center;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="9" y1="9" x2="15" y2="9"></line>
-                <line x1="9" y1="15" x2="15" y2="15"></line>
-              </svg>
+        <div style="padding: 18px;">
+          <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 14px;">
+            <div style="
+              flex-shrink: 0;
+              width: 44px;
+              height: 44px;
+              border-radius: 12px;
+              background: linear-gradient(135deg, hsl(211 84% 31%), hsl(211 84% 45%));
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              color: white;
+              font-weight: 700;
+              font-size: 15px;
+              box-shadow: 0 4px 12px rgba(11, 61, 145, 0.2);
+            ">
+              ${abbreviation}
             </div>
-            <div>
-              <div style="font-weight: 600; font-size: 14px; line-height: 1.2;">${location.name}</div>
-              <div style="color: #666; font-size: 12px;">${location.city}</div>
+            <div style="flex: 1; min-width: 0;">
+              <h3 style="font-weight: 700; font-size: 15px; margin: 0 0 4px 0; color: hsl(215 25% 15%); line-height: 1.3;">
+                ${location.name}
+              </h3>
+              <p style="color: hsl(215 15% 45%); font-size: 12px; margin: 0; display: flex; align-items: center; gap: 6px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>${location.city}</span>
+              </p>
             </div>
           </div>
-          <div style="border-top: 1px solid #e5e7eb; padding-top: 8px; margin-top: 8px;">
-            <div style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${location.color}" stroke-width="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                <circle cx="12" cy="10" r="3"></circle>
-              </svg>
-              <span style="font-weight: 500;">${location.count} openstaande vacatures</span>
+          
+          <div style="border-top: 1px solid hsl(215 20% 88%); padding-top: 12px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-size: 13px; font-weight: 600; color: hsl(215 15% 45%);">
+                Openstaande vacatures
+              </span>
+              <span style="
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 28px;
+                height: 28px;
+                padding: 0 10px;
+                border-radius: 8px;
+                background: hsl(16 100% 60%);
+                color: white;
+                font-weight: 700;
+                font-size: 14px;
+              ">
+                ${location.count}
+              </span>
             </div>
           </div>
         </div>
@@ -131,30 +205,6 @@ const MapPreview = () => {
 
       markersRef.current.push(marker);
     });
-
-    // Add animation keyframes
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes markerFadeIn {
-        from {
-          opacity: 0;
-          transform: scale(0.5) translateY(-20px);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-        }
-      }
-      .custom-popup .maplibregl-popup-content {
-        border-radius: 12px;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        padding: 0;
-      }
-      .custom-popup .maplibregl-popup-tip {
-        border-top-color: white;
-      }
-    `;
-    document.head.appendChild(style);
 
     return () => {
       markersRef.current.forEach(marker => marker.remove());

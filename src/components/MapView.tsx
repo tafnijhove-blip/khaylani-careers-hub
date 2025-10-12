@@ -98,6 +98,19 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     }
   }, []);
 
+  // Helper function to create company abbreviation
+  const getCompanyAbbreviation = (naam: string): string => {
+    const words = naam.trim().split(/\s+/);
+    if (words.length === 1) {
+      return naam.substring(0, 3).toUpperCase();
+    }
+    // Take first letter of first 2-3 words
+    return words.slice(0, Math.min(3, words.length))
+      .map(w => w.charAt(0))
+      .join('')
+      .toUpperCase();
+  };
+
   // Create or update markers when data or map state changes
   useEffect(() => {
     if (!map.current || !mapLoaded) return;
@@ -112,64 +125,196 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
     const bounds = new maplibregl.LngLatBounds();
     let added = 0;
 
+    // Add custom styles for markers and popups
+    const styleId = 'map-marker-styles';
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement('style');
+      style.id = styleId;
+      style.textContent = `
+        .map-pin-badge {
+          padding: 8px 14px;
+          border-radius: 12px;
+          background: hsl(211 84% 31%);
+          color: white;
+          font-weight: 600;
+          font-size: 12px;
+          letter-spacing: 0.5px;
+          cursor: pointer;
+          box-shadow: 0 4px 12px rgba(11, 61, 145, 0.25), 0 2px 4px rgba(0, 0, 0, 0.1);
+          border: 2px solid white;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
+          white-space: nowrap;
+          font-family: 'Inter', -apple-system, sans-serif;
+        }
+        
+        .map-pin-badge:hover {
+          background: hsl(16 100% 60%);
+          transform: translateY(-4px) scale(1.08);
+          box-shadow: 0 8px 24px rgba(255, 107, 53, 0.35), 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .map-pin-badge.active {
+          background: hsl(16 100% 60%);
+          transform: scale(1.05);
+        }
+        
+        .maplibregl-popup-content {
+          border-radius: 16px;
+          padding: 0;
+          box-shadow: 0 12px 48px rgba(11, 61, 145, 0.18), 0 4px 12px rgba(0, 0, 0, 0.12);
+          border: 1px solid hsl(215 20% 88%);
+          font-family: 'Inter', -apple-system, sans-serif;
+        }
+        
+        .maplibregl-popup-tip {
+          border-top-color: white;
+        }
+        
+        .mv-vacature-item {
+          transition: all 0.2s ease;
+        }
+        
+        .mv-vacature-item:hover {
+          background: hsl(211 84% 45%) !important;
+          color: white !important;
+          transform: translateX(4px);
+        }
+        
+        .mv-vacature-item:hover .vacancy-badge {
+          background: white !important;
+          color: hsl(211 84% 45%) !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
     bedrijven.forEach((bedrijf) => {
       if (bedrijf.lat && bedrijf.lng) {
+        const abbreviation = getCompanyAbbreviation(bedrijf.naam);
+        
+        // Create badge-style marker
         const el = document.createElement('div');
-        el.style.width = '32px';
-        el.style.height = '32px';
-        el.style.borderRadius = '50%';
-        el.style.backgroundColor = '#3B82F6';
-        el.style.border = '3px solid white';
-        el.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
-        el.style.cursor = 'pointer';
-        el.style.display = 'flex';
-        el.style.alignItems = 'center';
-        el.style.justifyContent = 'center';
-        el.style.color = 'white';
-        el.style.fontWeight = 'bold';
-        el.style.fontSize = '14px';
-        el.textContent = bedrijf.naam.charAt(0).toUpperCase();
+        el.className = 'map-pin-badge';
+        el.textContent = abbreviation;
+        el.setAttribute('title', bedrijf.naam);
 
         if (onBedrijfClick) {
           el.addEventListener('click', () => onBedrijfClick(bedrijf));
         }
 
         const bedrijfVacatures = vacatures.filter(v => v.bedrijf_id === bedrijf.id);
+        const totalOpen = bedrijfVacatures.reduce((sum, v) => {
+          const stat = vacatureStats.find(s => s.id === v.id);
+          return sum + (stat?.posities_open ?? v.aantal_posities);
+        }, 0);
 
+        // Create enhanced popup
         const popupHtml = `
-            <div style="padding:12px;max-width:280px">
-              <h3 style="font-weight:600;margin-bottom:4px;">${bedrijf.naam}</h3>
-              <p style="color:#666;font-size:12px;margin:0;">
-                ${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}
-              </p>
-              <div style="margin-top:8px;border-top:1px solid #eee;padding-top:8px;">
-                <div style="font-size:12px;color:#666;margin-bottom:6px;">Vacatures (${bedrijfVacatures.length})</div>
-                ${bedrijfVacatures.length ? `
-                  <ul style="list-style:none;padding:0;margin:0;display:grid;gap:6px;">
-                    ${bedrijfVacatures.map(v => {
-                      const stat = vacatureStats.find(s => s.id === v.id);
-                      const open = (stat?.posities_open ?? v.aantal_posities);
-                      return `
-                        <li>
-                          <a href="#" class="mv-vacature-item" data-id="${v.id}" style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:#f6f7f9;text-decoration:none;color:inherit;">
-                            <span style="font-size:13px;font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.functietitel}</span>
-                            <span style="font-size:12px;background:#eef2ff;color:#1d4ed8;padding:2px 6px;border-radius:999px;">${open} open</span>
-                          </a>
-                        </li>
-                      `;
-                    }).join('')}
-                  </ul>
-                ` : `<div style="font-size:12px;color:#999;">Geen vacatures</div>`}
+          <div style="padding: 18px; max-width: 320px;">
+            <div style="display: flex; align-items: start; gap: 12px; margin-bottom: 14px;">
+              <div style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, hsl(211 84% 31%), hsl(211 84% 45%)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 15px; box-shadow: 0 4px 12px rgba(11, 61, 145, 0.2);">
+                ${abbreviation}
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <h3 style="font-weight: 700; font-size: 16px; margin: 0 0 4px 0; color: hsl(215 25% 15%); line-height: 1.3;">
+                  ${bedrijf.naam}
+                </h3>
+                <p style="color: hsl(215 15% 45%); font-size: 13px; margin: 0; display: flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink: 0;">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span>${bedrijf.regio}${bedrijf.plaats ? ` • ${bedrijf.plaats}` : ''}</span>
+                </p>
               </div>
             </div>
-          `;
+            
+            <div style="border-top: 1px solid hsl(215 20% 88%); padding-top: 14px; margin-top: 14px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <span style="font-size: 13px; font-weight: 600; color: hsl(215 15% 45%);">
+                  Openstaande vacatures
+                </span>
+                <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 28px; padding: 0 10px; border-radius: 8px; background: hsl(16 100% 60%); color: white; font-weight: 700; font-size: 14px;">
+                  ${totalOpen}
+                </span>
+              </div>
+              
+              ${bedrijfVacatures.length ? `
+                <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: 8px;">
+                  ${bedrijfVacatures.map(v => {
+                    const stat = vacatureStats.find(s => s.id === v.id);
+                    const open = (stat?.posities_open ?? v.aantal_posities);
+                    return `
+                      <li>
+                        <a href="#" class="mv-vacature-item" data-id="${v.id}" style="
+                          display: flex;
+                          justify-content: space-between;
+                          align-items: center;
+                          padding: 12px;
+                          border-radius: 10px;
+                          background: hsl(210 20% 96%);
+                          text-decoration: none;
+                          color: inherit;
+                          gap: 12px;
+                        ">
+                          <span style="
+                            font-size: 14px;
+                            font-weight: 600;
+                            color: hsl(215 25% 15%);
+                            flex: 1;
+                            min-width: 0;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                          ">${v.functietitel}</span>
+                          <span class="vacancy-badge" style="
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            min-width: 32px;
+                            padding: 4px 10px;
+                            border-radius: 8px;
+                            background: hsl(211 84% 31%);
+                            color: white;
+                            font-weight: 600;
+                            font-size: 12px;
+                            flex-shrink: 0;
+                          ">${open}</span>
+                        </a>
+                      </li>
+                    `;
+                  }).join('')}
+                </ul>
+              ` : `
+                <div style="
+                  padding: 20px;
+                  text-align: center;
+                  color: hsl(215 15% 45%);
+                  font-size: 13px;
+                  background: hsl(210 20% 96%);
+                  border-radius: 10px;
+                ">
+                  Geen openstaande vacatures
+                </div>
+              `}
+            </div>
+          </div>
+        `;
 
-        const popup = new maplibregl.Popup({ offset: 25 }).setHTML(popupHtml);
+        const popup = new maplibregl.Popup({ 
+          offset: 30,
+          closeButton: true,
+          closeOnClick: true,
+          maxWidth: '340px'
+        }).setHTML(popupHtml);
 
         popup.on('open', () => {
-          const el = popup.getElement();
-          if (!el) return;
-          el.querySelectorAll('.mv-vacature-item').forEach((item) => {
+          el.classList.add('active');
+          const popupEl = popup.getElement();
+          if (!popupEl) return;
+          
+          popupEl.querySelectorAll('.mv-vacature-item').forEach((item) => {
             item.addEventListener('click', (e) => {
               e.preventDefault();
               const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
@@ -180,6 +325,10 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
               }
             }, { once: true });
           });
+        });
+
+        popup.on('close', () => {
+          el.classList.remove('active');
         });
 
         const marker = new maplibregl.Marker(el)
@@ -195,12 +344,18 @@ const MapView = ({ bedrijven, vacatures = [], vacatureStats = [], onBedrijfClick
 
     if (added > 0) {
       try {
-        map.current!.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 800 });
+        map.current!.fitBounds(bounds, { padding: 80, maxZoom: 11, duration: 1000 });
       } catch (e) {
         console.warn('MapView: fitBounds failed', e);
       }
     }
-  }, [bedrijven, vacatures, vacatureStats, mapLoaded]);
+
+    // Cleanup styles on unmount
+    return () => {
+      const style = document.getElementById(styleId);
+      if (style) style.remove();
+    };
+  }, [bedrijven, vacatures, vacatureStats, mapLoaded, onBedrijfClick, onVacatureClick]);
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
