@@ -200,10 +200,12 @@ const Index = () => {
 
       <div className="min-h-screen bg-background">
         {/* Navigation */}
-        <nav className={`fixed top-0 w-full z-50 glass-card border-b transition-all duration-300 ${showStickyNav ? 'shadow-lg' : ''}`}>
-          <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+        <nav className={`fixed top-0 w-full z-50 glass-card border-b transition-all duration-300 ${showStickyNav ? 'shadow-lg' : 'shadow-sm'}`}>
+          <div className="container mx-auto px-6 py-5 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3 group">
-              <MapPin className="h-6 w-6 text-primary transition-transform group-hover:scale-110" />
+              <div className="h-10 w-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
+                <MapPin className="h-5 w-5 text-white" />
+              </div>
               <span className="text-xl font-bold text-gradient">Khaylani</span>
             </Link>
             <div className="flex items-center gap-4">
@@ -224,27 +226,24 @@ const Index = () => {
         </nav>
 
         {/* Hero Section */}
-        <section className="relative pt-32 pb-24 px-6 overflow-hidden">
-          {/* Animated gradient background */}
-          <div className="absolute inset-0 bg-gradient-animated opacity-30" />
-          <div className="cyber-grid absolute inset-0 opacity-20" />
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+        <section className="relative pt-36 pb-24 px-6 overflow-hidden">
+          {/* Subtle background effects */}
+          <div className="absolute inset-0 bg-gradient-mesh opacity-40" />
           
-          {/* Floating orbs */}
-          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent-cyan/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-accent-purple/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+          {/* Floating orbs - more subtle */}
+          <div className="absolute top-20 left-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-20 right-10 w-[32rem] h-[32rem] bg-secondary/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
           
           <main className="container mx-auto max-w-6xl relative z-10">
             <div className="text-center space-y-8 animate-fade-in">
-              <Badge variant="secondary" className="mb-4 text-sm py-2 px-4">
+              <Badge variant="secondary" className="mb-4 text-sm py-2 px-4 shadow-sm">
                 <Zap className="h-4 w-4 mr-2 inline" />
                 {t('landing.hero.trust')}
               </Badge>
               
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
                 {t('landing.hero.main.title')}{" "}
-                <span className="text-gradient animate-shimmer bg-[length:200%_100%]">
+                <span className="text-gradient">
                   {t('landing.hero.main.highlight')}
                 </span>
               </h1>
@@ -254,7 +253,7 @@ const Index = () => {
               </p>
               
 
-              <div className="flex items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
                   <span>{t('landing.usp.realtime')}</span>
@@ -263,7 +262,7 @@ const Index = () => {
                   <CheckCircle2 className="h-4 w-4 text-primary" />
                   <span>{t('landing.usp.geographic')}</span>
                 </div>
-                <div className="flex items-center gap-2 hidden sm:flex">
+                <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
                   <span>{t('landing.usp.efficient')}</span>
                 </div>
@@ -271,24 +270,24 @@ const Index = () => {
             </div>
 
             {/* Map Preview - Geografisch overzicht */}
-            <div className="mt-20 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <div className="text-center mb-8">
-                <Badge variant="secondary" className="mb-4">
+            <div className="mt-24 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+              <div className="text-center mb-10">
+                <Badge variant="secondary" className="mb-4 shadow-sm">
                   <MapPin className="h-4 w-4 mr-2 inline" />
                   {t('landing.map.badge')}
                 </Badge>
-                <h2 className="text-3xl md:text-5xl font-bold mb-4">
+                <h2 className="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
                   {t('landing.map.title')} <span className="text-gradient">{t('landing.map.highlight')}</span>
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                   {t('landing.map.description')}
                 </p>
               </div>
               <LandingMapWithData />
             </div>
 
-            <a href="#vacatures" className="flex justify-center mt-12 animate-bounce">
-              <ChevronDown className="h-8 w-8 text-muted-foreground" />
+            <a href="#vacatures" className="flex justify-center mt-16 animate-bounce">
+              <ChevronDown className="h-8 w-8 text-muted-foreground opacity-50" />
             </a>
           </main>
         </section>
@@ -326,22 +325,22 @@ const Index = () => {
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 px-6 bg-muted/50">
+        <section className="py-20 px-6 bg-muted/30">
           <div className="container mx-auto max-w-6xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
                 <div 
                   key={index} 
-                  className="text-center space-y-2 animate-fade-in"
+                  className="text-center space-y-3 animate-fade-in hover-lift p-6 rounded-xl bg-card/50 border shadow-sm"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="flex justify-center mb-3">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center">
+                    <div className="h-12 w-12 rounded-xl bg-gradient-primary flex items-center justify-center shadow-md">
                       <stat.icon className="h-6 w-6 text-white" />
                     </div>
                   </div>
                   <div className="text-4xl font-bold text-gradient">{stat.value}</div>
-                  <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+                  <div className="text-sm text-muted-foreground font-medium leading-snug">{stat.label}</div>
                 </div>
               ))}
             </div>
@@ -349,14 +348,14 @@ const Index = () => {
         </section>
 
         {/* Benefits Section */}
-        <section id="features" className="py-24 px-6 bg-muted/30">
+        <section id="features" className="py-24 px-6">
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-16 space-y-4">
-              <Badge variant="secondary" className="mb-2">Waarom Khaylani?</Badge>
-              <h2 className="text-4xl md:text-6xl font-bold">
+              <Badge variant="secondary" className="mb-2 shadow-sm">Waarom Khaylani?</Badge>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
                 Sneller schakelen = <span className="text-gradient">sneller plaatsen</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                 Minder vergaderingen, minder mails, minder gedoe. Meer transparantie tussen recruiters, sales én management.
               </p>
             </div>
@@ -365,13 +364,13 @@ const Index = () => {
               {benefits.map((benefit, index) => (
                 <Card 
                   key={index} 
-                  className="glass-card p-8 hover-lift group animate-fade-in"
+                  className="glass-card p-8 hover-lift group animate-fade-in border"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="h-14 w-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6 group-hover:shadow-glow transition-all group-hover:scale-110">
+                  <div className="h-14 w-14 rounded-2xl bg-gradient-primary flex items-center justify-center mb-6 shadow-md group-hover:shadow-lg transition-all">
                     <benefit.icon className="h-7 w-7 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold mb-3">{benefit.title}</h3>
+                  <h3 className="text-2xl font-bold mb-3 tracking-tight">{benefit.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">
                     {benefit.description}
                   </p>
