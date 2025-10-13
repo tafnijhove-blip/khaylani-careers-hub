@@ -4,8 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, TrendingUp, Loader2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { MapPin } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import JobMapFilters from "./JobMapFilters";
 import JobMapStats from "./JobMapStats";
@@ -118,155 +117,222 @@ const InteractiveJobMap = () => {
     return "#1D4ED8"; // dark blue
   };
 
-  // Initialize map
+  // Initialize map with better tile loading
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    const isSupported = (maplibregl as any)?.supported ? (maplibregl as any).supported() : true;
-    if (!isSupported) {
-      console.error("Map rendering is not supported in this browser/device (WebGL disabled).");
-      return;
-    }
-
-    console.log("Initializing map...");
-    const mapInstance = new maplibregl.Map({
-      container: mapContainer.current,
-      style: {
-        version: 8,
-        sources: {
-          osm: {
-            type: "raster",
-            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-            tileSize: 256,
-            attribution: "&copy; OpenStreetMap Contributors",
-            maxzoom: 19
-          }
+    console.log("🗺️ Initializing map...");
+    
+    try {
+      const mapInstance = new maplibregl.Map({
+        container: mapContainer.current,
+        style: {
+          version: 8,
+          sources: {
+            "osm-tiles": {
+              type: "raster",
+              tiles: [
+                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              ],
+              tileSize: 256,
+              attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+              maxzoom: 19
+            }
+          },
+          layers: [
+            {
+              id: "osm-layer",
+              type: "raster",
+              source: "osm-tiles",
+              minzoom: 0,
+              maxzoom: 22
+            }
+          ]
         },
-        layers: [
-          { id: "osm", type: "raster", source: "osm" }
-        ]
-      },
-      center: [5.2913, 52.1326],
-      zoom: 7,
-      minZoom: 6,
-      maxZoom: 18
-    });
+        center: [5.2913, 52.1326], // Netherlands center
+        zoom: 7,
+        minZoom: 6,
+        maxZoom: 18
+      });
 
-    map.current = mapInstance;
+      map.current = mapInstance;
 
-    mapInstance.addControl(new maplibregl.NavigationControl(), "top-right");
+      // Add navigation controls
+      mapInstance.addControl(
+        new maplibregl.NavigationControl({
+          showCompass: true,
+          showZoom: true,
+          visualizePitch: false
+        }),
+        "top-right"
+      );
 
-    const onLoad = () => {
-      console.log("Map loaded");
-      // Force a resize in case the container size changed while loading (e.g. cookie banner)
-      mapInstance.resize();
-    };
+      mapInstance.on("load", () => {
+        console.log("✅ Map loaded successfully");
+        mapInstance.resize();
+      });
 
-    const onError = (e: any) => {
-      console.error("Map error:", e?.error || e);
-    };
+      mapInstance.on("error", (e) => {
+        console.error("❌ Map error:", e);
+      });
 
-    mapInstance.on("load", onLoad);
-    mapInstance.on("error", onError);
+      // Safety resize after mount
+      setTimeout(() => {
+        if (mapInstance) {
+          mapInstance.resize();
+          console.log("🔄 Map resized");
+        }
+      }, 100);
 
-    // Also attempt a resize after a short delay as a safety net
-    const resizeTimeout = window.setTimeout(() => mapInstance.resize(), 500);
-
-    return () => {
-      window.clearTimeout(resizeTimeout);
-      mapInstance.off("load", onLoad);
-      mapInstance.off("error", onError);
-      mapInstance.remove();
-      map.current = null;
-    };
+      return () => {
+        console.log("🧹 Cleaning up map");
+        mapInstance.remove();
+        map.current = null;
+      };
+    } catch (error) {
+      console.error("❌ Failed to initialize map:", error);
+    }
   }, []);
 
-  // Add markers when companies data changes
+  // Add markers with company names visible on map
   useEffect(() => {
     if (!map.current || filteredCompanies.length === 0) return;
+
+    console.log(`📍 Adding ${filteredCompanies.length} markers to map`);
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
 
-    // Add new markers
+    // Add new markers with visible company names
     filteredCompanies.forEach(company => {
-      const el = document.createElement("div");
-      el.className = "custom-marker";
-      el.style.cssText = `
-        background-color: ${getPinColor(company.vacancyCount)};
-        width: 40px;
-        height: 40px;
+      // Create pin container
+      const pinContainer = document.createElement("div");
+      pinContainer.className = "map-pin-container";
+      pinContainer.style.cssText = `
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+      `;
+
+      // Company name label (always visible)
+      const nameLabel = document.createElement("div");
+      nameLabel.style.cssText = `
+        background: white;
+        color: #000;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        margin-bottom: 4px;
+        pointer-events: none;
+      `;
+      nameLabel.textContent = company.naam;
+
+      // Pin marker
+      const pin = document.createElement("div");
+      pin.style.cssText = `
+        background-color: #0077FF;
+        width: 32px;
+        height: 32px;
         border-radius: 50% 50% 50% 0;
         transform: rotate(-45deg);
         border: 3px solid white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        cursor: pointer;
-        transition: transform 0.2s;
+        box-shadow: 0 3px 10px rgba(0,119,255,0.4);
+        transition: transform 0.2s, box-shadow 0.2s;
         display: flex;
         align-items: center;
         justify-content: center;
       `;
 
-      const label = document.createElement("div");
-      label.style.cssText = `
+      // Vacancy count inside pin
+      const countLabel = document.createElement("div");
+      countLabel.style.cssText = `
         transform: rotate(45deg);
-        font-size: 12px;
+        font-size: 11px;
         font-weight: bold;
         color: white;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.5);
       `;
-      label.textContent = company.vacancyCount.toString();
-      el.appendChild(label);
+      countLabel.textContent = company.vacancyCount.toString();
+      pin.appendChild(countLabel);
 
-      el.addEventListener("mouseenter", () => {
-        el.style.transform = "rotate(-45deg) scale(1.1)";
+      pinContainer.appendChild(nameLabel);
+      pinContainer.appendChild(pin);
+
+      // Hover effects
+      pinContainer.addEventListener("mouseenter", () => {
+        pin.style.transform = "rotate(-45deg) scale(1.15)";
+        pin.style.boxShadow = "0 4px 15px rgba(0,119,255,0.6)";
+        nameLabel.style.background = "#0077FF";
+        nameLabel.style.color = "white";
       });
 
-      el.addEventListener("mouseleave", () => {
-        el.style.transform = "rotate(-45deg) scale(1)";
+      pinContainer.addEventListener("mouseleave", () => {
+        pin.style.transform = "rotate(-45deg) scale(1)";
+        pin.style.boxShadow = "0 3px 10px rgba(0,119,255,0.4)";
+        nameLabel.style.background = "white";
+        nameLabel.style.color = "#000";
       });
 
+      // Popup content
       const popupHTML = `
-        <div style="padding: 12px; min-width: 200px;">
-          <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #1e293b;">
+        <div style="padding: 16px; min-width: 240px; font-family: system-ui, -apple-system, sans-serif;">
+          <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #1e293b;">
             ${company.naam}
           </h3>
-          <p style="margin: 0 0 8px 0; font-size: 14px; color: #64748b;">
-            ${company.plaats || company.regio}
+          <p style="margin: 0 0 12px 0; font-size: 14px; color: #64748b;">
+            📍 ${company.plaats || company.regio}
           </p>
-          <p style="margin: 0 0 12px 0; font-size: 14px; color: #0ea5e9; font-weight: 600;">
+          <p style="margin: 0 0 12px 0; font-size: 15px; color: #0077FF; font-weight: 600;">
             ${company.vacancyCount} open ${company.vacancyCount === 1 ? 'vacature' : 'vacatures'}
           </p>
-          <div style="margin-bottom: 12px;">
+          <div style="margin-bottom: 16px;">
             ${company.vacancies.slice(0, 3).map(v => `
-              <div style="padding: 4px 8px; background: #f1f5f9; border-radius: 4px; margin-bottom: 4px; font-size: 13px;">
+              <div style="padding: 6px 10px; background: #f1f5f9; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #1e293b;">
                 ${v.functietitel}
               </div>
             `).join('')}
+            ${company.vacancyCount > 3 ? `<p style="font-size: 12px; color: #64748b; margin: 8px 0 0 0;">+${company.vacancyCount - 3} meer...</p>` : ''}
           </div>
           <button 
             onclick="window.location.href='#vacatures'"
             style="
               width: 100%;
-              padding: 8px;
+              padding: 10px;
               background: #0077FF;
               color: white;
               border: none;
-              border-radius: 6px;
+              border-radius: 8px;
               font-weight: 600;
               cursor: pointer;
               font-size: 14px;
+              transition: background 0.2s;
             "
+            onmouseover="this.style.background='#0066DD'"
+            onmouseout="this.style.background='#0077FF'"
           >
-            Bekijk alle vacatures
+            Bekijk alle vacatures →
           </button>
         </div>
       `;
 
-      const popup = new maplibregl.Popup({ offset: 25 }).setHTML(popupHTML);
+      const popup = new maplibregl.Popup({
+        offset: 25,
+        closeButton: true,
+        closeOnClick: true,
+        className: "map-popup"
+      }).setHTML(popupHTML);
 
-      const marker = new maplibregl.Marker({ element: el })
+      const marker = new maplibregl.Marker({
+        element: pinContainer,
+        anchor: "bottom"
+      })
         .setLngLat([company.lng, company.lat])
         .setPopup(popup)
         .addTo(map.current!);
@@ -280,8 +346,10 @@ const InteractiveJobMap = () => {
       filteredCompanies.forEach(company => {
         bounds.extend([company.lng, company.lat]);
       });
-      map.current.fitBounds(bounds, { padding: 100, maxZoom: 12 });
+      map.current.fitBounds(bounds, { padding: 100, maxZoom: 11, duration: 1000 });
     }
+
+    console.log("✅ Markers added successfully");
   }, [filteredCompanies]);
 
   // User location button handler
@@ -314,18 +382,21 @@ const InteractiveJobMap = () => {
     <section className="py-16 bg-gradient-to-br from-background via-background to-primary/5">
       {/* CTA Banner */}
       <div className="container mx-auto px-4 mb-8">
-        <Card className="bg-gradient-primary text-white p-8 text-center border-0">
-          <h2 className="text-3xl font-bold mb-4">
+        <Card className="bg-gradient-primary text-white p-8 text-center border-0 shadow-2xl">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Ontdek waar je klanten de meeste vacatures hebben
           </h2>
-          <p className="text-lg mb-6 text-white/90">
+          <p className="text-lg mb-6 text-white/90 max-w-2xl mx-auto">
             Interactieve kaart met real-time vacaturedata per regio
           </p>
           <Button 
             size="lg" 
             variant="secondary"
-            onClick={() => setSelectedRegion("all")}
-            className="bg-white text-primary hover:bg-white/90"
+            onClick={() => {
+              setSelectedRegion("all");
+              centerOnUserLocation();
+            }}
+            className="bg-white text-primary hover:bg-white/90 shadow-lg"
           >
             <MapPin className="mr-2 h-5 w-5" />
             Verken mijn regio
@@ -339,8 +410,12 @@ const InteractiveJobMap = () => {
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Main Map */}
             <div className="flex-1 relative">
-              <Card className="overflow-hidden border-2 shadow-xl">
-                <div ref={mapContainer} className="w-full h-[600px]" />
+              <Card className="overflow-hidden border-2 shadow-2xl rounded-xl">
+                <div 
+                  ref={mapContainer} 
+                  className="w-full h-[600px] bg-gray-100"
+                  style={{ minHeight: "600px" }}
+                />
               </Card>
 
               {/* Filters Overlay */}
@@ -354,20 +429,15 @@ const InteractiveJobMap = () => {
               />
 
               {/* Legend */}
-              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4 border">
-                <h4 className="font-semibold text-sm mb-3 text-foreground">Vacatures per bedrijf</h4>
+              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-4 border-2">
+                <h4 className="font-semibold text-sm mb-3 text-foreground">Legenda</h4>
                 <div className="space-y-2 text-xs">
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#60A5FA" }} />
-                    <span>1-2 vacatures</span>
+                    <div className="w-3 h-3 rounded-full bg-[#0077FF]" />
+                    <span>Bedrijven met vacatures</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#3B82F6" }} />
-                    <span>3-5 vacatures</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: "#1D4ED8" }} />
-                    <span>6+ vacatures</span>
+                    <span className="text-muted-foreground">Klik op een pin voor details</span>
                   </div>
                 </div>
               </div>
