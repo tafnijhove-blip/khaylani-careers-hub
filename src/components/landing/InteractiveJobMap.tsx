@@ -122,7 +122,14 @@ const InteractiveJobMap = () => {
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    map.current = new maplibregl.Map({
+    const isSupported = (maplibregl as any)?.supported ? (maplibregl as any).supported() : true;
+    if (!isSupported) {
+      console.error("Map rendering is not supported in this browser/device (WebGL disabled).");
+      return;
+    }
+
+    console.log("Initializing map...");
+    const mapInstance = new maplibregl.Map({
       container: mapContainer.current,
       style: {
         version: 8,
@@ -136,11 +143,7 @@ const InteractiveJobMap = () => {
           }
         },
         layers: [
-          {
-            id: "osm",
-            type: "raster",
-            source: "osm"
-          }
+          { id: "osm", type: "raster", source: "osm" }
         ]
       },
       center: [5.2913, 52.1326],
@@ -149,10 +152,31 @@ const InteractiveJobMap = () => {
       maxZoom: 18
     });
 
-    map.current.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.current = mapInstance;
+
+    mapInstance.addControl(new maplibregl.NavigationControl(), "top-right");
+
+    const onLoad = () => {
+      console.log("Map loaded");
+      // Force a resize in case the container size changed while loading (e.g. cookie banner)
+      mapInstance.resize();
+    };
+
+    const onError = (e: any) => {
+      console.error("Map error:", e?.error || e);
+    };
+
+    mapInstance.on("load", onLoad);
+    mapInstance.on("error", onError);
+
+    // Also attempt a resize after a short delay as a safety net
+    const resizeTimeout = window.setTimeout(() => mapInstance.resize(), 500);
 
     return () => {
-      map.current?.remove();
+      window.clearTimeout(resizeTimeout);
+      mapInstance.off("load", onLoad);
+      mapInstance.off("error", onError);
+      mapInstance.remove();
       map.current = null;
     };
   }, []);
