@@ -59,14 +59,38 @@ const InteractiveJobMap = () => {
         ]);
 
         if (companiesRes.data && vacanciesRes.data) {
-          const companiesWithVacancies: CompanyWithVacancies[] = companiesRes.data.map(company => {
-            const companyVacancies = vacanciesRes.data.filter(v => v.bedrijf_id === company.id);
-            return {
-              ...company,
-              vacancies: companyVacancies,
-              vacancyCount: companyVacancies.length
-            };
-          }).filter(c => c.vacancyCount > 0);
+          const buildAddress = (c: Company) =>
+            [c.naam, c.plaats, c.regio, "Nederland"].filter(Boolean).join(", ");
+
+          const fixCompanyCoords = async (c: Company): Promise<Company> => {
+            const coords = getCompanyLngLat(c);
+            if (coords) return { ...c, lng: coords[0], lat: coords[1] } as Company;
+            try {
+              const { data, error } = await supabase.functions.invoke('geocode-address', {
+                body: { address: buildAddress(c) },
+              });
+              if (error) throw error;
+              if (data?.lng !== undefined && data?.lat !== undefined && isWithinNetherlands(Number(data.lng), Number(data.lat))) {
+                return { ...c, lng: Number(data.lng), lat: Number(data.lat) } as Company;
+              }
+            } catch (e) {
+              console.error('Geocoding failed for', c.naam, e);
+            }
+            return c;
+          };
+
+          const fixedCompanies = await Promise.all(companiesRes.data.map(fixCompanyCoords));
+
+          const companiesWithVacancies: CompanyWithVacancies[] = fixedCompanies
+            .map(company => {
+              const companyVacancies = vacanciesRes.data!.filter(v => v.bedrijf_id === company.id);
+              return {
+                ...company,
+                vacancies: companyVacancies,
+                vacancyCount: companyVacancies.length
+              } as CompanyWithVacancies;
+            })
+            .filter(c => c.vacancyCount > 0 && isWithinNetherlands(Number(c.lng), Number(c.lat)));
 
           setCompanies(companiesWithVacancies);
         }
