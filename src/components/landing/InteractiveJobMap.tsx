@@ -118,6 +118,38 @@ const InteractiveJobMap = () => {
     return "#1D4ED8"; // dark blue
   };
 
+  // Netherlands bounds to validate coordinates
+  const NL_BOUNDS = {
+    minLng: 3.2,
+    maxLng: 7.3,
+    minLat: 50.7,
+    maxLat: 53.7,
+  };
+
+  const isWithinNetherlands = (lng: number, lat: number) =>
+    lng >= NL_BOUNDS.minLng &&
+    lng <= NL_BOUNDS.maxLng &&
+    lat >= NL_BOUNDS.minLat &&
+    lat <= NL_BOUNDS.maxLat;
+
+  // Normalize potential swapped coordinates and filter out invalid ones
+  const getCompanyLngLat = (company: Company): [number, number] | null => {
+    const rawLng = Number(company.lng);
+    const rawLat = Number(company.lat);
+
+    // First try as stored (lng, lat)
+    if (isWithinNetherlands(rawLng, rawLat)) return [rawLng, rawLat];
+
+    // Try swapped
+    if (isWithinNetherlands(rawLat, rawLng)) {
+      console.warn(`Swapped coords for ${company.naam}`);
+      return [rawLat, rawLng];
+    }
+
+    // Discard if outside bounds
+    return null;
+  };
+
   // Initialize map with better tile loading
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -226,6 +258,8 @@ const InteractiveJobMap = () => {
 
     // Add new markers with visible company names
     filteredCompanies.forEach(company => {
+      const coords = getCompanyLngLat(company);
+      if (!coords) return;
       // Create pin container
       const pinContainer = document.createElement("div");
       pinContainer.className = "map-pin-container";
@@ -351,7 +385,7 @@ const InteractiveJobMap = () => {
         element: pinContainer,
         anchor: "bottom"
       })
-        .setLngLat([company.lng, company.lat])
+        .setLngLat(coords as [number, number])
         .setPopup(popup)
         .addTo(map.current!);
 
@@ -362,7 +396,8 @@ const InteractiveJobMap = () => {
     if (filteredCompanies.length > 0) {
       const bounds = new maplibregl.LngLatBounds();
       filteredCompanies.forEach(company => {
-        bounds.extend([company.lng, company.lat]);
+        const coords = getCompanyLngLat(company);
+        if (coords) bounds.extend(coords);
       });
       map.current.fitBounds(bounds, { padding: 100, maxZoom: 11, duration: 1000 });
     }
