@@ -37,6 +37,7 @@ const InteractiveJobMap = () => {
   const markersRef = useRef<maplibregl.Marker[]>([]);
   
   const [isLoading, setIsLoading] = useState(true);
+  const [mapLoaded, setMapLoaded] = useState(false);
   const [companies, setCompanies] = useState<CompanyWithVacancies[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [minVacancies, setMinVacancies] = useState<number>(0);
@@ -129,23 +130,25 @@ const InteractiveJobMap = () => {
         style: {
           version: 8,
           sources: {
-            "osm-tiles": {
+            "carto-tiles": {
               type: "raster",
               tiles: [
-                "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+                "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+                "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
+                "https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
               ],
               tileSize: 256,
-              attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-              maxzoom: 19
+              attribution:
+                '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
+              maxzoom: 20
             }
           },
           layers: [
             {
-              id: "osm-layer",
+              id: "carto-layer",
               type: "raster",
-              source: "osm-tiles",
+              source: "carto-tiles",
               minzoom: 0,
               maxzoom: 22
             }
@@ -153,7 +156,7 @@ const InteractiveJobMap = () => {
         },
         center: [5.2913, 52.1326], // Netherlands center
         zoom: 7,
-        minZoom: 6,
+        minZoom: 5,
         maxZoom: 18
       });
 
@@ -169,10 +172,21 @@ const InteractiveJobMap = () => {
         "top-right"
       );
 
+      // Track load and ensure resize when visible
       mapInstance.on("load", () => {
         console.log("✅ Map loaded successfully");
+        setMapLoaded(true);
         mapInstance.resize();
       });
+
+      // Resize when container size changes
+      let resizeObserver: ResizeObserver | null = null;
+      if (mapContainer.current) {
+        resizeObserver = new ResizeObserver(() => {
+          mapInstance.resize();
+        });
+        resizeObserver.observe(mapContainer.current);
+      }
 
       mapInstance.on("error", (e) => {
         console.error("❌ Map error:", e);
@@ -184,10 +198,12 @@ const InteractiveJobMap = () => {
           mapInstance.resize();
           console.log("🔄 Map resized");
         }
-      }, 100);
+      }, 150);
 
       return () => {
         console.log("🧹 Cleaning up map");
+        resizeObserver?.disconnect();
+        setMapLoaded(false);
         mapInstance.remove();
         map.current = null;
       };
@@ -198,13 +214,15 @@ const InteractiveJobMap = () => {
 
   // Add markers with company names visible on map
   useEffect(() => {
-    if (!map.current || filteredCompanies.length === 0) return;
+    if (!map.current || !mapLoaded) return;
 
     console.log(`📍 Adding ${filteredCompanies.length} markers to map`);
 
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
+
+    if (filteredCompanies.length === 0) return;
 
     // Add new markers with visible company names
     filteredCompanies.forEach(company => {
@@ -350,7 +368,7 @@ const InteractiveJobMap = () => {
     }
 
     console.log("✅ Markers added successfully");
-  }, [filteredCompanies]);
+  }, [filteredCompanies, mapLoaded]);
 
   // User location button handler
   const centerOnUserLocation = () => {
