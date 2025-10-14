@@ -168,15 +168,20 @@ const InteractiveJobMap = () => {
 
       map.current = mapInstance;
 
-      // Add navigation controls
+      // Add navigation controls (compass only, no zoom)
       mapInstance.addControl(
         new maplibregl.NavigationControl({
           showCompass: true,
-          showZoom: true,
+          showZoom: false,
           visualizePitch: false
         }),
         "top-right"
       );
+
+      // Disable zoom interactions
+      mapInstance.scrollZoom.disable();
+      mapInstance.doubleClickZoom.disable();
+      mapInstance.touchZoomRotate.disable();
 
       // Track load and ensure resize when visible
       mapInstance.on("load", () => {
