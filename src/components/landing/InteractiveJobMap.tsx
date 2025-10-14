@@ -159,33 +159,7 @@ const InteractiveJobMap = () => {
     try {
       const mapInstance = new maplibregl.Map({
         container: mapContainer.current,
-        style: {
-          version: 8,
-          sources: {
-            "carto-tiles": {
-              type: "raster",
-              tiles: [
-                "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-                "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-                "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png",
-                "https://d.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
-              ],
-              tileSize: 256,
-              attribution:
-                '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors © <a href="https://carto.com/attributions">CARTO</a>',
-              maxzoom: 20
-            }
-          },
-          layers: [
-            {
-              id: "carto-layer",
-              type: "raster",
-              source: "carto-tiles",
-              minzoom: 0,
-              maxzoom: 22
-            }
-          ]
-        },
+        style: 'https://demotiles.maplibre.org/style.json',
         center: [5.2913, 52.1326], // Netherlands center
         zoom: 7,
         minZoom: 5,
