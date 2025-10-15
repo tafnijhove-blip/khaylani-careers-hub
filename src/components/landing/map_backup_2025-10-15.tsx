@@ -174,121 +174,120 @@ const InteractiveJobMap = () => {
     return null;
   };
 
-  // Initialize map with delayed mount + mobile-friendly settings
+  // Initialize map with better tile loading
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    const init = () => {
-      if (!mapContainer.current) return;
-      // Only start when container is visible
-      const visible = mapContainer.current.offsetHeight > 0 && mapContainer.current.offsetWidth > 0;
-      if (!visible) {
-        // try again next frame
-        requestAnimationFrame(init);
-        return;
-      }
-
-      try {
-        const prefersMobile = window.innerWidth < 768;
-
-        const stadiaStyle = 'https://tiles.stadiamaps.com/styles/alidade_smooth.json';
-        const osmRasterStyle = {
+    console.log("🗺️ Initializing map...");
+    
+    try {
+      const mapInstance = new maplibregl.Map({
+        container: mapContainer.current,
+        style: {
           version: 8,
           sources: {
             osm: {
               type: 'raster',
               tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
               tileSize: 256,
-              attribution: '© OpenStreetMap contributors'
-            }
+              attribution: '© OpenStreetMap contributors',
+            },
           },
-          layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
-        } as any;
+          layers: [
+            { id: 'osm', type: 'raster', source: 'osm' },
+          ],
+        },
+        center: [5.2913, 52.1326], // Netherlands center
+        zoom: 7,
+        minZoom: 5,
+        maxZoom: 18
+      });
 
-        const mapInstance = new maplibregl.Map({
-          container: mapContainer.current,
-          style: stadiaStyle,
-          center: [5.2913, 52.1326],
-          zoom: 7,
-          minZoom: 5,
-          maxZoom: 18
-        });
+      map.current = mapInstance;
 
-        map.current = mapInstance;
-
-        mapInstance.addControl(new maplibregl.NavigationControl({
+      // Add navigation controls (compass only, no zoom)
+      mapInstance.addControl(
+        new maplibregl.NavigationControl({
           showCompass: true,
-          showZoom: true,
+          showZoom: false,
           visualizePitch: false
-        }), 'top-right');
+        }),
+        "top-right"
+      );
 
-        // Mobile-friendly interactions
-        if (prefersMobile) {
-          mapInstance.scrollZoom.disable();
-          mapInstance.doubleClickZoom.disable();
-          mapInstance.touchZoomRotate.disableRotation();
-        } else {
-          mapInstance.touchZoomRotate.disableRotation();
+      // Disable zoom interactions
+      mapInstance.scrollZoom.disable();
+      mapInstance.doubleClickZoom.disable();
+      mapInstance.touchZoomRotate.disable();
+
+      // Track load and ensure resize when visible
+      const switchToFallbackStyle = () => {
+        try {
+          console.warn("⚠️ Switching to fallback raster style");
+          mapInstance.setStyle('https://demotiles.maplibre.org/style.json');
+        } catch (err) {
+          console.error("Failed to switch style:", err);
         }
+      };
 
-        const switchToOsmFallback = () => {
-          try {
-            console.warn('⚠️ Switching to OSM raster fallback');
-            mapInstance.setStyle(osmRasterStyle as any);
-          } catch (err) {
-            console.error('Failed to switch to OSM raster style:', err);
-          }
-        };
+      mapInstance.on("load", () => {
+        console.log("✅ Map loaded successfully");
+        setMapLoaded(true);
+        mapInstance.resize();
+      });
 
-        mapInstance.on('load', () => {
-          setMapLoaded(true);
+      // Extra diagnostics
+      mapInstance.on("styledata", () => {
+        console.log("🎨 Style data loaded");
+      });
+      mapInstance.on("idle", () => {
+        console.log("🟢 Map idle - tiles loaded:", mapInstance.areTilesLoaded());
+      });
+
+      // Fallback on error
+      let errorCount = 0;
+      mapInstance.on("error", (e) => {
+        errorCount++;
+        console.error("❌ Map error:", e);
+        if (errorCount === 1) {
+          // First error, try fallback style
+          switchToFallbackStyle();
+        }
+      });
+
+      // Resize when container size changes
+      let resizeObserver: ResizeObserver | null = null;
+      if (mapContainer.current) {
+        resizeObserver = new ResizeObserver(() => {
           mapInstance.resize();
         });
-
-        // Errors / tile failures
-        let errored = false;
-        mapInstance.on('error', (e) => {
-          console.error('❌ Map error:', e);
-          if (!errored) {
-            errored = true;
-            switchToOsmFallback();
-          }
-        });
-
-        // Resize handling
-        const onWindowResize = () => mapInstance.resize();
-        window.addEventListener('resize', onWindowResize);
-
-        let resizeObserver: ResizeObserver | null = null;
-        if (mapContainer.current) {
-          resizeObserver = new ResizeObserver(() => mapInstance.resize());
-          resizeObserver.observe(mapContainer.current);
-        }
-
-        // Timed safety resize + fallback check
-        setTimeout(() => {
-          try {
-            const ok = mapInstance.areTilesLoaded();
-            if (!ok) switchToOsmFallback();
-            mapInstance.resize();
-          } catch {}
-        }, 600);
-
-        return () => {
-          window.removeEventListener('resize', onWindowResize);
-          resizeObserver?.disconnect();
-          setMapLoaded(false);
-          mapInstance.remove();
-          map.current = null;
-        };
-      } catch (error) {
-        console.error('❌ Failed to initialize map:', error);
+        resizeObserver.observe(mapContainer.current);
       }
-    };
 
-    // small delay to let layout settle
-    const t = setTimeout(() => requestAnimationFrame(init), 300);
-    return () => clearTimeout(t);
+      // Safety resize and fallback if tiles not loaded in time
+      setTimeout(() => {
+        try {
+          if (mapInstance) {
+            mapInstance.resize();
+            const tilesOk = mapInstance.areTilesLoaded();
+            console.log("🔄 Map resized, tiles loaded:", tilesOk);
+            if (!tilesOk) switchToFallbackStyle();
+          }
+        } catch (err) {
+          console.error("Post-init check failed:", err);
+        }
+      }, 600);
+
+      return () => {
+        console.log("🧹 Cleaning up map");
+        resizeObserver?.disconnect();
+        setMapLoaded(false);
+        mapInstance.remove();
+        map.current = null;
+      };
+    } catch (error) {
+      console.error("❌ Failed to initialize map:", error);
+    }
   }, []);
 
   // Add markers with company names visible on map
@@ -454,28 +453,20 @@ const InteractiveJobMap = () => {
 
   // User location button handler
   const centerOnUserLocation = () => {
-    if (!navigator.geolocation) {
-      alert('Locatiefunctie wordt niet ondersteund door deze browser.');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userCoords: [number, number] = [position.coords.longitude, position.coords.latitude];
-        map.current?.flyTo({ center: userCoords, zoom: 13, duration: 1500 });
-        // Voeg een marker toe op de gebruikerslocatie
-        try {
-          new maplibregl.Marker({ color: '#FF6600' })
-            .setLngLat(userCoords)
-            .addTo(map.current!);
-        } catch (e) {
-          console.error('Kon gebruikersmarker niet toevoegen', e);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          map.current?.flyTo({
+            center: [position.coords.longitude, position.coords.latitude],
+            zoom: 10,
+            duration: 2000
+          });
+        },
+        (error) => {
+          console.error("Error getting user location:", error);
         }
-      },
-      () => {
-        alert('Locatie kon niet worden opgehaald.');
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
-    );
+      );
+    }
   };
 
   if (isLoading) {
@@ -519,17 +510,11 @@ const InteractiveJobMap = () => {
             {/* Main Map */}
             <div className="flex-1 relative">
               <Card className="overflow-hidden border-2 shadow-2xl rounded-xl">
-                <div
-                  id="map"
-                  ref={mapContainer}
-                  className="w-full h-[60vh] md:h-[80vh] bg-muted/40"
+                <div 
+                  ref={mapContainer} 
+                  className="w-full h-[600px] bg-gray-100"
+                  style={{ minHeight: "600px" }}
                 />
-                {/* Overlay: Gebruik mijn locatie */}
-                <div className="absolute top-4 left-4 z-10">
-                  <Button size="sm" variant="secondary" onClick={centerOnUserLocation}>
-                    📍 Gebruik mijn locatie
-                  </Button>
-                </div>
               </Card>
 
               {/* Filters Overlay */}
