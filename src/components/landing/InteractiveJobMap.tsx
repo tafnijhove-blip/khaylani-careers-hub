@@ -35,7 +35,7 @@ const InteractiveJobMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [companies, setCompanies] = useState<CompanyWithVacancies[]>([]);
@@ -47,34 +47,30 @@ const InteractiveJobMap = () => {
     const fetchData = async () => {
       try {
         const [companiesRes, vacanciesRes] = await Promise.all([
-          supabase
-            .from("bedrijven")
-            .select("*")
-            .not("lat", "is", null)
-            .not("lng", "is", null),
-          supabase
-            .from("vacatures")
-            .select("*")
-            .eq("status", "open")
+          supabase.from("bedrijven").select("*").not("lat", "is", null).not("lng", "is", null),
+          supabase.from("vacatures").select("*").eq("status", "open"),
         ]);
 
         if (companiesRes.data && vacanciesRes.data) {
-          const buildAddress = (c: Company) =>
-            [c.naam, c.plaats, c.regio, "Nederland"].filter(Boolean).join(", ");
+          const buildAddress = (c: Company) => [c.naam, c.plaats, c.regio, "Nederland"].filter(Boolean).join(", ");
 
           const fixCompanyCoords = async (c: Company): Promise<Company> => {
             const coords = getCompanyLngLat(c);
             if (coords) return { ...c, lng: coords[0], lat: coords[1] } as Company;
             try {
-              const { data, error } = await supabase.functions.invoke('geocode-address', {
+              const { data, error } = await supabase.functions.invoke("geocode-address", {
                 body: { address: buildAddress(c) },
               });
               if (error) throw error;
-              if (data?.lng !== undefined && data?.lat !== undefined && isWithinNetherlands(Number(data.lng), Number(data.lat))) {
+              if (
+                data?.lng !== undefined &&
+                data?.lat !== undefined &&
+                isWithinNetherlands(Number(data.lng), Number(data.lat))
+              ) {
                 return { ...c, lng: Number(data.lng), lat: Number(data.lat) } as Company;
               }
             } catch (e) {
-              console.error('Geocoding failed for', c.naam, e);
+              console.error("Geocoding failed for", c.naam, e);
             }
             return c;
           };
@@ -82,15 +78,15 @@ const InteractiveJobMap = () => {
           const fixedCompanies = await Promise.all(companiesRes.data.map(fixCompanyCoords));
 
           const companiesWithVacancies: CompanyWithVacancies[] = fixedCompanies
-            .map(company => {
-              const companyVacancies = vacanciesRes.data!.filter(v => v.bedrijf_id === company.id);
+            .map((company) => {
+              const companyVacancies = vacanciesRes.data!.filter((v) => v.bedrijf_id === company.id);
               return {
                 ...company,
                 vacancies: companyVacancies,
-                vacancyCount: companyVacancies.length
+                vacancyCount: companyVacancies.length,
               } as CompanyWithVacancies;
             })
-            .filter(c => c.vacancyCount > 0 && isWithinNetherlands(Number(c.lng), Number(c.lat)));
+            .filter((c) => c.vacancyCount > 0 && isWithinNetherlands(Number(c.lng), Number(c.lat)));
 
           setCompanies(companiesWithVacancies);
         }
@@ -106,7 +102,7 @@ const InteractiveJobMap = () => {
 
   // Filter companies based on selected filters
   const filteredCompanies = useMemo(() => {
-    return companies.filter(company => {
+    return companies.filter((company) => {
       const regionMatch = selectedRegion === "all" || company.regio === selectedRegion;
       const vacancyMatch = company.vacancyCount >= minVacancies;
       return regionMatch && vacancyMatch;
@@ -115,19 +111,22 @@ const InteractiveJobMap = () => {
 
   // Get unique regions for filter
   const regions = useMemo(() => {
-    const uniqueRegions = Array.from(new Set(companies.map(c => c.regio)));
+    const uniqueRegions = Array.from(new Set(companies.map((c) => c.regio)));
     return uniqueRegions.sort();
   }, [companies]);
 
   // Calculate regional stats
   const regionalStats = useMemo(() => {
-    const stats = companies.reduce((acc, company) => {
-      if (!acc[company.regio]) {
-        acc[company.regio] = 0;
-      }
-      acc[company.regio] += company.vacancyCount;
-      return acc;
-    }, {} as Record<string, number>);
+    const stats = companies.reduce(
+      (acc, company) => {
+        if (!acc[company.regio]) {
+          acc[company.regio] = 0;
+        }
+        acc[company.regio] += company.vacancyCount;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return Object.entries(stats)
       .map(([region, count]) => ({ region, count }))
@@ -151,10 +150,7 @@ const InteractiveJobMap = () => {
   };
 
   const isWithinNetherlands = (lng: number, lat: number) =>
-    lng >= NL_BOUNDS.minLng &&
-    lng <= NL_BOUNDS.maxLng &&
-    lat >= NL_BOUNDS.minLat &&
-    lat <= NL_BOUNDS.maxLat;
+    lng >= NL_BOUNDS.minLng && lng <= NL_BOUNDS.maxLng && lat >= NL_BOUNDS.minLat && lat <= NL_BOUNDS.maxLat;
 
   // Normalize potential swapped coordinates and filter out invalid ones
   const getCompanyLngLat = (company: Company): [number, number] | null => {
@@ -191,36 +187,39 @@ const InteractiveJobMap = () => {
       try {
         const prefersMobile = window.innerWidth < 768;
 
-        const stadiaStyle = 'https://tiles.stadiamaps.com/styles/alidade_smooth.json';
+        const stadiaStyle = "https://tiles.stadiamaps.com/styles/alidade_smooth.json";
         const osmRasterStyle = {
           version: 8,
           sources: {
             osm: {
-              type: 'raster',
-              tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+              type: "raster",
+              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
               tileSize: 256,
-              attribution: '© OpenStreetMap contributors'
-            }
+              attribution: "© OpenStreetMap contributors",
+            },
           },
-          layers: [{ id: 'osm', type: 'raster', source: 'osm' }]
+          layers: [{ id: "osm", type: "raster", source: "osm" }],
         } as any;
 
         const mapInstance = new maplibregl.Map({
           container: mapContainer.current,
-          style: stadiaStyle,
+          style: "https://demotiles.maplibre.org/style.json",
           center: [5.2913, 52.1326],
           zoom: 7,
           minZoom: 5,
-          maxZoom: 18
+          maxZoom: 18,
         });
 
         map.current = mapInstance;
 
-        mapInstance.addControl(new maplibregl.NavigationControl({
-          showCompass: true,
-          showZoom: true,
-          visualizePitch: false
-        }), 'top-right');
+        mapInstance.addControl(
+          new maplibregl.NavigationControl({
+            showCompass: true,
+            showZoom: true,
+            visualizePitch: false,
+          }),
+          "top-right",
+        );
 
         // Mobile-friendly interactions
         if (prefersMobile) {
@@ -233,22 +232,22 @@ const InteractiveJobMap = () => {
 
         const switchToOsmFallback = () => {
           try {
-            console.warn('⚠️ Switching to OSM raster fallback');
+            console.warn("⚠️ Switching to OSM raster fallback");
             mapInstance.setStyle(osmRasterStyle as any);
           } catch (err) {
-            console.error('Failed to switch to OSM raster style:', err);
+            console.error("Failed to switch to OSM raster style:", err);
           }
         };
 
-        mapInstance.on('load', () => {
+        mapInstance.on("load", () => {
           setMapLoaded(true);
           mapInstance.resize();
         });
 
         // Errors / tile failures
         let errored = false;
-        mapInstance.on('error', (e) => {
-          console.error('❌ Map error:', e);
+        mapInstance.on("error", (e) => {
+          console.error("❌ Map error:", e);
           if (!errored) {
             errored = true;
             switchToOsmFallback();
@@ -257,7 +256,7 @@ const InteractiveJobMap = () => {
 
         // Resize handling
         const onWindowResize = () => mapInstance.resize();
-        window.addEventListener('resize', onWindowResize);
+        window.addEventListener("resize", onWindowResize);
 
         let resizeObserver: ResizeObserver | null = null;
         if (mapContainer.current) {
@@ -275,14 +274,14 @@ const InteractiveJobMap = () => {
         }, 600);
 
         return () => {
-          window.removeEventListener('resize', onWindowResize);
+          window.removeEventListener("resize", onWindowResize);
           resizeObserver?.disconnect();
           setMapLoaded(false);
           mapInstance.remove();
           map.current = null;
         };
       } catch (error) {
-        console.error('❌ Failed to initialize map:', error);
+        console.error("❌ Failed to initialize map:", error);
       }
     };
 
@@ -298,13 +297,13 @@ const InteractiveJobMap = () => {
     console.log(`📍 Adding ${filteredCompanies.length} markers to map`);
 
     // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
     if (filteredCompanies.length === 0) return;
 
     // Add new markers with visible company names
-    filteredCompanies.forEach(company => {
+    filteredCompanies.forEach((company) => {
       const coords = getCompanyLngLat(company);
       if (!coords) return;
       // Create pin container
@@ -389,15 +388,20 @@ const InteractiveJobMap = () => {
             📍 ${company.plaats || company.regio}
           </p>
           <p style="margin: 0 0 12px 0; font-size: 15px; color: #0077FF; font-weight: 600;">
-            ${company.vacancyCount} open ${company.vacancyCount === 1 ? 'vacature' : 'vacatures'}
+            ${company.vacancyCount} open ${company.vacancyCount === 1 ? "vacature" : "vacatures"}
           </p>
           <div style="margin-bottom: 16px;">
-            ${company.vacancies.slice(0, 3).map(v => `
+            ${company.vacancies
+              .slice(0, 3)
+              .map(
+                (v) => `
               <div style="padding: 6px 10px; background: #f1f5f9; border-radius: 6px; margin-bottom: 6px; font-size: 13px; color: #1e293b;">
                 ${v.functietitel}
               </div>
-            `).join('')}
-            ${company.vacancyCount > 3 ? `<p style="font-size: 12px; color: #64748b; margin: 8px 0 0 0;">+${company.vacancyCount - 3} meer...</p>` : ''}
+            `,
+              )
+              .join("")}
+            ${company.vacancyCount > 3 ? `<p style="font-size: 12px; color: #64748b; margin: 8px 0 0 0;">+${company.vacancyCount - 3} meer...</p>` : ""}
           </div>
           <button 
             onclick="window.location.href='#vacatures'"
@@ -425,12 +429,12 @@ const InteractiveJobMap = () => {
         offset: 25,
         closeButton: true,
         closeOnClick: true,
-        className: "map-popup"
+        className: "map-popup",
       }).setHTML(popupHTML);
 
       const marker = new maplibregl.Marker({
         element: pinContainer,
-        anchor: "bottom"
+        anchor: "bottom",
       })
         .setLngLat(coords as [number, number])
         .setPopup(popup)
@@ -442,7 +446,7 @@ const InteractiveJobMap = () => {
     // Fit bounds to show all markers
     if (filteredCompanies.length > 0) {
       const bounds = new maplibregl.LngLatBounds();
-      filteredCompanies.forEach(company => {
+      filteredCompanies.forEach((company) => {
         const coords = getCompanyLngLat(company);
         if (coords) bounds.extend(coords);
       });
@@ -455,7 +459,7 @@ const InteractiveJobMap = () => {
   // User location button handler
   const centerOnUserLocation = () => {
     if (!navigator.geolocation) {
-      alert('Locatiefunctie wordt niet ondersteund door deze browser.');
+      alert("Locatiefunctie wordt niet ondersteund door deze browser.");
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -464,17 +468,15 @@ const InteractiveJobMap = () => {
         map.current?.flyTo({ center: userCoords, zoom: 13, duration: 1500 });
         // Voeg een marker toe op de gebruikerslocatie
         try {
-          new maplibregl.Marker({ color: '#FF6600' })
-            .setLngLat(userCoords)
-            .addTo(map.current!);
+          new maplibregl.Marker({ color: "#FF6600" }).setLngLat(userCoords).addTo(map.current!);
         } catch (e) {
-          console.error('Kon gebruikersmarker niet toevoegen', e);
+          console.error("Kon gebruikersmarker niet toevoegen", e);
         }
       },
       () => {
-        alert('Locatie kon niet worden opgehaald.');
+        alert("Locatie kon niet worden opgehaald.");
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
     );
   };
 
@@ -491,14 +493,12 @@ const InteractiveJobMap = () => {
       {/* CTA Banner */}
       <div className="container mx-auto px-4 mb-8">
         <Card className="bg-gradient-primary text-white p-8 text-center border-0 shadow-2xl">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ontdek waar je klanten de meeste vacatures hebben
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ontdek waar je klanten de meeste vacatures hebben</h2>
           <p className="text-lg mb-6 text-white/90 max-w-2xl mx-auto">
             Interactieve kaart met real-time vacaturedata per regio
           </p>
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             variant="secondary"
             onClick={() => {
               setSelectedRegion("all");
@@ -519,11 +519,7 @@ const InteractiveJobMap = () => {
             {/* Main Map */}
             <div className="flex-1 relative">
               <Card className="overflow-hidden border-2 shadow-2xl rounded-xl">
-                <div
-                  id="map"
-                  ref={mapContainer}
-                  className="w-full h-[60vh] md:h-[80vh] bg-muted/40"
-                />
+                <div id="map" ref={mapContainer} className="w-full h-[60vh] md:h-[80vh] bg-muted/40" />
                 {/* Overlay: Gebruik mijn locatie */}
                 <div className="absolute top-4 left-4 z-10">
                   <Button size="sm" variant="secondary" onClick={centerOnUserLocation}>
@@ -558,7 +554,7 @@ const InteractiveJobMap = () => {
             </div>
 
             {/* Stats Sidebar */}
-            <JobMapStats 
+            <JobMapStats
               regionalStats={regionalStats}
               totalVacancies={filteredCompanies.reduce((sum, c) => sum + c.vacancyCount, 0)}
               totalCompanies={filteredCompanies.length}
