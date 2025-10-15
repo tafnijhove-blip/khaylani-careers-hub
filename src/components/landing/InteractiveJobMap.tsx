@@ -221,10 +221,38 @@ const InteractiveJobMap = () => {
       mapInstance.touchZoomRotate.disable();
 
       // Track load and ensure resize when visible
+      const switchToFallbackStyle = () => {
+        try {
+          console.warn("⚠️ Switching to fallback raster style");
+          mapInstance.setStyle('https://demotiles.maplibre.org/style.json');
+        } catch (err) {
+          console.error("Failed to switch style:", err);
+        }
+      };
+
       mapInstance.on("load", () => {
         console.log("✅ Map loaded successfully");
         setMapLoaded(true);
         mapInstance.resize();
+      });
+
+      // Extra diagnostics
+      mapInstance.on("styledata", () => {
+        console.log("🎨 Style data loaded");
+      });
+      mapInstance.on("idle", () => {
+        console.log("🟢 Map idle - tiles loaded:", mapInstance.areTilesLoaded());
+      });
+
+      // Fallback on error
+      let errorCount = 0;
+      mapInstance.on("error", (e) => {
+        errorCount++;
+        console.error("❌ Map error:", e);
+        if (errorCount === 1) {
+          // First error, try fallback style
+          switchToFallbackStyle();
+        }
       });
 
       // Resize when container size changes
@@ -236,17 +264,19 @@ const InteractiveJobMap = () => {
         resizeObserver.observe(mapContainer.current);
       }
 
-      mapInstance.on("error", (e) => {
-        console.error("❌ Map error:", e);
-      });
-
-      // Safety resize after mount
+      // Safety resize and fallback if tiles not loaded in time
       setTimeout(() => {
-        if (mapInstance) {
-          mapInstance.resize();
-          console.log("🔄 Map resized");
+        try {
+          if (mapInstance) {
+            mapInstance.resize();
+            const tilesOk = mapInstance.areTilesLoaded();
+            console.log("🔄 Map resized, tiles loaded:", tilesOk);
+            if (!tilesOk) switchToFallbackStyle();
+          }
+        } catch (err) {
+          console.error("Post-init check failed:", err);
         }
-      }, 150);
+      }, 600);
 
       return () => {
         console.log("🧹 Cleaning up map");
