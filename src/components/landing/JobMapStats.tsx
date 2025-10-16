@@ -11,9 +11,10 @@ interface JobMapStatsProps {
   regionalStats: RegionalStat[];
   totalVacancies: number;
   totalCompanies: number;
+  onRegionClick?: (region: string) => void;
 }
 
-const JobMapStats = ({ regionalStats, totalVacancies, totalCompanies }: JobMapStatsProps) => {
+const JobMapStats = ({ regionalStats, totalVacancies, totalCompanies, onRegionClick }: JobMapStatsProps) => {
   return (
     <div className="w-full lg:w-80 space-y-4">
       {/* Total Stats */}
@@ -22,7 +23,7 @@ const JobMapStats = ({ regionalStats, totalVacancies, totalCompanies }: JobMapSt
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Briefcase className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">Totaal Vacatures</span>
+              <span className="text-sm font-medium text-muted-foreground">Vacatures</span>
             </div>
             <Badge variant="secondary" className="text-lg font-bold">
               {totalVacancies}
@@ -48,7 +49,11 @@ const JobMapStats = ({ regionalStats, totalVacancies, totalCompanies }: JobMapSt
         </div>
         <div className="space-y-3">
           {regionalStats.map((stat, index) => (
-            <div key={stat.region} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg hover:bg-secondary/70 transition-colors">
+            <div 
+              key={stat.region} 
+              onClick={() => onRegionClick?.(stat.region)}
+              className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg hover:bg-secondary/70 transition-colors cursor-pointer"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">
                   {index + 1}

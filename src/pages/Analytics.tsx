@@ -126,7 +126,7 @@ const Analytics = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="border-2 hover:shadow-lg transition-all duration-300">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Totaal Vacatures</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Vacatures</CardTitle>
               <Briefcase className="h-5 w-5 text-primary" />
             </CardHeader>
             <CardContent>

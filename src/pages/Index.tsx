@@ -141,7 +141,7 @@ const Index = () => {
     {
       icon: Users,
       title: "Managers weten precies waar de omzet zit",
-      description: "Stop met raden. Zie exact welke regio's, klanten en recruiters presteren. Data die telt.",
+      description: "Zie in één blik welke recruiters draaien, waar je omzet zit en waar je moet bijsturen.",
     },
     {
       icon: BarChart3,
@@ -261,17 +261,14 @@ const Index = () => {
 
           <main className="container mx-auto max-w-6xl relative z-10">
             <div className="text-center space-y-8 animate-fade-in">
-              <Badge variant="secondary" className="mb-4 text-sm py-2 px-4 shadow-sm">
-                <Zap className="h-4 w-4 mr-2 inline" />
-                {t("landing.hero.trust")}
-              </Badge>
-
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                {t("landing.hero.main.title")} <span className="text-gradient">{t("landing.hero.main.highlight")}</span>
+                Recruitment en sales, <span className="text-gradient">eindelijk in sync</span>
               </h1>
 
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                {t("landing.hero.main.description")}
+                Stop met losse e-mails en belrondes. Eén platform, één overzicht.
+                Recruiters en accountmanagers werken samen met realtime inzicht in leads, kandidaten en omzet.
+                Sneller schakelen = sneller plaatsen.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
@@ -466,7 +463,7 @@ const Index = () => {
               </Badge>
               <h2 className="text-4xl md:text-5xl font-bold">Start vandaag nog met Khaylani</h2>
               <p className="text-xl text-muted-foreground">
-                Binnen <strong>24 uur</strong> ontvang je een persoonlijk voorstel op maat
+                Binnen <strong>24 uur</strong> ontvang je een voorstel op maat
               </p>
             </div>
 
@@ -552,7 +549,7 @@ const Index = () => {
                   ) : (
                     <>
                       <Shield className="h-5 w-5" />
-                      Vraag gratis offerte aan
+                      Vraag een gratis offerte aan
                       <ArrowRight className="h-5 w-5" />
                     </>
                   )}
