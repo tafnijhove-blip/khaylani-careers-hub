@@ -1,0 +1,358 @@
+{
+  "companies": [
+    {
+      "id": "demo_cmp_01",
+      "name": "TechForce Nederland",
+      "address": "Damrak 1, Amsterdam",
+      "location": { "lat": 52.3731, "lon": 4.8937 },
+      "logoUrl": null,
+      "openVacancyCount": 5
+    },
+    {
+      "id": "demo_cmp_02",
+      "name": "Digital Talents",
+      "address": "Coolsingel 10, Rotterdam",
+      "location": { "lat": 51.9225, "lon": 4.4792 },
+      "logoUrl": null,
+      "openVacancyCount": 3
+    },
+    {
+      "id": "demo_cmp_03",
+      "name": "DevMasters BV",
+      "address": "Lange Voorhout 5, Den Haag",
+      "location": { "lat": 52.0808, "lon": 4.3121 },
+      "logoUrl": null,
+      "openVacancyCount": 4
+    },
+    {
+      "id": "demo_cmp_04",
+      "name": "CodeCrafters",
+      "address": "Domstraat 15, Utrecht",
+      "location": { "lat": 52.0907, "lon": 5.1214 },
+      "logoUrl": null,
+      "openVacancyCount": 6
+    },
+    {
+      "id": "demo_cmp_05",
+      "name": "IT Solutions Group",
+      "address": "Stationsplein 1, Eindhoven",
+      "location": { "lat": 51.4416, "lon": 5.4797 },
+      "logoUrl": null,
+      "openVacancyCount": 2
+    },
+    {
+      "id": "demo_cmp_06",
+      "name": "Smart Recruitment",
+      "address": "Markt 1, Groningen",
+      "location": { "lat": 53.2194, "lon": 6.5665 },
+      "logoUrl": null,
+      "openVacancyCount": 3
+    },
+    {
+      "id": "demo_cmp_07",
+      "name": "Talent Connect",
+      "address": "Wilhelminaplein 1, Breda",
+      "location": { "lat": 51.5883, "lon": 4.7758 },
+      "logoUrl": null,
+      "openVacancyCount": 4
+    },
+    {
+      "id": "demo_cmp_08",
+      "name": "ProStaff Solutions",
+      "address": "Stationsweg 10, Arnhem",
+      "location": { "lat": 51.9851, "lon": 5.8987 },
+      "logoUrl": null,
+      "openVacancyCount": 5
+    }
+  ],
+  "jobs": [
+    {
+      "id": "demo_job_001",
+      "companyId": "demo_cmp_01",
+      "title": "Senior Frontend Developer",
+      "summary": "Werk aan moderne React applicaties met TypeScript",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "senior-frontend-developer-techforce-amsterdam"
+    },
+    {
+      "id": "demo_job_002",
+      "companyId": "demo_cmp_01",
+      "title": "Backend Developer Java",
+      "summary": "Ontwikkel microservices architectuur",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "backend-developer-java-techforce-amsterdam"
+    },
+    {
+      "id": "demo_job_003",
+      "companyId": "demo_cmp_01",
+      "title": "DevOps Engineer",
+      "summary": "Cloud infrastructuur met AWS en Kubernetes",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "devops-engineer-techforce-amsterdam"
+    },
+    {
+      "id": "demo_job_004",
+      "companyId": "demo_cmp_01",
+      "title": "UX/UI Designer",
+      "summary": "Ontwerp gebruiksvriendelijke interfaces",
+      "type": "Fulltime",
+      "remote": "On-site",
+      "detailSlug": "ux-ui-designer-techforce-amsterdam"
+    },
+    {
+      "id": "demo_job_005",
+      "companyId": "demo_cmp_01",
+      "title": "Product Owner",
+      "summary": "Stuur productontwikkeling aan",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "product-owner-techforce-amsterdam"
+    },
+    {
+      "id": "demo_job_006",
+      "companyId": "demo_cmp_02",
+      "title": "Full Stack Developer",
+      "summary": "Bouw complete web applicaties",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "full-stack-developer-digital-talents-rotterdam"
+    },
+    {
+      "id": "demo_job_007",
+      "companyId": "demo_cmp_02",
+      "title": "Data Scientist",
+      "summary": "Analyseer data en bouw ML modellen",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "data-scientist-digital-talents-rotterdam"
+    },
+    {
+      "id": "demo_job_008",
+      "companyId": "demo_cmp_02",
+      "title": "Scrum Master",
+      "summary": "Begeleid agile teams",
+      "type": "Fulltime",
+      "remote": "On-site",
+      "detailSlug": "scrum-master-digital-talents-rotterdam"
+    },
+    {
+      "id": "demo_job_009",
+      "companyId": "demo_cmp_03",
+      "title": "Python Developer",
+      "summary": "Ontwikkel backend systemen",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "python-developer-devmasters-denhaag"
+    },
+    {
+      "id": "demo_job_010",
+      "companyId": "demo_cmp_03",
+      "title": "React Native Developer",
+      "summary": "Bouw cross-platform mobile apps",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "react-native-developer-devmasters-denhaag"
+    },
+    {
+      "id": "demo_job_011",
+      "companyId": "demo_cmp_03",
+      "title": "QA Engineer",
+      "summary": "Test en verbeter softwarekwaliteit",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "qa-engineer-devmasters-denhaag"
+    },
+    {
+      "id": "demo_job_012",
+      "companyId": "demo_cmp_03",
+      "title": "Solution Architect",
+      "summary": "Ontwerp technische oplossingen",
+      "type": "Fulltime",
+      "remote": "On-site",
+      "detailSlug": "solution-architect-devmasters-denhaag"
+    },
+    {
+      "id": "demo_job_013",
+      "companyId": "demo_cmp_04",
+      "title": "Node.js Developer",
+      "summary": "Backend development met Node.js",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "nodejs-developer-codecrafters-utrecht"
+    },
+    {
+      "id": "demo_job_014",
+      "companyId": "demo_cmp_04",
+      "title": "Angular Developer",
+      "summary": "Frontend development met Angular",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "angular-developer-codecrafters-utrecht"
+    },
+    {
+      "id": "demo_job_015",
+      "companyId": "demo_cmp_04",
+      "title": "Cybersecurity Specialist",
+      "summary": "Beveilig IT infrastructuur",
+      "type": "Fulltime",
+      "remote": "On-site",
+      "detailSlug": "cybersecurity-specialist-codecrafters-utrecht"
+    },
+    {
+      "id": "demo_job_016",
+      "companyId": "demo_cmp_04",
+      "title": "Cloud Engineer",
+      "summary": "Beheer cloud omgevingen",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "cloud-engineer-codecrafters-utrecht"
+    },
+    {
+      "id": "demo_job_017",
+      "companyId": "demo_cmp_04",
+      "title": "Business Analyst",
+      "summary": "Analyseer business processen",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "business-analyst-codecrafters-utrecht"
+    },
+    {
+      "id": "demo_job_018",
+      "companyId": "demo_cmp_04",
+      "title": "Technical Lead",
+      "summary": "Leid development teams",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "technical-lead-codecrafters-utrecht"
+    },
+    {
+      "id": "demo_job_019",
+      "companyId": "demo_cmp_05",
+      "title": "SAP Consultant",
+      "summary": "Implementeer SAP oplossingen",
+      "type": "Fulltime",
+      "remote": "On-site",
+      "detailSlug": "sap-consultant-itsolutions-eindhoven"
+    },
+    {
+      "id": "demo_job_020",
+      "companyId": "demo_cmp_05",
+      "title": "Database Administrator",
+      "summary": "Beheer database systemen",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "database-administrator-itsolutions-eindhoven"
+    },
+    {
+      "id": "demo_job_021",
+      "companyId": "demo_cmp_06",
+      "title": "Vue.js Developer",
+      "summary": "Ontwikkel met Vue.js framework",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "vuejs-developer-smartrecruitment-groningen"
+    },
+    {
+      "id": "demo_job_022",
+      "companyId": "demo_cmp_06",
+      "title": "Mobile Developer iOS",
+      "summary": "Native iOS development",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "mobile-developer-ios-smartrecruitment-groningen"
+    },
+    {
+      "id": "demo_job_023",
+      "companyId": "demo_cmp_06",
+      "title": "AI Engineer",
+      "summary": "Ontwikkel AI oplossingen",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "ai-engineer-smartrecruitment-groningen"
+    },
+    {
+      "id": "demo_job_024",
+      "companyId": "demo_cmp_07",
+      "title": ".NET Developer",
+      "summary": "Backend development met .NET",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "dotnet-developer-talentconnect-breda"
+    },
+    {
+      "id": "demo_job_025",
+      "companyId": "demo_cmp_07",
+      "title": "Salesforce Developer",
+      "summary": "Customizatie Salesforce platform",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "salesforce-developer-talentconnect-breda"
+    },
+    {
+      "id": "demo_job_026",
+      "companyId": "demo_cmp_07",
+      "title": "IT Project Manager",
+      "summary": "Managen IT projecten",
+      "type": "Fulltime",
+      "remote": "On-site",
+      "detailSlug": "it-project-manager-talentconnect-breda"
+    },
+    {
+      "id": "demo_job_027",
+      "companyId": "demo_cmp_07",
+      "title": "System Administrator",
+      "summary": "Beheer IT systemen",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "system-administrator-talentconnect-breda"
+    },
+    {
+      "id": "demo_job_028",
+      "companyId": "demo_cmp_08",
+      "title": "PHP Developer",
+      "summary": "Web development met PHP",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "php-developer-prostaff-arnhem"
+    },
+    {
+      "id": "demo_job_029",
+      "companyId": "demo_cmp_08",
+      "title": "Network Engineer",
+      "summary": "Ontwerp netwerk architectuur",
+      "type": "Fulltime",
+      "remote": "On-site",
+      "detailSlug": "network-engineer-prostaff-arnhem"
+    },
+    {
+      "id": "demo_job_030",
+      "companyId": "demo_cmp_08",
+      "title": "Blockchain Developer",
+      "summary": "Ontwikkel blockchain applicaties",
+      "type": "Fulltime",
+      "remote": "Remote",
+      "detailSlug": "blockchain-developer-prostaff-arnhem"
+    },
+    {
+      "id": "demo_job_031",
+      "companyId": "demo_cmp_08",
+      "title": "Information Security Officer",
+      "summary": "Beveilig organisatie informatie",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "information-security-officer-prostaff-arnhem"
+    },
+    {
+      "id": "demo_job_032",
+      "companyId": "demo_cmp_08",
+      "title": "Tech Recruiter",
+      "summary": "Werven van IT talent",
+      "type": "Fulltime",
+      "remote": "Hybrid",
+      "detailSlug": "tech-recruiter-prostaff-arnhem"
+    }
+  ]
+}

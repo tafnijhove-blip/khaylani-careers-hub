@@ -1,5 +1,4 @@
 "use client";
-import "maplibre-gl/dist/maplibre-gl.css";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,7 +30,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
 import DashboardPreview from "@/components/landing/DashboardPreview";
-import InteractiveJobMap from "@/components/landing/InteractiveJobMap";
+import DemoJobMap from "@/components/landing/DemoJobMap";
 import VacaturePreview from "@/components/landing/VacaturePreview";
 import Footer from "@/components/landing/Footer";
 import CookieBanner from "@/components/CookieBanner";
@@ -287,9 +286,9 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Interactive Job Map */}
+            {/* Demo Job Map */}
             <div className="mt-24 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <InteractiveJobMap />
+              <DemoJobMap />
             </div>
 
             <a href="#vacatures" className="flex justify-center mt-16 animate-bounce">
