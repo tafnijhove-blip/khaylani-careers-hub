@@ -9,6 +9,7 @@ import { Building2, MapPin, Briefcase, Search, Plus, AlertCircle, Trash2, XCircl
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useUserRole } from "@/hooks/useUserRole";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
 import { VacatureDetailDialog } from "@/components/VacatureDetailDialog";
@@ -53,6 +54,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const permissions = usePermissions();
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
   const [bedrijven, setBedrijven] = useState<Bedrijf[]>([]);
   const [vacatures, setVacatures] = useState<Vacature[]>([]);
   const [vacatureStats, setVacatureStats] = useState<VacatureStat[]>([]);
@@ -62,6 +64,26 @@ const Dashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteVacatureDialog, setDeleteVacatureDialog] = useState<{open: boolean, id: string, titel: string}>({open: false, id: '', titel: ''});
   const [deleteBedrijfDialog, setDeleteBedrijfDialog] = useState<{open: boolean, id: string, naam: string, vacatures: number}>({open: false, id: '', naam: '', vacatures: 0});
+
+  // Redirect to role-specific dashboard
+  useEffect(() => {
+    if (!roleLoading && userRole) {
+      switch (userRole) {
+        case 'superadmin':
+          navigate('/superadmin', { replace: true });
+          break;
+        case 'ceo':
+          navigate('/manager', { replace: true });
+          break;
+        case 'accountmanager':
+          navigate('/accountmanager', { replace: true });
+          break;
+        case 'recruiter':
+          navigate('/recruiter', { replace: true });
+          break;
+      }
+    }
+  }, [userRole, roleLoading, navigate]);
 
   useEffect(() => {
     fetchData();

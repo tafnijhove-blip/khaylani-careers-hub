@@ -58,9 +58,17 @@ export function AppSidebar() {
   const mainNavItems = [
     {
       title: "Dashboard",
-      url: companyId ? `/bedrijf/${companyId}` : "/dashboard",
+      url: permissions.isSuperAdmin 
+        ? "/superadmin" 
+        : permissions.isManager 
+        ? "/manager" 
+        : permissions.isAccountManager 
+        ? "/accountmanager" 
+        : permissions.isRecruiter 
+        ? "/recruiter" 
+        : "/dashboard",
       icon: Building2,
-      show: !permissions.isSuperAdmin,
+      show: true,
     },
     {
       title: "Vacatures",
