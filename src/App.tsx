@@ -11,6 +11,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./components/app-sidebar";
 import BackgroundEffect from "./components/BackgroundEffect";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -56,85 +57,111 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/login" element={<Auth />} />
               <Route path="/superadmin" element={
-                <SidebarProvider>
-                  <div className="min-h-screen flex w-full">
-                    <AppSidebar />
-                    <main className="flex-1">
-                      <header className="h-14 border-b flex items-center px-4">
-                        <SidebarTrigger />
-                      </header>
-                      <div className="p-6">
-                        <SuperAdminDashboard />
-                      </div>
-                    </main>
-                  </div>
-                </SidebarProvider>
+                <ProtectedRoute requiredRoles={["superadmin"]}>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1">
+                        <header className="h-14 border-b flex items-center px-4">
+                          <SidebarTrigger />
+                        </header>
+                        <div className="p-6">
+                          <SuperAdminDashboard />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </ProtectedRoute>
               } />
               <Route path="/bedrijf/:companyId" element={
-                <SidebarProvider>
-                  <div className="min-h-screen flex w-full">
-                    <AppSidebar />
-                    <main className="flex-1">
-                      <header className="h-14 border-b flex items-center px-4">
-                        <SidebarTrigger />
-                      </header>
-                      <div className="p-6">
-                        <CompanyDashboard />
-                      </div>
-                    </main>
-                  </div>
-                </SidebarProvider>
+                <ProtectedRoute requiredRoles={["ceo", "accountmanager", "recruiter"]}>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1">
+                        <header className="h-14 border-b flex items-center px-4">
+                          <SidebarTrigger />
+                        </header>
+                        <div className="p-6">
+                          <CompanyDashboard />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </ProtectedRoute>
               } />
               <Route path="/bedrijf/:companyId/vacatures" element={
-                <SidebarProvider>
-                  <div className="min-h-screen flex w-full">
-                    <AppSidebar />
-                    <main className="flex-1">
-                      <header className="h-14 border-b flex items-center px-4">
-                        <SidebarTrigger />
-                      </header>
-                      <div className="p-6">
-                        <Vacatures />
-                      </div>
-                    </main>
-                  </div>
-                </SidebarProvider>
+                <ProtectedRoute requiredRoles={["ceo", "accountmanager", "recruiter"]}>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1">
+                        <header className="h-14 border-b flex items-center px-4">
+                          <SidebarTrigger />
+                        </header>
+                        <div className="p-6">
+                          <Vacatures />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </ProtectedRoute>
               } />
               <Route path="/bedrijf/:companyId/kandidaten" element={
-                <SidebarProvider>
-                  <div className="min-h-screen flex w-full">
-                    <AppSidebar />
-                    <main className="flex-1">
-                      <header className="h-14 border-b flex items-center px-4">
-                        <SidebarTrigger />
-                      </header>
-                      <div className="p-6">
-                        <Kandidaten />
-                      </div>
-                    </main>
-                  </div>
-                </SidebarProvider>
+                <ProtectedRoute requiredRoles={["ceo", "accountmanager", "recruiter"]}>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1">
+                        <header className="h-14 border-b flex items-center px-4">
+                          <SidebarTrigger />
+                        </header>
+                        <div className="p-6">
+                          <Kandidaten />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </ProtectedRoute>
               } />
               <Route path="/bedrijf/:companyId/analytics" element={
-                <SidebarProvider>
-                  <div className="min-h-screen flex w-full">
-                    <AppSidebar />
-                    <main className="flex-1">
-                      <header className="h-14 border-b flex items-center px-4">
-                        <SidebarTrigger />
-                      </header>
-                      <div className="p-6">
-                        <Analytics />
-                      </div>
-                    </main>
-                  </div>
-                </SidebarProvider>
+                <ProtectedRoute requiredRoles={["ceo", "accountmanager"]}>
+                  <SidebarProvider>
+                    <div className="min-h-screen flex w-full">
+                      <AppSidebar />
+                      <main className="flex-1">
+                        <header className="h-14 border-b flex items-center px-4">
+                          <SidebarTrigger />
+                        </header>
+                        <div className="p-6">
+                          <Analytics />
+                        </div>
+                      </main>
+                    </div>
+                  </SidebarProvider>
+                </ProtectedRoute>
               } />
               {/* Fallback routes for backwards compatibility */}
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/vacatures" element={<Vacatures />} />
-              <Route path="/kandidaten" element={<Kandidaten />} />
-              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/vacatures" element={
+                <ProtectedRoute>
+                  <Vacatures />
+                </ProtectedRoute>
+              } />
+              <Route path="/kandidaten" element={
+                <ProtectedRoute>
+                  <Kandidaten />
+                </ProtectedRoute>
+              } />
+              <Route path="/analytics" element={
+                <ProtectedRoute requiredRoles={["ceo", "accountmanager"]}>
+                  <Analytics />
+                </ProtectedRoute>
+              } />
               {/* Legal pages */}
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/cookies" element={<CookiePolicy />} />
