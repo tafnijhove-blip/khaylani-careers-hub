@@ -141,7 +141,128 @@ const DashboardInteractiveMap = ({
 
         map.current = mapInstance;
 
-        mapInstance.on('load', () => {
+        // Add province and city boundaries after map loads
+        mapInstance.on('load', async () => {
+          // Add province boundaries
+          try {
+            const response = await fetch('https://cartomap.github.io/nl/wgs84/provincie_2023.geojson');
+            const provincesData = await response.json();
+
+            mapInstance.addSource('provinces', {
+              type: 'geojson',
+              data: provincesData
+            });
+
+            // Province boundary lines
+            mapInstance.addLayer({
+              id: 'province-boundaries',
+              type: 'line',
+              source: 'provinces',
+              paint: {
+                'line-color': 'hsl(189, 70%, 48%)',
+                'line-width': 2,
+                'line-opacity': 0.6
+              }
+            });
+
+            // Province fills (subtle)
+            mapInstance.addLayer({
+              id: 'province-fills',
+              type: 'fill',
+              source: 'provinces',
+              paint: {
+                'fill-color': 'hsl(189, 70%, 48%)',
+                'fill-opacity': 0.05
+              }
+            }, 'province-boundaries');
+
+            // Province labels
+            mapInstance.addLayer({
+              id: 'province-labels',
+              type: 'symbol',
+              source: 'provinces',
+              layout: {
+                'text-field': ['get', 'statnaam'],
+                'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+                'text-size': 14,
+                'text-transform': 'uppercase',
+                'text-letter-spacing': 0.1
+              },
+              paint: {
+                'text-color': 'hsl(189, 70%, 38%)',
+                'text-halo-color': '#ffffff',
+                'text-halo-width': 2,
+                'text-halo-blur': 1
+              }
+            });
+          } catch (error) {
+            console.warn('Could not load province boundaries:', error);
+          }
+
+          // Add major city labels
+          const cities = [
+            { name: 'Amsterdam', coordinates: [4.9041, 52.3676] },
+            { name: 'Rotterdam', coordinates: [4.4777, 51.9225] },
+            { name: 'Den Haag', coordinates: [4.3007, 52.0705] },
+            { name: 'Utrecht', coordinates: [5.1214, 52.0907] },
+            { name: 'Eindhoven', coordinates: [5.4697, 51.4416] },
+            { name: 'Groningen', coordinates: [6.5665, 53.2194] },
+            { name: 'Maastricht', coordinates: [5.6889, 50.8514] },
+            { name: 'Arnhem', coordinates: [5.8987, 51.9851] },
+            { name: 'Nijmegen', coordinates: [5.8520, 51.8426] },
+            { name: 'Enschede', coordinates: [6.8937, 52.2215] }
+          ];
+
+          mapInstance.addSource('cities', {
+            type: 'geojson',
+            data: {
+              type: 'FeatureCollection',
+              features: cities.map(city => ({
+                type: 'Feature',
+                geometry: {
+                  type: 'Point',
+                  coordinates: city.coordinates
+                },
+                properties: {
+                  name: city.name
+                }
+              }))
+            }
+          });
+
+          // City dots
+          mapInstance.addLayer({
+            id: 'city-dots',
+            type: 'circle',
+            source: 'cities',
+            paint: {
+              'circle-radius': 4,
+              'circle-color': 'hsl(25, 95%, 53%)',
+              'circle-stroke-width': 2,
+              'circle-stroke-color': '#ffffff'
+            }
+          });
+
+          // City labels
+          mapInstance.addLayer({
+            id: 'city-labels',
+            type: 'symbol',
+            source: 'cities',
+            layout: {
+              'text-field': ['get', 'name'],
+              'text-font': ['Open Sans Semibold', 'Arial Unicode MS Regular'],
+              'text-size': 12,
+              'text-offset': [0, 1.5],
+              'text-anchor': 'top'
+            },
+            paint: {
+              'text-color': 'hsl(25, 95%, 43%)',
+              'text-halo-color': '#ffffff',
+              'text-halo-width': 2,
+              'text-halo-blur': 1
+            }
+          });
+
           setMapLoaded(true);
           mapInstance.resize();
         });
