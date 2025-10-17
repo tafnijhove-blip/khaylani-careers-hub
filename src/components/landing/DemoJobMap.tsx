@@ -97,8 +97,122 @@ const DemoJobMap = () => {
       map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
 
       // Wait for map to load before adding markers
-      map.current.on('load', () => {
+      map.current.on('load', async () => {
         if (!map.current) return;
+
+        // Add province boundaries
+        try {
+          const response = await fetch('https://cartomap.github.io/nl/wgs84/provincie_2023.geojson');
+          const provincesData = await response.json();
+
+          map.current.addSource('provinces', {
+            type: 'geojson',
+            data: provincesData
+          });
+
+          // Province boundary lines
+          map.current.addLayer({
+            id: 'province-boundaries',
+            type: 'line',
+            source: 'provinces',
+            paint: {
+              'line-color': 'hsl(189, 70%, 48%)',
+              'line-width': 2,
+              'line-opacity': 0.5
+            }
+          });
+
+          // Province fills
+          map.current.addLayer({
+            id: 'province-fills',
+            type: 'fill',
+            source: 'provinces',
+            paint: {
+              'fill-color': 'hsl(189, 70%, 48%)',
+              'fill-opacity': 0.03
+            }
+          }, 'province-boundaries');
+
+          // Province labels
+          map.current.addLayer({
+            id: 'province-labels',
+            type: 'symbol',
+            source: 'provinces',
+            layout: {
+              'text-field': ['get', 'statnaam'],
+              'text-font': ['Open Sans Bold'],
+              'text-size': 13,
+              'text-transform': 'uppercase',
+              'text-letter-spacing': 0.1
+            },
+            paint: {
+              'text-color': 'hsl(189, 70%, 38%)',
+              'text-halo-color': '#ffffff',
+              'text-halo-width': 2
+            }
+          });
+        } catch (error) {
+          console.warn('Could not load province boundaries:', error);
+        }
+
+        // Add major city markers
+        const cities = [
+          { name: 'Amsterdam', coordinates: [4.9041, 52.3676] },
+          { name: 'Rotterdam', coordinates: [4.4777, 51.9225] },
+          { name: 'Den Haag', coordinates: [4.3007, 52.0705] },
+          { name: 'Utrecht', coordinates: [5.1214, 52.0907] },
+          { name: 'Eindhoven', coordinates: [5.4697, 51.4416] },
+          { name: 'Groningen', coordinates: [6.5665, 53.2194] }
+        ];
+
+        map.current.addSource('cities', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: cities.map(city => ({
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: city.coordinates
+              },
+              properties: {
+                name: city.name
+              }
+            }))
+          }
+        });
+
+        // City dots
+        map.current.addLayer({
+          id: 'city-dots',
+          type: 'circle',
+          source: 'cities',
+          paint: {
+            'circle-radius': 3,
+            'circle-color': 'hsl(25, 95%, 53%)',
+            'circle-stroke-width': 1.5,
+            'circle-stroke-color': '#ffffff'
+          }
+        });
+
+        // City labels
+        map.current.addLayer({
+          id: 'city-labels',
+          type: 'symbol',
+          source: 'cities',
+          layout: {
+            'text-field': ['get', 'name'],
+            'text-font': ['Open Sans Semibold'],
+            'text-size': 11,
+            'text-offset': [0, 1.2],
+            'text-anchor': 'top'
+          },
+          paint: {
+            'text-color': 'hsl(25, 95%, 43%)',
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 2
+          }
+        });
 
         // Add markers for each company
         companies.forEach((company) => {
