@@ -152,7 +152,7 @@ const Vacatures = () => {
     const vacaturesCount = alleVacatures.filter(v => v.bedrijf_id === bedrijfId).length;
     
     if (vacaturesCount > 0) {
-      if (!confirm(`LET OP: Dit bedrijf heeft ${vacaturesCount} actieve vacature(s).\n\nAls je "${bedrijfNaam}" verwijdert, worden ook alle bijbehorende vacatures en kandidaten permanent verwijderd.\n\nWeet je zeker dat je door wilt gaan?`)) {
+      if (!confirm(`LET OP: Dit bedrijf heeft ${vacaturesCount} actieve vacature(s).\n\nAls je "${bedrijfNaam}" verwijdert, worden ook alle bijbehorende vacatures permanent verwijderd.\n\nWeet je zeker dat je door wilt gaan?`)) {
         return;
       }
     } else {
@@ -166,16 +166,6 @@ const Vacatures = () => {
       const vacatureIds = alleVacatures
         .filter(v => v.bedrijf_id === bedrijfId)
         .map(v => v.id);
-
-      // First delete all kandidaten for these vacatures
-      if (vacatureIds.length > 0) {
-        const { error: kandidatenError } = await supabase
-          .from("kandidaten")
-          .delete()
-          .in("vacature_id", vacatureIds);
-
-        if (kandidatenError) throw kandidatenError;
-      }
 
       // Then delete all vacatures
       const { error: vacaturesError } = await supabase
@@ -1030,7 +1020,7 @@ const Vacatures = () => {
                 Bedrijven Beheer
               </CardTitle>
               <CardDescription className="text-destructive/80">
-                <strong>Waarschuwing:</strong> Bij het verwijderen van een bedrijf worden ook alle bijbehorende vacatures en kandidaten permanent verwijderd
+                <strong>Waarschuwing:</strong> Bij het verwijderen van een bedrijf worden ook alle bijbehorende vacatures permanent verwijderd
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -1065,7 +1055,7 @@ const Vacatures = () => {
                             size="icon"
                             className="hover:bg-destructive hover:text-destructive-foreground"
                             onClick={() => deleteBedrijf(bedrijf.id, bedrijf.naam)}
-                            title="Verwijder bedrijf (inclusief alle vacatures en kandidaten)"
+                            title="Verwijder bedrijf (inclusief alle vacatures)"
                           >
                             <XCircle className="h-4 w-4" />
                           </Button>

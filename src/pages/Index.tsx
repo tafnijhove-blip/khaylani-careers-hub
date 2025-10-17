@@ -144,7 +144,7 @@ const Index = () => {
       description:
         "Nieuwe klant? Recruiter weet het meteen. Nieuwe vacature bij een bedrijf? Recruiter weet direct tot in detail wat hij of zij moet zoeken.",
       subdescription:
-        "Maak het visueel duidelijk aan kandidaten waar je actief bent en toon betrokkenheid. Recruiters weten exact waar vacatures openstaan en kunnen tijdens een intake concrete voorstellen doen. Zo voelt de kandidaat zich serieus genomen en krijgt hij het vertrouwen dat jullie hem of haar écht helpen aan die perfecte baan.",
+        "Maak het visueel duidelijk waar je actief bent en toon betrokkenheid. Recruiters weten exact waar vacatures openstaan en kunnen tijdens een intake concrete voorstellen doen. Zo ontstaat er vertrouwen en transparantie in de samenwerking met klanten.",
     },
     {
       icon: BarChart3,
@@ -155,7 +155,7 @@ const Index = () => {
       icon: Target,
       title: "Minder meetings, meer doen",
       description:
-        "Elk uur dat een recruiter en accountmanager minder in overleg zitten, is een uur meer om geschikte kandidaten te vinden. Tijd is kostbaar — en Khaylani bespaart tijd, zodat je kunt focussen op wat écht belangrijk is.",
+        "Elk uur dat een recruiter en accountmanager minder in overleg zitten, is een uur meer om te focussen op klanten en openstaande vacatures. Tijd is kostbaar — en Khaylani bespaart tijd, zodat je kunt focussen op wat écht belangrijk is.",
     },
   ];
 
@@ -164,7 +164,7 @@ const Index = () => {
     {
       question: "Wat is Khaylani?",
       answer:
-        "Khaylani is een recruitment dashboard voor detacheringsbureaus dat realtime inzicht biedt in klanten, vacatures en kandidaten. Het centraliseert alle informatie op één plek, zodat je team altijd overzicht heeft.",
+        "Khaylani is een recruitment dashboard voor detacheringsbureaus dat realtime inzicht biedt in klanten, vacatures en teamactiviteiten. Het centraliseert alle informatie op één plek, zodat je team altijd overzicht heeft.",
     },
     {
       question: "Hoe snel kan ik starten met Khaylani?",
@@ -308,7 +308,7 @@ const Index = () => {
                 Realtime inzicht – <span className="text-gradient">alles in één overzicht</span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                Zie in één oogopslag waar je klanten en vacatures zitten, en welke kandidaten je moet zoeken. Recruiters hebben alle informatie direct in het systeem, zodat onnodige meetings met accountmanagers overbodig zijn. Interactieve realtime kaart per regio houdt alles overzichtelijk.
+                Zie in één oogopslag waar je klanten en vacatures zitten en waar je team actief is. Recruiters hebben alle informatie direct in het systeem, zodat onnodige meetings met accountmanagers overbodig zijn. Interactieve realtime kaart per regio houdt alles overzichtelijk.
               </p>
               <p className="text-sm text-muted-foreground/80 pt-2">
                 Bekijk je kansen in realtime

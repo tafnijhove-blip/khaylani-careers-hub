@@ -13,7 +13,6 @@ const translations = {
     // Navigation
     'nav.dashboard': 'Dashboard',
     'nav.vacancies': 'Vacatures',
-    'nav.candidates': 'Kandidaten',
     'nav.analytics': 'Analytics',
     'nav.companies': 'Bedrijven',
     'nav.users': 'Gebruikers',
@@ -22,7 +21,7 @@ const translations = {
     
     // Landing Page
     'landing.hero.title': 'Vacaturebeheer voor detacheringsbureaus',
-    'landing.hero.subtitle': 'Beheer vacatures, kandidaten en klanten op één centrale plek met real-time inzicht',
+    'landing.hero.subtitle': 'Beheer vacatures en klanten op één centrale plek met real-time inzicht',
     'landing.hero.cta': 'Gratis proberen',
     'landing.hero.demo': 'Bekijk demo',
     'landing.hero.trust': 'Trusted by 50+ recruitment bureaus',
@@ -50,13 +49,13 @@ const translations = {
     'landing.nav.login': 'Inloggen',
     'landing.nav.quote': 'Gratis offerte',
     'landing.features.title': 'Alles wat je nodig hebt',
-    'landing.features.subtitle': 'Een compleet platform voor vacature- en kandidatenbeheer',
+    'landing.features.subtitle': 'Een compleet platform voor vacaturebeheer en klantrelaties',
     'landing.features.map': 'Interactieve Kaart',
     'landing.features.map.desc': 'Visualiseer alle vacatures op een kaart van Nederland',
     'landing.features.dashboard': 'Real-time Dashboard',
     'landing.features.dashboard.desc': 'Live statistieken en KPIs voor je team',
-    'landing.features.tracking': 'Kandidaten Tracking',
-    'landing.features.tracking.desc': 'Volg de status van elke kandidaat',
+    'landing.features.tracking': 'Team Activiteiten',
+    'landing.features.tracking.desc': 'Volg de activiteiten van je team per regio',
     'landing.features.analytics': 'Geavanceerde Analytics',
     'landing.features.analytics.desc': 'Inzicht in trends en performance',
     'landing.cta.title': 'Klaar om te starten?',

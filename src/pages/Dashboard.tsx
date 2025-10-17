@@ -480,7 +480,7 @@ const Dashboard = () => {
         onOpenChange={(open) => setDeleteBedrijfDialog({...deleteBedrijfDialog, open})}
         title="Bedrijf verwijderen?"
         description={deleteBedrijfDialog.vacatures > 0 
-          ? `LET OP: Dit bedrijf heeft ${deleteBedrijfDialog.vacatures} actieve vacature(s).\n\nAls je "${deleteBedrijfDialog.naam}" verwijdert, worden ook alle bijbehorende vacatures en kandidaten permanent verwijderd.\n\nWeet je zeker dat je door wilt gaan?`
+          ? `LET OP: Dit bedrijf heeft ${deleteBedrijfDialog.vacatures} actieve vacature(s).\n\nAls je "${deleteBedrijfDialog.naam}" verwijdert, worden ook alle bijbehorende vacatures permanent verwijderd.\n\nWeet je zeker dat je door wilt gaan?`
           : `Weet je zeker dat je bedrijf "${deleteBedrijfDialog.naam}" wilt verwijderen?`
         }
         onConfirm={confirmDeleteBedrijf}

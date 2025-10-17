@@ -57,7 +57,7 @@ const TermsAndConditions = () => {
             <section className="mt-8">
               <h2>3. Dienstverlening</h2>
               <p>
-                Khaylani biedt een cloud-based recruitment dashboard platform aan waarmee detacheringsbureaus hun vacatures, kandidaten en recruitment activiteiten kunnen beheren. De dienstverlening omvat:
+                Khaylani biedt een cloud-based recruitment dashboard platform aan waarmee detacheringsbureaus hun vacatures, klantrelaties en recruitment activiteiten kunnen beheren. De dienstverlening omvat:
               </p>
               <ul>
                 <li>Toegang tot het online platform</li>

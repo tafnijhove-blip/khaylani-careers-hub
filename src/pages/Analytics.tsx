@@ -142,7 +142,7 @@ const Analytics = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold text-foreground">{stats.openVacatures}</div>
-              <p className="text-xs text-muted-foreground mt-1">Actief zoekend naar kandidaten</p>
+              <p className="text-xs text-muted-foreground mt-1">Actief openstaande posities</p>
             </CardContent>
           </Card>
 
