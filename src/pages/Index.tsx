@@ -5,6 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { useToast } from "@/hooks/use-toast";
 import {
   Database,
@@ -156,14 +162,14 @@ const Index = () => {
 
   const faqs = [
     {
-      question: "Werkt Khaylani ook met mijn bestaande systemen?",
+      question: "Wat is Khaylani?",
       answer:
-        "Ja, Khaylani integreert met de meeste HR- en ATS-systemen. We bieden API-koppelingen en kunnen data importeren vanuit Excel of CSV.",
+        "Khaylani is een recruitment dashboard voor detacheringsbureaus dat realtime inzicht biedt in klanten, vacatures en kandidaten. Het centraliseert alle informatie op één plek, zodat je team altijd overzicht heeft.",
     },
     {
       question: "Hoe snel kan ik starten met Khaylani?",
       answer:
-        "Na je offerteaanvraag ontvang je binnen 24 uur een persoonlijk voorstel. Na akkoord plannen we een meeting in om de onboarding op maat te bespreken.",
+        "Na je offerteaanvraag ontvang je binnen 24 uur een persoonlijk voorstel. Zodra je akkoord geeft, plannen we een onboarding-meeting op maat in, zodat je snel en efficiënt live kunt gaan.",
     },
   ];
 
@@ -399,25 +405,42 @@ const Index = () => {
         {/* FAQ Section */}
         <section className="py-24 px-6">
           <div className="container mx-auto max-w-4xl">
-            <div className="text-center mb-16">
-              <Badge variant="secondary" className="mb-4">
+            <div className="text-center mb-16 space-y-4">
+              <Badge variant="secondary" className="mb-2">
                 FAQ
               </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">Veelgestelde vragen</h2>
+              <h2 className="text-4xl md:text-5xl font-bold">Veelgestelde vragen</h2>
               <p className="text-xl text-muted-foreground">Alles wat je moet weten over Khaylani</p>
             </div>
 
-            <div className="space-y-6">
+            <Accordion type="single" collapsible className="w-full space-y-4">
               {faqs.map((faq, index) => (
-                <Card
+                <AccordionItem
                   key={index}
-                  className="glass-card p-8 hover-lift animate-fade-in"
+                  value={`item-${index}`}
+                  className="glass-card px-8 py-2 rounded-xl border animate-fade-in hover-lift"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <h3 className="text-xl font-bold mb-3">{faq.question}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{faq.answer}</p>
-                </Card>
+                  <AccordionTrigger className="text-xl font-bold hover:no-underline text-left">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed pt-2 pb-4">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
               ))}
+            </Accordion>
+
+            <div className="text-center mt-12">
+              <p className="text-lg text-muted-foreground mb-6">
+                Start vandaag nog met realtime inzicht in je recruitmentproces.
+              </p>
+              <a href="#offerte">
+                <Button size="lg" className="gap-2">
+                  Vraag een offerte aan
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </a>
             </div>
           </div>
         </section>
