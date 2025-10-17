@@ -130,24 +130,26 @@ const Index = () => {
       icon: Users,
       title: "Iedereen weet exact wat er speelt",
       description:
-        "Accountmanager heeft een nieuwe aanvraag? Recruiter ziet het meteen in het systeem. Van functie-eisen tot details over het bedrijf: de recruiter weet exact wat hij moet zoeken. Geen onnodige meetings meer.",
+        "Accountmanager heeft een nieuwe aanvraag? Recruiter ziet het direct in het systeem. Van functie-eisen tot details over het bedrijf: de recruiter weet precies wat hij moet zoeken. Geen onnodige meetings meer tussen accountmanagers en recruiters over vacatures.",
     },
     {
       icon: Clock,
       title: "Recruiters zien live wat sales binnenhaalt",
       description:
-        "Recruiters zien live wat sales binnenhaalt. Nieuwe klant? Recruiter weet het meteen. Nieuwe vacature? Recruiter weet precies wat gezocht moet worden.",
+        "Nieuwe klant? Recruiter weet het meteen. Nieuwe vacature bij een bedrijf? Recruiter weet direct tot in detail wat hij of zij moet zoeken.",
+      subdescription:
+        "Maak het visueel duidelijk aan kandidaten waar je actief bent en toon betrokkenheid. Recruiters weten exact waar vacatures openstaan en kunnen tijdens een intake concrete voorstellen doen. Zo voelt de kandidaat zich serieus genomen en krijgt hij het vertrouwen dat jullie hem of haar écht helpen aan die perfecte baan.",
     },
     {
       icon: BarChart3,
       title: "Managers weten precies waar de omzet zit",
-      description: "Managers weten precies hoe en waar ze hun team moeten bijsturen. Zie in één blik waar je team actief is en waar de kansen liggen, zodat je gericht actie kunt ondernemen.",
+      description: "Managers weten precies hoe en waar ze hun team moeten bijsturen. Zie in één oogopslag waar je team actief is en waar de kansen liggen, zodat je doelgericht kunt bijsturen waar dat nodig is.",
     },
     {
       icon: Target,
       title: "Minder meetings, meer doen",
       description:
-        "Elke uur dat een recruiter en accountmanager minder in overleg zitten, is een uur meer om geschikte kandidaten te vinden. Khaylani bespaart tijd voor wat echt belangrijk is.",
+        "Elk uur dat een recruiter en accountmanager minder in overleg zitten, is een uur meer om geschikte kandidaten te vinden. Tijd is kostbaar — en Khaylani bespaart tijd, zodat je kunt focussen op wat écht belangrijk is.",
     },
   ];
 
@@ -156,12 +158,12 @@ const Index = () => {
     {
       question: "Werkt Khaylani ook met mijn bestaande systemen?",
       answer:
-        "Ja, Khaylani integreert met de meeste HR- en ATS-systemen. We bieden API-koppelingen en kunnen data importeren vanuit Excel/CSV.",
+        "Ja, Khaylani integreert met de meeste HR- en ATS-systemen. We bieden API-koppelingen en kunnen data importeren vanuit Excel of CSV.",
     },
     {
       question: "Hoe snel kan ik starten met Khaylani?",
       answer:
-        "Na je offerte-aanvraag ontvang je binnen 24 uur een persoonlijk voorstel. Na akkoord plannen we een meeting in om de onboarding op maat te bespreken.",
+        "Na je offerteaanvraag ontvang je binnen 24 uur een persoonlijk voorstel. Na akkoord plannen we een meeting in om de onboarding op maat te bespreken.",
     },
   ];
 
@@ -203,12 +205,12 @@ const Index = () => {
               <LanguageSwitcher />
               <Link to="/auth">
                 <Button variant="ghost" size="sm">
-                  {t("landing.nav.login")}
+                  Inloggen
                 </Button>
               </Link>
               <a href="#offerte">
                 <Button size="sm" className="gap-2">
-                  {t("landing.nav.quote")}
+                  Offerte Aanvragen
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </a>
@@ -231,28 +233,35 @@ const Index = () => {
           <main className="container mx-auto max-w-6xl relative z-10">
             <div className="text-center space-y-8 animate-fade-in">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                <span className="text-gradient">Versnel jouw recruitmentproces</span>
+                <span className="text-gradient">Stop met losse e-mails en belrondes</span>
               </h1>
 
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Stop met losse e-mails en belrondes. Werk vanuit één platform met volledig overzicht. 
-                Recruiters en accountmanagers hebben realtime inzicht in klanten, vacatures en kansen. 
-                Sneller schakelen = sneller plaatsen.
+                Eén platform, één overzicht. Recruiters en accountmanagers werken samen met realtime inzicht in klanten, vacatures en statistieken. Sneller schakelen = sneller plaatsen.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>{t("landing.usp.realtime")}</span>
+                  <span>Realtime synchronisatie</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>{t("landing.usp.geographic")}</span>
+                  <span>Geografisch overzicht</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
-                  <span>{t("landing.usp.efficient")}</span>
+                  <span>Direct inzetbaar</span>
                 </div>
+              </div>
+
+              <div className="pt-8">
+                <a href="#offerte">
+                  <Button size="lg" className="gap-2 text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all">
+                    Versnel nu jouw recruitmentproces
+                    <ArrowRight className="h-5 w-5" />
+                  </Button>
+                </a>
               </div>
             </div>
 
@@ -272,12 +281,14 @@ const Index = () => {
           <div className="container mx-auto max-w-5xl">
             <div className="text-center mb-12 space-y-4">
               <Badge variant="secondary" className="mb-2">
-                {t("landing.vacature.badge")}
+                Realtime Inzicht
               </Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                {t("landing.vacature.title")} <span className="text-gradient">{t("landing.vacature.highlight")}</span>
+                Krijg in één oogopslag inzicht <span className="text-gradient">waar de kansen liggen</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">{t("landing.vacature.description")}</p>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Zie waar je klanten en vacatures zich bevinden, en waar de kansen liggen. Interactieve kaart met realtime vacaturedata per regio.
+              </p>
             </div>
             <VacaturePreview />
           </div>
@@ -350,6 +361,11 @@ const Index = () => {
                   </div>
                   <h3 className="text-2xl font-bold mb-3 tracking-tight">{benefit.title}</h3>
                   <p className="text-muted-foreground leading-relaxed">{benefit.description}</p>
+                  {'subdescription' in benefit && (
+                    <p className="text-muted-foreground/80 text-sm leading-relaxed mt-4 pt-4 border-t">
+                      {benefit.subdescription}
+                    </p>
+                  )}
                 </Card>
               ))}
             </div>
