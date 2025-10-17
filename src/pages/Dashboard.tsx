@@ -67,23 +67,35 @@ const Dashboard = () => {
 
   // Redirect to role-specific dashboard
   useEffect(() => {
+    // Only redirect if userRole is loaded and we're on the /dashboard route
     if (!roleLoading && userRole) {
-      switch (userRole) {
-        case 'superadmin':
-          navigate('/superadmin', { replace: true });
-          break;
-        case 'ceo':
-          navigate('/manager', { replace: true });
-          break;
-        case 'accountmanager':
-          navigate('/accountmanager', { replace: true });
-          break;
-        case 'recruiter':
-          navigate('/recruiter', { replace: true });
-          break;
+      const currentPath = window.location.pathname;
+      
+      // Don't redirect if we're already on a role-specific dashboard
+      if (currentPath === '/dashboard') {
+        let redirectPath: string | null = null;
+        
+        switch (userRole) {
+          case 'superadmin':
+            redirectPath = '/superadmin';
+            break;
+          case 'ceo':
+            redirectPath = '/manager';
+            break;
+          case 'accountmanager':
+            redirectPath = '/accountmanager';
+            break;
+          case 'recruiter':
+            redirectPath = '/recruiter';
+            break;
+        }
+        
+        if (redirectPath) {
+          navigate(redirectPath, { replace: true });
+        }
       }
     }
-  }, [userRole, roleLoading, navigate]);
+  }, [userRole, roleLoading]);
 
   useEffect(() => {
     fetchData();
