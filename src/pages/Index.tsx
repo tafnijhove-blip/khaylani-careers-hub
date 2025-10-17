@@ -317,12 +317,17 @@ const Index = () => {
           <div className="container mx-auto max-w-6xl">
             <div className="text-center mb-12 space-y-4">
               <Badge variant="secondary" className="mb-2">
-                {t("landing.dashboard.badge")}
+                Manager Dashboard
               </Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                {t("landing.dashboard.title")} <span className="text-gradient">{t("landing.dashboard.highlight")}</span>
+                Manager Dashboard – <span className="text-gradient">stuur je team met inzicht</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">{t("landing.dashboard.description")}</p>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                Zie precies waar je team actief is, waar de kansen liggen en waar je moet ingrijpen. Alle informatie direct beschikbaar, zodat je tijd bespaart en resultaten verbetert.
+              </p>
+              <p className="text-sm text-muted-foreground/80 pt-2">
+                Bekijk je team in realtime
+              </p>
             </div>
             <DashboardPreview />
           </div>
