@@ -52,11 +52,33 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
         .eq("id", user.id)
         .single();
 
+      // Try to geocode the address if available
+      let coordinates: { lat: number; lng: number } | null = null;
+      if (validated.adres || validated.plaats) {
+        try {
+          const addressToGeocode = validated.adres 
+            ? `${validated.adres}, ${validated.plaats || ''}, Nederland` 
+            : `${validated.plaats}, Nederland`;
+          
+          const { data: geocodeData } = await supabase.functions.invoke('geocode-address', {
+            body: { address: addressToGeocode }
+          });
+          
+          if (geocodeData?.lat && geocodeData?.lng) {
+            coordinates = { lat: geocodeData.lat, lng: geocodeData.lng };
+          }
+        } catch (geocodeError) {
+          console.warn('Geocoding failed:', geocodeError);
+          // Continue without coordinates
+        }
+      }
+
       // Insert the company
       const { data: newCompany, error: companyError } = await supabase.from("bedrijven").insert({
         ...validated,
         type,
         created_by: user.id,
+        ...(coordinates && { lat: coordinates.lat, lng: coordinates.lng })
       }).select().single();
 
       if (companyError) throw companyError;
