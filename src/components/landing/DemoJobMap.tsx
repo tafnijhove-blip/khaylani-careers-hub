@@ -1,130 +1,209 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import MarkerClusterGroup from "react-leaflet-cluster";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useRef, useState } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, ExternalLink } from "lucide-react";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import { MapPin, Navigation } from "lucide-react";
 
-// Fix Leaflet default icons
-import iconUrl from "leaflet/dist/images/marker-icon.png";
-import iconRetinaUrl from "leaflet/dist/images/marker-icon-2x.png";
-import shadowUrl from "leaflet/dist/images/marker-shadow.png";
-
-const DefaultIcon = L.icon({
-  iconUrl,
-  iconRetinaUrl,
-  shadowUrl,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41],
-});
-L.Marker.prototype.options.icon = DefaultIcon;
-
-interface Company {
-  id: string;
-  name: string;
-  address: string;
-  location: { lat: number; lon: number };
-  logoUrl: string | null;
-  openVacancyCount: number;
-}
-
-interface Job {
-  id: string;
-  companyId: string;
-  title: string;
-  summary: string;
-  type: string;
-  remote: string;
-  detailSlug: string;
-}
-
-interface MapData {
-  companies: Company[];
-  jobs: Job[];
-}
-
-// Auto-resize map when loaded
-function MapResizer() {
-  const map = useMap();
-  
-  useEffect(() => {
-    // Delay to ensure container is visible
-    const timer = setTimeout(() => {
-      map.invalidateSize();
-    }, 300);
-    
-    return () => clearTimeout(timer);
-  }, [map]);
-  
-  return null;
-}
+// Static local company data
+const companies = [
+  { 
+    id: 1,
+    name: "Khaylani Recruitment", 
+    vacancies: 8, 
+    lat: 52.3676, 
+    lng: 4.9041,
+    city: "Amsterdam"
+  },
+  { 
+    id: 2,
+    name: "FutureHire BV", 
+    vacancies: 3, 
+    lat: 51.9244, 
+    lng: 4.4777,
+    city: "Rotterdam"
+  },
+  { 
+    id: 3,
+    name: "SkyTalent Group", 
+    vacancies: 6, 
+    lat: 52.0907, 
+    lng: 5.1214,
+    city: "Utrecht"
+  },
+  { 
+    id: 4,
+    name: "TechForce Nederland", 
+    vacancies: 5, 
+    lat: 52.3731, 
+    lng: 4.8937,
+    city: "Amsterdam"
+  },
+  { 
+    id: 5,
+    name: "Digital Talents", 
+    vacancies: 4, 
+    lat: 51.9225, 
+    lng: 4.4792,
+    city: "Rotterdam"
+  },
+  { 
+    id: 6,
+    name: "DevMasters BV", 
+    vacancies: 7, 
+    lat: 52.0808, 
+    lng: 4.3121,
+    city: "Den Haag"
+  },
+  { 
+    id: 7,
+    name: "CodeCrafters", 
+    vacancies: 6, 
+    lat: 52.0907, 
+    lng: 5.1214,
+    city: "Utrecht"
+  },
+  { 
+    id: 8,
+    name: "IT Solutions Group", 
+    vacancies: 2, 
+    lat: 51.4416, 
+    lng: 5.4797,
+    city: "Eindhoven"
+  },
+];
 
 const DemoJobMap = () => {
-  const [mapData, setMapData] = useState<MapData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<maplibregl.Map | null>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
 
-  // Fetch demo data
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/demo/map.json");
-        const data = await response.json();
-        setMapData(data);
-      } catch (error) {
-        console.error("Error loading demo map data:", error);
-      } finally {
-        setIsLoading(false);
+    if (!mapContainer.current) return;
+    if (map.current) return; // Initialize map only once
+
+    try {
+      // Initialize map
+      map.current = new maplibregl.Map({
+        container: mapContainer.current,
+        style: 'https://demotiles.maplibre.org/style.json',
+        center: [5.2913, 52.1326], // Center of Netherlands
+        zoom: 7,
+      });
+
+      // Add navigation controls
+      map.current.addControl(new maplibregl.NavigationControl(), 'top-right');
+
+      // Wait for map to load before adding markers
+      map.current.on('load', () => {
+        if (!map.current) return;
+
+        // Add markers for each company
+        companies.forEach((company) => {
+          if (!map.current) return;
+
+          // Create marker element with label
+          const el = document.createElement('div');
+          el.className = 'company-marker';
+          el.innerHTML = `
+            <div class="marker-pin"></div>
+            <div class="marker-label">${company.name}</div>
+          `;
+
+          // Create popup
+          const popup = new maplibregl.Popup({ offset: 25, closeButton: true })
+            .setHTML(`
+              <div class="map-popup">
+                <h3 class="popup-title">${company.name}</h3>
+                <p class="popup-city"><svg class="popup-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${company.city}</p>
+                <p class="popup-vacancies">${company.vacancies} open vacature${company.vacancies !== 1 ? 's' : ''}</p>
+                <button class="popup-button" onclick="document.getElementById('offerte')?.scrollIntoView({ behavior: 'smooth' })">
+                  Bekijk alle vacatures
+                </button>
+              </div>
+            `);
+
+          // Create and add marker
+          const marker = new maplibregl.Marker({ element: el })
+            .setLngLat([company.lng, company.lat])
+            .setPopup(popup)
+            .addTo(map.current);
+
+          markersRef.current.push(marker);
+        });
+      });
+
+      map.current.on('error', (e) => {
+        console.error('Map error:', e);
+        setMapError('Kaart kon niet worden geladen, ververs de pagina.');
+      });
+
+    } catch (error) {
+      console.error('Failed to initialize map:', error);
+      setMapError('Kaart kon niet worden geladen, ververs de pagina.');
+    }
+
+    // Cleanup
+    return () => {
+      markersRef.current.forEach(marker => marker.remove());
+      markersRef.current = [];
+      if (map.current) {
+        map.current.remove();
+        map.current = null;
       }
     };
-
-    fetchData();
   }, []);
 
-  // Group jobs by company
-  const jobsByCompany = useMemo(() => {
-    if (!mapData) return {};
-    
-    const grouped: Record<string, Job[]> = {};
-    mapData.jobs.forEach((job) => {
-      if (!grouped[job.companyId]) {
-        grouped[job.companyId] = [];
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Locatiefunctie wordt niet ondersteund door deze browser.');
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        if (!map.current) return;
+        
+        const userCoords: [number, number] = [
+          position.coords.longitude,
+          position.coords.latitude
+        ];
+
+        // Fly to user location
+        map.current.flyTo({
+          center: userCoords,
+          zoom: 13,
+          duration: 2000
+        });
+
+        // Add user location marker
+        const el = document.createElement('div');
+        el.className = 'user-location-marker';
+        el.innerHTML = '<div class="user-location-pulse"></div>';
+
+        new maplibregl.Marker({ element: el })
+          .setLngLat(userCoords)
+          .addTo(map.current);
+
+        setIsLocating(false);
+      },
+      () => {
+        alert('Locatie kon niet worden opgehaald.');
+        setIsLocating(false);
       }
-      grouped[job.companyId].push(job);
-    });
-    return grouped;
-  }, [mapData]);
-
-  // Custom cluster icon
-  const createClusterCustomIcon = useCallback((cluster: any) => {
-    const count = cluster.getChildCount();
-    let size = "small";
-    if (count > 10) size = "large";
-    else if (count > 5) size = "medium";
-
-    return L.divIcon({
-      html: `<div class="cluster-marker cluster-${size}">${count}</div>`,
-      className: "custom-cluster-icon",
-      iconSize: L.point(40, 40, true),
-    });
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="w-full h-[600px] flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 rounded-xl">
-        <LoadingSpinner size="lg" message="Laden van vacaturekaart..." />
-      </div>
     );
-  }
+  };
 
-  if (!mapData || mapData.companies.length === 0) {
+  if (mapError) {
     return (
-      <Card className="w-full h-[600px] flex items-center justify-center">
-        <p className="text-muted-foreground">Geen vacaturedata beschikbaar</p>
+      <Card className="w-full h-[600px] md:h-[400px] flex items-center justify-center bg-muted">
+        <div className="text-center p-6">
+          <MapPin className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+          <p className="text-muted-foreground">{mapError}</p>
+        </div>
       </Card>
     );
   }
@@ -154,108 +233,33 @@ const DemoJobMap = () => {
 
       {/* Map Container */}
       <div className="container mx-auto px-4">
-        <Card className="overflow-hidden border-2 shadow-2xl rounded-xl">
-          <div className="w-full h-[60vh] md:h-[80vh] relative" style={{ minHeight: "500px" }}>
-            <MapContainer
-              center={[52.1326, 5.2913]}
-              zoom={7}
-              scrollWheelZoom={true}
-              className="h-full w-full"
-              style={{ zIndex: 0 }}
-            >
-              <MapResizer />
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              
-              <MarkerClusterGroup
-                chunkedLoading
-                iconCreateFunction={createClusterCustomIcon}
-                spiderfyOnMaxZoom={true}
-                showCoverageOnHover={false}
-                zoomToBoundsOnClick={true}
-                maxClusterRadius={60}
-              >
-                {mapData.companies.map((company) => {
-                  const companyJobs = jobsByCompany[company.id] || [];
-                  
-                  return (
-                    <Marker
-                      key={company.id}
-                      position={[company.location.lat, company.location.lon]}
-                      title={company.name}
-                    >
-                      <Popup maxWidth={320} minWidth={280}>
-                        <div className="p-4 font-sans">
-                          <h3 className="text-xl font-bold mb-2 text-foreground">
-                            {company.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mb-3 flex items-center gap-1">
-                            <MapPin className="h-4 w-4" />
-                            {company.address}
-                          </p>
-                          <p className="text-base font-semibold text-primary mb-4">
-                            {company.openVacancyCount} open {company.openVacancyCount === 1 ? 'vacature' : 'vacatures'}
-                          </p>
-                          
-                          {companyJobs.length > 0 && (
-                            <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
-                              {companyJobs.slice(0, 5).map((job) => (
-                                <div
-                                  key={job.id}
-                                  className="p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
-                                >
-                                  <div className="font-semibold text-sm text-foreground mb-1">
-                                    {job.title}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground mb-1">
-                                    {job.type} · {job.remote}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground line-clamp-2">
-                                    {job.summary}
-                                  </div>
-                                </div>
-                              ))}
-                              {companyJobs.length > 5 && (
-                                <p className="text-xs text-muted-foreground italic text-center">
-                                  +{companyJobs.length - 5} meer...
-                                </p>
-                              )}
-                            </div>
-                          )}
-                          
-                          <Button
-                            size="sm"
-                            className="w-full gap-2"
-                            onClick={() => document.getElementById('offerte')?.scrollIntoView({ behavior: 'smooth' })}
-                          >
-                            Vraag een demo aan
-                            <ExternalLink className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  );
-                })}
-              </MarkerClusterGroup>
-            </MapContainer>
+        <Card className="overflow-hidden border-2 shadow-2xl rounded-xl relative">
+          {/* Use My Location Button */}
+          <Button
+            onClick={handleUseMyLocation}
+            disabled={isLocating}
+            className="absolute top-4 left-4 z-[1000] shadow-xl gap-2"
+            size="sm"
+          >
+            <Navigation className={`h-4 w-4 ${isLocating ? 'animate-spin' : ''}`} />
+            📍 Gebruik mijn locatie
+          </Button>
 
-            {/* Legend */}
-            <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-4 border-2 z-[1000]">
-              <h4 className="font-semibold text-sm mb-3 text-foreground">Legenda</h4>
-              <div className="space-y-2 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-primary" />
-                  <span>Bedrijven met vacatures</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="cluster-marker cluster-small" style={{width: '24px', height: '24px', fontSize: '10px'}}>5</div>
-                  <span>Meerdere bedrijven (klik om uit te klappen)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Klik op een marker voor details</span>
-                </div>
+          <div 
+            ref={mapContainer} 
+            className="w-full h-[600px] md:h-[600px] sm:h-[400px]"
+          />
+
+          {/* Legend */}
+          <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-4 border-2 z-[1000]">
+            <h4 className="font-semibold text-sm mb-3 text-foreground">Legenda</h4>
+            <div className="space-y-2 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-primary" />
+                <span>Bedrijven met vacatures</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">Klik op een marker voor details</span>
               </div>
             </div>
           </div>
@@ -265,7 +269,7 @@ const DemoJobMap = () => {
         <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="p-6 text-center">
             <div className="text-3xl font-bold text-primary mb-2">
-              {mapData.companies.length}
+              {companies.length}
             </div>
             <div className="text-sm text-muted-foreground">
               Bedrijven op de kaart
@@ -273,15 +277,15 @@ const DemoJobMap = () => {
           </Card>
           <Card className="p-6 text-center">
             <div className="text-3xl font-bold text-primary mb-2">
-              {mapData.jobs.length}
+              {companies.reduce((sum, c) => sum + c.vacancies, 0)}
             </div>
             <div className="text-sm text-muted-foreground">
-              Totaal vacatures
+              Vacatures
             </div>
           </Card>
           <Card className="p-6 text-center">
             <div className="text-3xl font-bold text-primary mb-2">
-              {Math.round(mapData.jobs.length / mapData.companies.length)}
+              {Math.round(companies.reduce((sum, c) => sum + c.vacancies, 0) / companies.length)}
             </div>
             <div className="text-sm text-muted-foreground">
               Gemiddeld vacatures per bedrijf
@@ -290,64 +294,149 @@ const DemoJobMap = () => {
         </div>
       </div>
 
-      {/* Custom CSS for cluster styling */}
+      {/* Custom CSS for map styling */}
       <style>{`
-        .custom-cluster-icon {
-          background: transparent;
-          border: none;
+        .company-marker {
+          position: relative;
+          cursor: pointer;
         }
         
-        .cluster-marker {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: 50%;
-          font-weight: bold;
-          color: white;
+        .marker-pin {
+          width: 30px;
+          height: 30px;
+          border-radius: 50% 50% 50% 0;
+          background: hsl(var(--primary));
+          position: absolute;
+          transform: rotate(-45deg);
+          left: 50%;
+          top: 50%;
+          margin: -15px 0 0 -15px;
           border: 3px solid white;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
           transition: transform 0.2s;
         }
-        
-        .cluster-marker:hover {
-          transform: scale(1.1);
+
+        .company-marker:hover .marker-pin {
+          transform: rotate(-45deg) scale(1.2);
         }
         
-        .cluster-small {
-          width: 40px;
-          height: 40px;
-          font-size: 14px;
-          background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8));
-        }
-        
-        .cluster-medium {
-          width: 50px;
-          height: 50px;
-          font-size: 16px;
-          background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-        }
-        
-        .cluster-large {
-          width: 60px;
-          height: 60px;
-          font-size: 18px;
-          background: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--primary)));
+        .marker-label {
+          position: absolute;
+          top: 35px;
+          left: 50%;
+          transform: translateX(-50%);
+          background: white;
+          padding: 4px 8px;
+          border-radius: 6px;
+          font-size: 11px;
+          font-weight: 600;
+          white-space: nowrap;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+          border: 1px solid hsl(var(--border));
+          color: hsl(var(--foreground));
+          pointer-events: none;
         }
 
-        .leaflet-popup-content-wrapper {
-          border-radius: 12px;
+        .user-location-marker {
+          width: 20px;
+          height: 20px;
+          position: relative;
+        }
+
+        .user-location-pulse {
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: #FF6600;
+          border: 3px solid white;
+          box-shadow: 0 0 0 0 rgba(255, 102, 0, 0.7);
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(255, 102, 0, 0.7);
+          }
+          70% {
+            box-shadow: 0 0 0 15px rgba(255, 102, 0, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(255, 102, 0, 0);
+          }
+        }
+        
+        .map-popup {
+          padding: 16px;
+          min-width: 200px;
+          font-family: system-ui, -apple-system, sans-serif;
+        }
+        
+        .popup-title {
+          font-size: 18px;
+          font-weight: 700;
+          margin: 0 0 8px 0;
+          color: hsl(var(--foreground));
+        }
+        
+        .popup-city {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 13px;
+          color: hsl(var(--muted-foreground));
+          margin: 0 0 8px 0;
+        }
+
+        .popup-icon {
+          width: 16px;
+          height: 16px;
+        }
+        
+        .popup-vacancies {
+          font-size: 15px;
+          font-weight: 600;
+          color: hsl(var(--primary));
+          margin: 0 0 12px 0;
+        }
+        
+        .popup-button {
+          width: 100%;
+          padding: 8px 16px;
+          background: hsl(var(--primary));
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.2s;
+        }
+        
+        .popup-button:hover {
+          background: hsl(var(--primary) / 0.9);
+        }
+
+        .maplibregl-popup-content {
           padding: 0;
+          border-radius: 12px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
         }
-        
-        .leaflet-popup-content {
-          margin: 0;
-          width: 100% !important;
+
+        .maplibregl-popup-close-button {
+          font-size: 24px;
+          padding: 8px;
+          color: hsl(var(--foreground));
         }
-        
-        .leaflet-popup-close-button {
-          color: hsl(var(--foreground)) !important;
-          font-size: 24px !important;
-          padding: 4px 8px !important;
+
+        @media (max-width: 640px) {
+          .company-marker {
+            transform: scale(0.85);
+          }
+          
+          .marker-label {
+            font-size: 10px;
+            padding: 3px 6px;
+          }
         }
       `}</style>
     </section>
