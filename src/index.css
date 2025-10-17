@@ -10,7 +10,7 @@
 
 @layer base {
   :root {
-    /* Core Colors - Cyber Tech Theme */
+    /* Core Colors - Simplified Cyber Theme */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     
@@ -20,12 +20,12 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     
-    /* Primary - Vibrant Cyber Blue */
-    --primary: 199 89% 48%;
+    /* Primary - Cyber Cyan */
+    --primary: 189 70% 48%;
     --primary-foreground: 0 0% 100%;
-    --primary-dark: 199 89% 38%;
-    --primary-light: 199 89% 58%;
-    --primary-glow: 199 89% 68%;
+    --primary-dark: 189 70% 38%;
+    --primary-light: 189 70% 58%;
+    --primary-glow: 189 70% 68%;
     
     /* Secondary - Cyber Orange */
     --secondary: 25 95% 53%;
@@ -36,47 +36,46 @@
     --muted: 240 5% 96%;
     --muted-foreground: 240 3.8% 46.1%;
     
-    /* Accent Colors - Vibrant Tech Colors */
+    /* Accent - Simplified */
     --accent: 240 5% 96%;
     --accent-foreground: 222 47% 11%;
     --accent-cyan: 189 70% 48%;
     --accent-purple: 262 60% 55%;
     --accent-teal: 173 50% 42%;
-    --accent-orange: 25 95% 53%;
     
-    /* Destructive - Vibrant Red */
+    /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
     /* Border & Input */
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 199 89% 48%;
+    --ring: 189 70% 48%;
     
     /* Border Radius */
     --radius: 0.75rem;
     
-    /* Cyber Gradients - With Orange */
-    --gradient-primary: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(25, 95%, 53%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(262, 60%, 55%) 50%, hsl(25, 95%, 53%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(199, 89%, 98%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.9) 0%, hsla(199, 89%, 98%, 0.9) 100%);
-    --gradient-shine: linear-gradient(90deg, transparent 0%, hsla(25, 95%, 63%, 0.4) 50%, transparent 100%);
-    --gradient-border: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(25, 95%, 53%) 100%);
-    --gradient-cyber: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(262, 60%, 55%) 50%, hsl(25, 95%, 53%) 100%);
-    --gradient-animated: linear-gradient(270deg, hsl(199, 89%, 48%), hsl(262, 60%, 55%), hsl(25, 95%, 53%));
-    --gradient-mesh: radial-gradient(at 50% 0%, hsla(199, 89%, 48%, 0.15) 0, transparent 50%);
+    /* Simplified Gradients - Cyan & Orange Only */
+    --gradient-primary: linear-gradient(135deg, hsl(189, 70%, 48%) 0%, hsl(25, 95%, 53%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(189, 70%, 48%) 0%, hsl(25, 95%, 53%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(189, 70%, 98%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.9) 0%, hsla(189, 70%, 98%, 0.9) 100%);
+    --gradient-shine: linear-gradient(90deg, transparent 0%, hsla(189, 70%, 68%, 0.3) 50%, transparent 100%);
+    --gradient-border: linear-gradient(135deg, hsl(189, 70%, 48%) 0%, hsl(25, 95%, 53%) 100%);
+    --gradient-cyber: linear-gradient(135deg, hsl(189, 70%, 48%) 0%, hsl(25, 95%, 53%) 100%);
+    --gradient-animated: linear-gradient(270deg, hsl(189, 70%, 48%), hsl(25, 95%, 53%));
+    --gradient-mesh: radial-gradient(at 50% 0%, hsla(189, 70%, 48%, 0.1) 0, transparent 50%);
     
-    /* Vibrant Shadows */
+    /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    --shadow-glow: 0 0 30px rgba(8, 211, 255, 0.4);
-    --shadow-glow-cyan: 0 0 30px rgba(8, 211, 255, 0.5);
+    --shadow-glow: 0 0 30px rgba(8, 211, 255, 0.3);
+    --shadow-glow-cyan: 0 0 30px rgba(8, 211, 255, 0.4);
     --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
     
-    /* Glass Effect - Cyber Style */
+    /* Glass Effect */
     --glass-bg: rgba(255, 255, 255, 0.9);
     --glass-border: rgba(8, 211, 255, 0.2);
     
@@ -124,30 +123,30 @@
   }
 
   .dark {
-    /* Dark Mode - Cyber Tech */
+    /* Dark Mode - Simplified Cyber */
     --background: 222 47% 6%;
-    --foreground: 199 89% 95%;
+    --foreground: 189 70% 95%;
     
     --card: 222 47% 8%;
-    --card-foreground: 199 89% 95%;
+    --card-foreground: 189 70% 95%;
     --popover: 222 47% 8%;
-    --popover-foreground: 199 89% 95%;
+    --popover-foreground: 189 70% 95%;
     
-    --primary: 199 89% 48%;
+    --primary: 189 70% 48%;
     --primary-foreground: 0 0% 100%;
-    --primary-dark: 199 89% 38%;
-    --primary-light: 199 89% 58%;
-    --primary-glow: 199 89% 68%;
+    --primary-dark: 189 70% 38%;
+    --primary-light: 189 70% 58%;
+    --primary-glow: 189 70% 68%;
     
-    --secondary: 262 60% 55%;
+    --secondary: 25 95% 53%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 262 60% 65%;
+    --secondary-light: 25 95% 63%;
     
     --muted: 222 47% 15%;
-    --muted-foreground: 199 89% 70%;
+    --muted-foreground: 189 70% 70%;
     
     --accent: 222 47% 15%;
-    --accent-foreground: 199 89% 95%;
+    --accent-foreground: 189 70% 95%;
     --accent-cyan: 189 70% 48%;
     --accent-purple: 262 60% 55%;
     --accent-teal: 173 50% 42%;
@@ -157,7 +156,7 @@
     
     --border: 222 47% 18%;
     --input: 222 47% 18%;
-    --ring: 199 89% 48%;
+    --ring: 189 70% 48%;
     
     --glass-bg: rgba(12, 17, 29, 0.9);
     --glass-border: rgba(8, 211, 255, 0.2);
