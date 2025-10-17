@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import SuperAdminLayout from "@/components/layout/SuperAdminLayout";
@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Building2, Users, Trash2, UserPlus, Edit, Plus } from "lucide-react";
+import { Building2, Users, Trash2, Edit, Plus, UserPlus } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -23,6 +23,8 @@ import AddUserDialog from "@/components/superadmin/AddUserDialog";
 import EditUserDialog from "@/components/superadmin/EditUserDialog";
 import { SearchBar } from "@/components/search/SearchBar";
 import { FilterSelect } from "@/components/search/FilterSelect";
+import DashboardInteractiveMap from "@/components/dashboard/DashboardInteractiveMap";
+import DashboardStats from "@/components/dashboard/DashboardStats";
 import {
   AlertDialog,
   AlertDialogAction,
