@@ -272,13 +272,13 @@ const Index = () => {
                   Realtime Inzicht
                 </Badge>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
-                  Realtime inzicht – <span className="text-gradient">alles in één overzicht</span>
+                  Krijg direct inzicht in waar je klanten en vacatures actief zijn, en ontdek waar de <span className="text-gradient">grootste kansen</span> liggen
                 </h2>
                 <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                  Zie in één oogopslag waar je klanten en vacatures zitten, en welke kandidaten je moet zoeken. Recruiters hebben alle informatie direct in het systeem, zodat onnodige meetings met accountmanagers overbodig zijn. Interactieve realtime kaart per regio houdt alles overzichtelijk.
+                  Interactieve kaart met realtime vacaturedata per regio.
                 </p>
                 <p className="text-sm text-muted-foreground/80 pt-2">
-                  Bekijk je kansen in realtime
+                  Bekijk waar jij het verschil kunt maken
                 </p>
               </div>
               
@@ -299,10 +299,13 @@ const Index = () => {
                 Realtime Inzicht
               </Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                <span className="text-gradient">Krijg in één oogopslag inzicht</span> waar je klanten en vacatures zich bevinden
+                Realtime inzicht – <span className="text-gradient">alles in één overzicht</span>
               </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                en waar de kansen liggen. Interactieve kaart met realtime vacaturedata per regio.
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                Zie in één oogopslag waar je klanten en vacatures zitten, en welke kandidaten je moet zoeken. Recruiters hebben alle informatie direct in het systeem, zodat onnodige meetings met accountmanagers overbodig zijn. Interactieve realtime kaart per regio houdt alles overzichtelijk.
+              </p>
+              <p className="text-sm text-muted-foreground/80 pt-2">
+                Bekijk je kansen in realtime
               </p>
             </div>
             <VacaturePreview />
