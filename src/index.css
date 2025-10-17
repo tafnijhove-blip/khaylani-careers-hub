@@ -10,7 +10,7 @@
 
 @layer base {
   :root {
-    /* Core Colors - Simplified Cyber Theme */
+    /* Core Colors - Professional Theme */
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     
@@ -20,28 +20,28 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     
-    /* Primary - Cyber Cyan */
-    --primary: 189 70% 48%;
+    /* Primary - Deep Blue (Professional & Trustworthy) */
+    --primary: 217 91% 35%;
     --primary-foreground: 0 0% 100%;
-    --primary-dark: 189 70% 38%;
-    --primary-light: 189 70% 58%;
-    --primary-glow: 189 70% 68%;
+    --primary-dark: 217 91% 25%;
+    --primary-light: 217 91% 45%;
+    --primary-glow: 217 91% 55%;
     
-    /* Secondary - Cyber Orange */
-    --secondary: 25 95% 53%;
+    /* Secondary - Emerald Green (Growth & Opportunity) */
+    --secondary: 160 84% 39%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 25 95% 63%;
+    --secondary-light: 160 84% 49%;
     
     /* Muted - Neutral Tones */
     --muted: 240 5% 96%;
     --muted-foreground: 240 3.8% 46.1%;
     
-    /* Accent - Simplified */
+    /* Accent - Amber (Highlights) */
     --accent: 240 5% 96%;
     --accent-foreground: 222 47% 11%;
-    --accent-cyan: 189 70% 48%;
-    --accent-purple: 262 60% 55%;
-    --accent-teal: 173 50% 42%;
+    --accent-amber: 38 92% 50%;
+    --accent-blue: 217 91% 35%;
+    --accent-green: 160 84% 39%;
     
     /* Destructive */
     --destructive: 0 84% 60%;
@@ -50,34 +50,34 @@
     /* Border & Input */
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 189 70% 48%;
+    --ring: 217 91% 35%;
     
     /* Border Radius */
     --radius: 0.75rem;
     
-    /* Simplified Gradients - Cyan & Orange Only */
-    --gradient-primary: linear-gradient(135deg, hsl(189, 70%, 48%) 0%, hsl(25, 95%, 53%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(189, 70%, 48%) 0%, hsl(25, 95%, 53%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(189, 70%, 98%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.9) 0%, hsla(189, 70%, 98%, 0.9) 100%);
-    --gradient-shine: linear-gradient(90deg, transparent 0%, hsla(189, 70%, 68%, 0.3) 50%, transparent 100%);
-    --gradient-border: linear-gradient(135deg, hsl(189, 70%, 48%) 0%, hsl(25, 95%, 53%) 100%);
-    --gradient-cyber: linear-gradient(135deg, hsl(189, 70%, 48%) 0%, hsl(25, 95%, 53%) 100%);
-    --gradient-animated: linear-gradient(270deg, hsl(189, 70%, 48%), hsl(25, 95%, 53%));
-    --gradient-mesh: radial-gradient(at 50% 0%, hsla(189, 70%, 48%, 0.1) 0, transparent 50%);
+    /* Professional Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(217, 91%, 35%) 0%, hsl(217, 91%, 50%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(217, 91%, 35%) 0%, hsl(160, 84%, 39%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(217, 91%, 98%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.9) 0%, hsla(217, 91%, 98%, 0.9) 100%);
+    --gradient-shine: linear-gradient(90deg, transparent 0%, hsla(217, 91%, 55%, 0.3) 50%, transparent 100%);
+    --gradient-border: linear-gradient(135deg, hsl(217, 91%, 35%) 0%, hsl(160, 84%, 39%) 100%);
+    --gradient-cyber: linear-gradient(135deg, hsl(217, 91%, 35%) 0%, hsl(160, 84%, 39%) 100%);
+    --gradient-animated: linear-gradient(270deg, hsl(217, 91%, 35%), hsl(160, 84%, 39%));
+    --gradient-mesh: radial-gradient(at 50% 0%, hsla(217, 91%, 35%, 0.1) 0, transparent 50%);
     
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
     --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    --shadow-glow: 0 0 30px rgba(8, 211, 255, 0.3);
-    --shadow-glow-cyan: 0 0 30px rgba(8, 211, 255, 0.4);
+    --shadow-glow: 0 0 30px rgba(30, 64, 175, 0.3);
+    --shadow-glow-cyan: 0 0 30px rgba(30, 64, 175, 0.4);
     --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
     
     /* Glass Effect */
     --glass-bg: rgba(255, 255, 255, 0.9);
-    --glass-border: rgba(8, 211, 255, 0.2);
+    --glass-border: rgba(30, 64, 175, 0.2);
     
     /* Status Colors - Clean Semantic Tokens */
     --status-open: 142 71% 45%;
@@ -86,9 +86,9 @@
     --status-invulling: 45 93% 47%;
     --status-invulling-bg: 45 93% 96%;
     --status-invulling-border: 45 93% 85%;
-    --status-hold: 25 95% 53%;
-    --status-hold-bg: 25 95% 96%;
-    --status-hold-border: 25 95% 85%;
+    --status-hold: 38 92% 50%;
+    --status-hold-bg: 38 92% 96%;
+    --status-hold-border: 38 92% 85%;
     --status-gesloten: 240 4% 46%;
     --status-gesloten-bg: 240 5% 96%;
     --status-gesloten-border: 240 5% 90%;
@@ -100,20 +100,20 @@
     --priority-hoog: 38 92% 50%;
     --priority-hoog-bg: 38 92% 96%;
     --priority-hoog-border: 38 92% 85%;
-    --priority-normaal: 222 47% 54%;
-    --priority-normaal-bg: 222 47% 96%;
-    --priority-normaal-border: 222 47% 85%;
+    --priority-normaal: 217 91% 45%;
+    --priority-normaal-bg: 217 91% 96%;
+    --priority-normaal-border: 217 91% 85%;
     --priority-laag: 240 4% 46%;
     --priority-laag-bg: 240 5% 96%;
     --priority-laag-border: 240 5% 90%;
     
     /* Kandidaat Status Colors */
-    --kandidaat-geplaatst: 222 47% 54%;
-    --kandidaat-geplaatst-bg: 222 47% 96%;
-    --kandidaat-geplaatst-border: 222 47% 85%;
-    --kandidaat-gestart: 142 71% 45%;
-    --kandidaat-gestart-bg: 142 71% 96%;
-    --kandidaat-gestart-border: 142 71% 85%;
+    --kandidaat-geplaatst: 217 91% 45%;
+    --kandidaat-geplaatst-bg: 217 91% 96%;
+    --kandidaat-geplaatst-border: 217 91% 85%;
+    --kandidaat-gestart: 160 84% 39%;
+    --kandidaat-gestart-bg: 160 84% 96%;
+    --kandidaat-gestart-border: 160 84% 85%;
     --kandidaat-afgerond: 240 4% 46%;
     --kandidaat-afgerond-bg: 240 5% 96%;
     --kandidaat-afgerond-border: 240 5% 90%;
@@ -123,43 +123,43 @@
   }
 
   .dark {
-    /* Dark Mode - Simplified Cyber */
+    /* Dark Mode - Professional Theme */
     --background: 222 47% 6%;
-    --foreground: 189 70% 95%;
+    --foreground: 217 91% 95%;
     
     --card: 222 47% 8%;
-    --card-foreground: 189 70% 95%;
+    --card-foreground: 217 91% 95%;
     --popover: 222 47% 8%;
-    --popover-foreground: 189 70% 95%;
+    --popover-foreground: 217 91% 95%;
     
-    --primary: 189 70% 48%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --primary-dark: 189 70% 38%;
-    --primary-light: 189 70% 58%;
-    --primary-glow: 189 70% 68%;
+    --primary-dark: 217 91% 50%;
+    --primary-light: 217 91% 70%;
+    --primary-glow: 217 91% 75%;
     
-    --secondary: 25 95% 53%;
+    --secondary: 160 84% 50%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-light: 25 95% 63%;
+    --secondary-light: 160 84% 60%;
     
     --muted: 222 47% 15%;
-    --muted-foreground: 189 70% 70%;
+    --muted-foreground: 217 91% 70%;
     
     --accent: 222 47% 15%;
-    --accent-foreground: 189 70% 95%;
-    --accent-cyan: 189 70% 48%;
-    --accent-purple: 262 60% 55%;
-    --accent-teal: 173 50% 42%;
+    --accent-foreground: 217 91% 95%;
+    --accent-amber: 38 92% 60%;
+    --accent-blue: 217 91% 60%;
+    --accent-green: 160 84% 50%;
     
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
     --border: 222 47% 18%;
     --input: 222 47% 18%;
-    --ring: 189 70% 48%;
+    --ring: 217 91% 60%;
     
     --glass-bg: rgba(12, 17, 29, 0.9);
-    --glass-border: rgba(8, 211, 255, 0.2);
+    --glass-border: rgba(30, 64, 175, 0.2);
   }
 }
 
