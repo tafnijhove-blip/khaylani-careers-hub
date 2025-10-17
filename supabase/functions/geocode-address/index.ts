@@ -22,25 +22,38 @@ serve(async (req) => {
       throw new Error('Mapbox token niet geconfigureerd');
     }
 
-    // Geocode using Mapbox API
-    const encodedAddress = encodeURIComponent(address);
-    const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${mapboxToken}&country=NL&limit=1`;
+    // Clean and format address for better geocoding
+    const cleanAddress = address.trim().replace(/\s+/g, ' ');
+    const encodedAddress = encodeURIComponent(cleanAddress);
     
-    console.log('Geocoding address:', address);
+    // Use types parameter to focus on addresses
+    const geocodeUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodedAddress}.json?access_token=${mapboxToken}&country=NL&types=address,place&limit=1`;
+    
+    console.log('Geocoding:', cleanAddress);
+    console.log('URL:', geocodeUrl.replace(mapboxToken, 'HIDDEN'));
     
     const response = await fetch(geocodeUrl);
+    
+    if (!response.ok) {
+      console.error('Mapbox API error:', response.status, response.statusText);
+      throw new Error(`Mapbox API fout: ${response.status}`);
+    }
+    
     const data = await response.json();
+    console.log('Mapbox response:', JSON.stringify(data, null, 2));
     
     if (!data.features || data.features.length === 0) {
-      throw new Error('Geen locatie gevonden voor dit adres');
+      console.error('Geen resultaten gevonden voor:', cleanAddress);
+      throw new Error('Geen locatie gevonden voor dit adres. Controleer of het adres correct is.');
     }
 
     const [lng, lat] = data.features[0].center;
+    const foundPlace = data.features[0].place_name;
     
-    console.log('Geocoded to:', { lat, lng });
+    console.log('Gevonden:', foundPlace, '-> lat:', lat, 'lng:', lng);
 
     return new Response(
-      JSON.stringify({ lat, lng }),
+      JSON.stringify({ lat, lng, place_name: foundPlace }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,
