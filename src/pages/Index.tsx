@@ -233,11 +233,11 @@ const Index = () => {
           <main className="container mx-auto max-w-6xl relative z-10">
             <div className="text-center space-y-8 animate-fade-in">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                Stop met losse e-mails en belrondes. <span className="text-gradient">Eén platform, één overzicht.</span>
+                Versnel je <span className="text-gradient">recruitmentproces</span>
               </h1>
 
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Recruiters en accountmanagers werken samen met realtime inzicht in klanten, vacatures en statistieken. Sneller schakelen = sneller plaatsen.
+                Werk samen vanuit één platform met realtime inzicht in klanten, vacatures en resultaten. Minder overleg, meer plaatsingen.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
