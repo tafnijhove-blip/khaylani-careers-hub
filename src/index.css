@@ -3,79 +3,81 @@
 @tailwind utilities;
 
 /* 
- * Design System v3.0 - Clean SaaS
- * Inspired by Linear, Notion & Deel
+ * Design System v3.0 - Cyber Tech
+ * Modern tech-inspired design with vibrant colors
  * All colors in HSL format
  */
 
 @layer base {
   :root {
-    /* Core Colors - Clean & Minimal */
+    /* Core Colors - Cyber Tech Theme */
     --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    --foreground: 222 47% 11%;
     
     /* Card & Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 222 47% 11%;
     
-    /* Primary - Professional Blue (Linear-inspired) */
-    --primary: 222 47% 54%;
+    /* Primary - Vibrant Cyber Blue */
+    --primary: 199 89% 48%;
     --primary-foreground: 0 0% 100%;
-    --primary-dark: 222 47% 44%;
-    --primary-light: 222 47% 64%;
-    --primary-glow: 222 47% 74%;
+    --primary-dark: 199 89% 38%;
+    --primary-light: 199 89% 58%;
+    --primary-glow: 199 89% 68%;
     
-    /* Secondary - Subtle Gray */
-    --secondary: 240 5% 96%;
-    --secondary-foreground: 240 6% 10%;
-    --secondary-light: 240 5% 98%;
+    /* Secondary - Tech Purple */
+    --secondary: 262 60% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 262 60% 65%;
     
     /* Muted - Neutral Tones */
     --muted: 240 5% 96%;
     --muted-foreground: 240 3.8% 46.1%;
     
-    /* Accent Colors - Minimal Use */
+    /* Accent Colors - Vibrant Tech Colors */
     --accent: 240 5% 96%;
-    --accent-foreground: 240 6% 10%;
+    --accent-foreground: 222 47% 11%;
     --accent-cyan: 189 70% 48%;
     --accent-purple: 262 60% 55%;
     --accent-teal: 173 50% 42%;
     
-    /* Destructive - Softer Red */
-    --destructive: 0 72% 51%;
+    /* Destructive - Vibrant Red */
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    /* Border & Input - Very Subtle */
+    /* Border & Input */
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
-    --ring: 222 47% 54%;
+    --ring: 199 89% 48%;
     
-    /* Border Radius - Slightly Smaller */
-    --radius: 0.625rem;
+    /* Border Radius */
+    --radius: 0.75rem;
     
-    /* Clean Gradients - Subtle */
-    --gradient-primary: linear-gradient(135deg, hsl(222, 47%, 54%) 0%, hsl(222, 47%, 64%) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(222, 47%, 54%) 0%, hsl(222, 47%, 44%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(240, 5%, 98%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.95) 0%, hsla(240, 5%, 98%, 0.95) 100%);
-    --gradient-shine: linear-gradient(90deg, transparent 0%, hsla(0, 0%, 100%, 0.6) 50%, transparent 100%);
-    --gradient-border: linear-gradient(135deg, hsl(222, 47%, 54%) 0%, hsl(240, 6%, 90%) 100%);
-    --gradient-mesh: radial-gradient(at 50% 0%, hsla(222, 47%, 54%, 0.08) 0, transparent 50%);
+    /* Cyber Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(189, 70%, 48%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(262, 60%, 55%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(199, 89%, 98%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsla(0, 0%, 100%, 0.9) 0%, hsla(199, 89%, 98%, 0.9) 100%);
+    --gradient-shine: linear-gradient(90deg, transparent 0%, hsla(199, 89%, 68%, 0.4) 50%, transparent 100%);
+    --gradient-border: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(262, 60%, 55%) 100%);
+    --gradient-cyber: linear-gradient(135deg, hsl(199, 89%, 48%) 0%, hsl(262, 60%, 55%) 50%, hsl(173, 50%, 42%) 100%);
+    --gradient-animated: linear-gradient(270deg, hsl(199, 89%, 48%), hsl(262, 60%, 55%), hsl(173, 50%, 42%));
+    --gradient-mesh: radial-gradient(at 50% 0%, hsla(199, 89%, 48%, 0.15) 0, transparent 50%);
     
-    /* Professional Shadows - Minimal */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-    --shadow-md: 0 2px 8px 0 rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
-    --shadow-xl: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-    --shadow-glow: 0 0 24px rgba(59, 90, 246, 0.15);
-    --shadow-glow-cyan: 0 0 24px rgba(8, 211, 255, 0.15);
-    --shadow-inner: inset 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+    /* Vibrant Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 30px rgba(8, 211, 255, 0.4);
+    --shadow-glow-cyan: 0 0 30px rgba(8, 211, 255, 0.5);
+    --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
     
-    /* Glass Effect - Professional */
-    --glass-bg: rgba(255, 255, 255, 0.95);
-    --glass-border: rgba(240, 240, 245, 0.5);
+    /* Glass Effect - Cyber Style */
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(8, 211, 255, 0.2);
     
     /* Status Colors - Clean Semantic Tokens */
     --status-open: 142 71% 45%;
@@ -121,61 +123,61 @@
   }
 
   .dark {
-    /* Dark Mode - Minimal & Clean */
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Dark Mode - Cyber Tech */
+    --background: 222 47% 6%;
+    --foreground: 199 89% 95%;
     
-    --card: 240 10% 7%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 7%;
-    --popover-foreground: 0 0% 98%;
+    --card: 222 47% 8%;
+    --card-foreground: 199 89% 95%;
+    --popover: 222 47% 8%;
+    --popover-foreground: 199 89% 95%;
     
-    --primary: 222 47% 54%;
+    --primary: 199 89% 48%;
     --primary-foreground: 0 0% 100%;
-    --primary-dark: 222 47% 44%;
-    --primary-light: 222 47% 64%;
-    --primary-glow: 222 47% 74%;
+    --primary-dark: 199 89% 38%;
+    --primary-light: 199 89% 58%;
+    --primary-glow: 199 89% 68%;
     
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --secondary-light: 240 3.7% 18%;
+    --secondary: 262 60% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 262 60% 65%;
     
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 222 47% 15%;
+    --muted-foreground: 199 89% 70%;
     
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 222 47% 15%;
+    --accent-foreground: 199 89% 95%;
     --accent-cyan: 189 70% 48%;
     --accent-purple: 262 60% 55%;
     --accent-teal: 173 50% 42%;
     
-    --destructive: 0 72% 51%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 222 47% 54%;
+    --border: 222 47% 18%;
+    --input: 222 47% 18%;
+    --ring: 199 89% 48%;
     
-    --glass-bg: rgba(15, 15, 20, 0.95);
-    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(12, 17, 29, 0.9);
+    --glass-border: rgba(8, 211, 255, 0.2);
   }
 }
 
-/* Clean Utility Classes - SaaS Style */
+/* Utility Classes - Cyber Tech Style */
 @layer utilities {
-  /* Glass Card - Minimal */
+  /* Glass Card - Cyber Style */
   .glass-card {
     background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.98) 0%, 
-      rgba(255, 255, 255, 0.95) 100%
+      rgba(255, 255, 255, 0.9) 0%, 
+      rgba(255, 255, 255, 0.85) 100%
     );
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid hsl(var(--border));
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
   }
 
-  /* Glow Border - Subtle */
+  /* Glow Border - Cyber Effect */
   .glow-border {
     position: relative;
     overflow: hidden;
@@ -196,10 +198,10 @@
   }
 
   .glow-border:hover::before {
-    opacity: 0.5;
+    opacity: 0.7;
   }
 
-  /* Text Gradient - Clean */
+  /* Text Gradient - Cyber */
   .text-gradient {
     background: var(--gradient-hero);
     -webkit-background-clip: text;
@@ -207,26 +209,26 @@
     background-clip: text;
   }
 
-  /* Hover Lift - Subtle */
+  /* Hover Lift - Interactive */
   .hover-lift {
     transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), 
                 box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .hover-lift:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
   }
 
-  /* Cyber Grid - Very Subtle */
+  /* Cyber Grid - Tech Pattern */
   .cyber-grid {
     background-image: 
-      linear-gradient(rgba(59, 90, 246, 0.01) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(59, 90, 246, 0.01) 1px, transparent 1px);
+      linear-gradient(rgba(8, 211, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(8, 211, 255, 0.03) 1px, transparent 1px);
     background-size: 80px 80px;
   }
 
-  /* Float Animations - Minimal */
+  /* Float Animations - Dynamic */
   @keyframes float-slow {
     0%, 100% { 
       transform: translate(0, 0) scale(1);
@@ -266,15 +268,15 @@
     animation: float-fast 18s ease-in-out infinite;
   }
 
-  /* Gradient Mesh - Subtle */
+  /* Gradient Mesh - Cyber Ambient */
   .bg-mesh-gradient {
     background: var(--gradient-mesh);
   }
 
-  /* Noise - Very Subtle */
+  /* Noise - Texture Overlay */
   .bg-noise {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    opacity: 0.012;
+    opacity: 0.02;
   }
 
   .bg-radial-fade {
@@ -282,7 +284,7 @@
   }
 }
 
-/* Base Styling - Clean Typography */
+/* Base Styling - Modern Typography */
 @layer base {
   * {
     @apply border-border;
@@ -305,7 +307,7 @@
     letter-spacing: -0.02em;
   }
 
-  /* Scrollbar - Clean & Minimal */
+  /* Scrollbar - Styled */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
