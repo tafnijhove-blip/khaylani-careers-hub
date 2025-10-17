@@ -6,36 +6,47 @@ import { Building2, MapPin, Euro, Users, ArrowRight, Clock } from "lucide-react"
 const VacaturePreview = () => {
   const vacatures = [
     {
-      title: "Senior Java Developer",
+      title: "Software Engineer",
       company: "TechCorp Amsterdam",
       location: "Amsterdam",
       salary: "€5.500 - €7.000",
       positions: 3,
       status: "open",
       priority: "urgent",
-      requirements: ["Java", "Spring Boot", "Microservices"],
+      requirements: ["React", "TypeScript", "Node.js"],
       posted: "2 dagen geleden"
     },
     {
-      title: "Product Manager",
-      company: "InnovatieHub Rotterdam",
+      title: "Accountmanager",
+      company: "Sales Solutions Rotterdam",
       location: "Rotterdam",
-      salary: "€6.000 - €8.000",
+      salary: "€4.000 - €5.500",
       positions: 2,
       status: "invulling",
       priority: "hoog",
-      requirements: ["Agile", "Scrum", "Product Strategy"],
+      requirements: ["B2B Sales", "CRM", "Relatiemanagement"],
       posted: "5 dagen geleden"
     },
     {
-      title: "UX/UI Designer",
-      company: "Digital Solutions Utrecht",
+      title: "Projectleider",
+      company: "BuildCo Utrecht",
       location: "Utrecht",
-      salary: "€4.500 - €6.000",
+      salary: "€5.000 - €6.500",
       positions: 1,
       status: "open",
+      priority: "hoog",
+      requirements: ["Agile", "Scrum", "Teamleiding"],
+      posted: "3 dagen geleden"
+    },
+    {
+      title: "Administratief Medewerker",
+      company: "Office Solutions Den Haag",
+      location: "Den Haag",
+      salary: "€2.500 - €3.500",
+      positions: 2,
+      status: "open",
       priority: "normaal",
-      requirements: ["Figma", "Adobe XD", "User Research"],
+      requirements: ["MS Office", "Administratie", "Klantencontact"],
       posted: "1 week geleden"
     }
   ];

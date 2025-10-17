@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import logo from "@/assets/logo-khaylani.png";
+import logo from "@/assets/logo-khaylani-new.png";
 
 interface SuperAdminLayoutProps {
   children: ReactNode;

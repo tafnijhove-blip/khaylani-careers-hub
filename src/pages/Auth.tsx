@@ -6,7 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Building2, MapPin, Users, TrendingUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import logo from "@/assets/logo-khaylani.png";
+import logo from "@/assets/logo-khaylani-new.png";
 
 const Auth = () => {
   const navigate = useNavigate();

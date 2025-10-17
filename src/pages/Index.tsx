@@ -39,7 +39,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import logo from "@/assets/logo-khaylani.png";
+import logo from "@/assets/logo-khaylani-new.png";
 
 const Index = () => {
   const { toast } = useToast();
@@ -127,73 +127,41 @@ const Index = () => {
 
   const benefits = [
     {
-      icon: MapPin,
-      title: "Sales ziet waar recruiters bezig zijn",
+      icon: Users,
+      title: "Iedereen weet exact wat er speelt",
       description:
-        "Geen gezeik meer over 'wat doet jouw team eigenlijk?'. Elke regio, elke vacature, direct zichtbaar.",
+        "Accountmanager heeft een nieuwe aanvraag? Recruiter ziet het meteen in het systeem. Van functie-eisen tot details over het bedrijf: de recruiter weet exact wat hij moet zoeken. Geen onnodige meetings meer.",
     },
     {
       icon: Clock,
       title: "Recruiters zien live wat sales binnenhaalt",
       description:
-        "Nieuwe klant? Recruiter weet het meteen. Kandidaat geplaatst? Sales ziet het direct. Échte samenwerking.",
-    },
-    {
-      icon: Users,
-      title: "Managers weten precies waar de omzet zit",
-      description: "Zie in één blik welke recruiters draaien, waar je omzet zit en waar je moet bijsturen.",
+        "Recruiters zien live wat sales binnenhaalt. Nieuwe klant? Recruiter weet het meteen. Nieuwe vacature? Recruiter weet precies wat gezocht moet worden.",
     },
     {
       icon: BarChart3,
+      title: "Managers weten precies waar de omzet zit",
+      description: "Managers weten precies hoe en waar ze hun team moeten bijsturen. Zie in één blik waar je team actief is en waar de kansen liggen, zodat je gericht actie kunt ondernemen.",
+    },
+    {
+      icon: Target,
       title: "Minder meetings, meer doen",
       description:
-        "Je team werkt uit hetzelfde systeem. Iedereen weet wat er speelt. 30% minder overhead, direct meetbaar.",
+        "Elke uur dat een recruiter en accountmanager minder in overleg zitten, is een uur meer om geschikte kandidaten te vinden. Khaylani bespaart tijd voor wat echt belangrijk is.",
     },
   ];
 
-  const testimonials = [
-    {
-      quote:
-        "Khaylani heeft onze recruitment workflow gerevolutioneerd. We besparen nu 30% tijd op administratie en hebben eindelijk realtime inzicht in alle vacatures.",
-      author: "Mark van der Berg",
-      role: "Manager",
-      company: "TechTalent Detachering",
-    },
-    {
-      quote:
-        "De geografische kaart is een gamechanger. We kunnen nu direct zien waar de meeste vraag is en onze recruiters daar naartoe sturen.",
-      author: "Sarah Jansen",
-      role: "Recruitment Manager",
-      company: "FlexForce Nederland",
-    },
-    {
-      quote:
-        "Onze recruiters zijn veel productiever sinds we Khaylani gebruiken. Alles in één overzicht, geen gezoek meer in verschillende systemen.",
-      author: "Peter de Vries",
-      role: "Operations Director",
-      company: "ProStaff Solutions",
-    },
-  ];
 
   const faqs = [
-    {
-      question: "Hoe snel kan ik starten met Khaylani?",
-      answer:
-        "Na je offerte aanvraag ontvang je binnen 24 uur een persoonlijk voorstel. Na akkoord kun je binnen 48 uur live gaan met onboarding en training.",
-    },
     {
       question: "Werkt Khaylani ook met mijn bestaande systemen?",
       answer:
         "Ja, Khaylani integreert met de meeste HR- en ATS-systemen. We bieden API-koppelingen en kunnen data importeren vanuit Excel/CSV.",
     },
     {
-      question: "Hoeveel gebruikers kan ik toevoegen?",
-      answer: "Onbeperkt. Je betaalt per bedrijf, niet per gebruiker. Ideaal voor groeiende teams.",
-    },
-    {
-      question: "Is mijn data veilig?",
+      question: "Hoe snel kan ik starten met Khaylani?",
       answer:
-        "Absoluut. We werken met enterprise-grade beveiliging, SSL-encryptie en voldoen aan AVG-wetgeving. Data wordt opgeslagen in EU datacenters.",
+        "Na je offerte-aanvraag ontvang je binnen 24 uur een persoonlijk voorstel. Na akkoord plannen we een meeting in om de onboarding op maat te bespreken.",
     },
   ];
 
@@ -227,9 +195,8 @@ const Index = () => {
             <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
               <img 
                 src={logo} 
-                alt="Khaylani Logo" 
+                alt="Khaylani Careers Hub Logo" 
                 className="h-10 w-auto"
-                style={{ mixBlendMode: 'multiply' }}
               />
             </Link>
             <div className="flex items-center gap-4">
@@ -264,12 +231,12 @@ const Index = () => {
           <main className="container mx-auto max-w-6xl relative z-10">
             <div className="text-center space-y-8 animate-fade-in">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                Recruitment en sales, <span className="text-gradient">eindelijk in sync</span>
+                <span className="text-gradient">Versnel jouw recruitmentproces</span>
               </h1>
 
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Stop met losse e-mails en belrondes. Eén platform, één overzicht.
-                Recruiters en accountmanagers werken samen met realtime inzicht in leads, kandidaten en omzet.
+                Stop met losse e-mails en belrondes. Werk vanuit één platform met volledig overzicht. 
+                Recruiters en accountmanagers hebben realtime inzicht in klanten, vacatures en kansen. 
                 Sneller schakelen = sneller plaatsen.
               </p>
 
@@ -389,45 +356,6 @@ const Index = () => {
           </div>
         </section>
 
-        {/* Social Proof Section */}
-        <section className="py-24 px-6 bg-muted/30">
-          <div className="container mx-auto max-w-6xl">
-            <div className="text-center mb-16">
-              <Badge variant="secondary" className="mb-4">
-                Testimonials
-              </Badge>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">Wat onze klanten zeggen</h2>
-              <div className="flex justify-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-6 w-6 fill-primary text-primary" />
-                ))}
-              </div>
-              <p className="text-muted-foreground">4.9/5 gemiddelde beoordeling van 50+ klanten</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {testimonials.map((testimonial, index) => (
-                <Card
-                  key={index}
-                  className="glass-card p-8 hover-lift animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <div className="flex gap-1 mb-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-primary text-primary" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-6 italic leading-relaxed">"{testimonial.quote}"</p>
-                  <div className="border-t pt-4">
-                    <p className="font-semibold">{testimonial.author}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                    <p className="text-sm text-primary font-medium">{testimonial.company}</p>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* FAQ Section */}
         <section className="py-24 px-6">

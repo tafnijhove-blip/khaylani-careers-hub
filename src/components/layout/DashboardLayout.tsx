@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MapPin, LayoutDashboard, FileText, Users, BarChart3, Settings, LogOut, User, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import logo from "@/assets/logo-khaylani.png";
+import logo from "@/assets/logo-khaylani-new.png";
 
 interface DashboardLayoutProps {
   children: ReactNode;

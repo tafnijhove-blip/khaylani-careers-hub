@@ -24,6 +24,7 @@ const CompanyDashboard = lazy(() => import("./pages/CompanyDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
+const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -165,6 +166,7 @@ const App = () => (
               {/* Legal pages */}
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/cookies" element={<CookiePolicy />} />
+              <Route path="/terms" element={<TermsAndConditions />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

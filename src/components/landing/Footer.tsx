@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Mail, Linkedin, Shield, FileText } from "lucide-react";
-import logoImage from "@/assets/logo-khaylani.png";
+import logoImage from "@/assets/logo-khaylani-new.png";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -14,13 +14,12 @@ const Footer = () => {
             <Link to="/" className="flex items-center group">
               <img 
                 src={logoImage} 
-                alt="Khaylani Logo" 
+                alt="Khaylani Careers Hub Logo" 
                 className="h-12 w-auto"
-                style={{ mixBlendMode: 'multiply' }}
               />
             </Link>
             <p className="text-sm text-muted-foreground">
-              Recruitment dashboard voor detacheringsbureaus. Realtime inzicht in vacatures en kandidaten.
+              Recruitment dashboard voor detacheringsbureaus. Realtime inzicht in vacatures en klanten.
             </p>
           </div>
 
@@ -43,11 +42,6 @@ const Footer = () => {
                   Vacatures
                 </a>
               </li>
-              <li>
-                <Link to="/auth" className="hover:text-primary transition-colors">
-                  Demo
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -66,9 +60,9 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="/terms" className="hover:text-primary transition-colors">
+                <Link to="/terms" className="hover:text-primary transition-colors">
                   Algemene Voorwaarden
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
