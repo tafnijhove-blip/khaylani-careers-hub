@@ -272,13 +272,13 @@ const Index = () => {
                   Realtime Inzicht
                 </Badge>
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
-                  Krijg direct inzicht in waar je klanten en vacatures actief zijn, en ontdek waar de <span className="text-gradient">grootste kansen</span> liggen
+                  Realtime inzicht – <span className="text-gradient">alles in één overzicht</span>
                 </h2>
                 <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
-                  Interactieve kaart met realtime vacaturedata per regio.
+                  Zie in één oogopslag waar je klanten en vacatures zitten, en welke kandidaten je moet zoeken. Recruiters hebben alle informatie direct in het systeem, zodat onnodige meetings met accountmanagers overbodig zijn. Interactieve realtime kaart per regio houdt alles overzichtelijk.
                 </p>
                 <p className="text-sm text-muted-foreground/80 pt-2">
-                  Bekijk waar jij het verschil kunt maken
+                  Bekijk je kansen in realtime
                 </p>
               </div>
               
