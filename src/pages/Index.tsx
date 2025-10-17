@@ -265,8 +265,23 @@ const Index = () => {
               </div>
             </div>
 
-            {/* Demo Job Map */}
-            <div className="mt-24 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+            {/* Feature Text + Demo Job Map */}
+            <div className="mt-24 space-y-12 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+              <div className="text-center space-y-4 max-w-4xl mx-auto">
+                <Badge variant="secondary" className="mb-2">
+                  Realtime Inzicht
+                </Badge>
+                <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight tracking-tight">
+                  Krijg direct inzicht in waar je klanten en vacatures actief zijn, en ontdek waar de <span className="text-gradient">grootste kansen</span> liggen
+                </h2>
+                <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
+                  Interactieve kaart met realtime vacaturedata per regio.
+                </p>
+                <p className="text-sm text-muted-foreground/80 pt-2">
+                  Bekijk waar jij het verschil kunt maken
+                </p>
+              </div>
+              
               <DemoJobMap />
             </div>
 
