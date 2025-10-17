@@ -3,7 +3,8 @@ import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MapPin, Navigation } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Navigation, TrendingUp } from "lucide-react";
 
 // Static local company data
 const companies = [
@@ -78,7 +79,24 @@ const DemoJobMap = () => {
   const map = useRef<maplibregl.Map | null>(null);
   const [mapError, setMapError] = useState<string | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const markersRef = useRef<maplibregl.Marker[]>([]);
+
+  // Calculate regional stats
+  const regionalStats = companies.reduce((acc, company) => {
+    const region = company.city;
+    const existing = acc.find(r => r.region === region);
+    if (existing) {
+      existing.count += company.vacancies;
+    } else {
+      acc.push({ region, count: company.vacancies });
+    }
+    return acc;
+  }, [] as { region: string; count: number }[])
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5);
+
+  const regions = ["Randstad", "Noord-Brabant", "Limburg", "Noord-Holland", "Zuid-Holland"];
 
   useEffect(() => {
     if (!mapContainer.current) return;
@@ -324,87 +342,115 @@ const DemoJobMap = () => {
 
   return (
     <section className="py-16 bg-gradient-to-br from-background via-background to-primary/5 rounded-xl">
-      {/* CTA Banner */}
-      <div className="container mx-auto px-4 mb-8">
-        <Card className="bg-gradient-primary text-white p-8 text-center border-0 shadow-2xl">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ontdek waar je klanten de meeste vacatures hebben
-          </h2>
-          <p className="text-lg mb-6 text-white/90 max-w-2xl mx-auto">
-            Interactieve kaart met real-time vacaturedata per regio
-          </p>
-          <Button 
-            size="lg" 
-            variant="secondary"
-            onClick={() => document.getElementById('offerte')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-white text-primary hover:bg-white/90 shadow-lg"
-          >
-            <MapPin className="mr-2 h-5 w-5" />
-            Probeer Khaylani
-          </Button>
-        </Card>
-      </div>
-
-      {/* Map Container */}
+      {/* Map Container with Side Panel */}
       <div className="container mx-auto px-4">
-        <Card className="overflow-hidden border-2 shadow-2xl rounded-xl relative">
-          {/* Use My Location Button */}
-          <Button
-            onClick={handleUseMyLocation}
-            disabled={isLocating}
-            className="absolute top-4 left-4 z-[1000] shadow-xl gap-2"
-            size="sm"
-          >
-            <Navigation className={`h-4 w-4 ${isLocating ? 'animate-spin' : ''}`} />
-            📍 Gebruik mijn locatie
-          </Button>
-
-          <div 
-            ref={mapContainer} 
-            className="w-full h-[600px] md:h-[600px] sm:h-[400px]"
-          />
-
-          {/* Legend */}
-          <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-4 border-2 z-[1000]">
-            <h4 className="font-semibold text-sm mb-3 text-foreground">Legenda</h4>
-            <div className="space-y-2 text-xs">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-primary" />
-                <span>Bedrijven met vacatures</span>
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Map */}
+          <div className="flex-1">
+            <Card className="overflow-hidden border-2 shadow-2xl rounded-xl relative">
+              {/* Region Filter Pills */}
+              <div className="absolute top-4 left-4 z-[1000] flex flex-wrap gap-2">
+                <Badge 
+                  variant={selectedRegion === "all" ? "default" : "outline"}
+                  className="cursor-pointer bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all"
+                  onClick={() => setSelectedRegion("all")}
+                >
+                  Alle regio's
+                </Badge>
+                {regions.map(region => (
+                  <Badge 
+                    key={region}
+                    variant={selectedRegion === region ? "default" : "outline"}
+                    className="cursor-pointer bg-white/95 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all"
+                    onClick={() => setSelectedRegion(region)}
+                  >
+                    {region}
+                  </Badge>
+                ))}
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Klik op een marker voor details</span>
+
+              {/* Use My Location Button */}
+              <Button
+                onClick={handleUseMyLocation}
+                disabled={isLocating}
+                className="absolute top-4 right-4 z-[1000] shadow-xl gap-2 rounded-xl"
+                size="sm"
+              >
+                <Navigation className={`h-4 w-4 ${isLocating ? 'animate-spin' : ''}`} />
+                📍 Gebruik mijn locatie
+              </Button>
+
+              <div 
+                ref={mapContainer} 
+                className="w-full h-[600px] md:h-[600px] sm:h-[400px]"
+              />
+
+              {/* Legend */}
+              <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-xl p-4 border-2 z-[1000]">
+                <h4 className="font-semibold text-sm mb-3 text-foreground">Legenda</h4>
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-primary" />
+                    <span>Bedrijven met vacatures</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground">Klik op een marker voor details</span>
+                  </div>
+                </div>
               </div>
-            </div>
+            </Card>
           </div>
-        </Card>
 
-        {/* Stats below map */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-6 text-center">
-            <div className="text-3xl font-bold text-primary mb-2">
-              {companies.length}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Bedrijven op de kaart
-            </div>
-          </Card>
-          <Card className="p-6 text-center">
-            <div className="text-3xl font-bold text-primary mb-2">
-              {companies.reduce((sum, c) => sum + c.vacancies, 0)}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Vacatures
-            </div>
-          </Card>
-          <Card className="p-6 text-center">
-            <div className="text-3xl font-bold text-primary mb-2">
-              {Math.round(companies.reduce((sum, c) => sum + c.vacancies, 0) / companies.length)}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Gemiddeld vacatures per bedrijf
-            </div>
-          </Card>
+          {/* Top 5 Regions Panel */}
+          <div className="lg:w-80">
+            <Card className="p-6 shadow-xl border-2 rounded-xl">
+              <div className="flex items-center gap-2 mb-6">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <h3 className="font-bold text-lg">Top 5 Regio's</h3>
+              </div>
+              <div className="space-y-3">
+                {regionalStats.map((stat, index) => (
+                  <div 
+                    key={stat.region} 
+                    className="flex items-center justify-between p-4 bg-secondary/50 rounded-xl hover:bg-secondary/70 transition-all cursor-pointer hover:shadow-md"
+                    onClick={() => {
+                      // Find company in this region and fly to it
+                      const company = companies.find(c => c.city === stat.region);
+                      if (company && map.current) {
+                        map.current.flyTo({
+                          center: [company.lng, company.lat],
+                          zoom: 11,
+                          duration: 1500
+                        });
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                        {index + 1}
+                      </div>
+                      <span className="font-semibold text-sm">{stat.region}</span>
+                    </div>
+                    <Badge variant="default" className="bg-primary/10 text-primary hover:bg-primary/20 font-bold">
+                      {stat.count}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+              
+              {/* CTA in sidebar */}
+              <div className="mt-6 pt-6 border-t">
+                <Button 
+                  className="w-full rounded-xl gap-2"
+                  size="lg"
+                  onClick={() => document.getElementById('offerte')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  <MapPin className="h-4 w-4" />
+                  Versnel nu jouw recruitmentproces
+                </Button>
+              </div>
+            </Card>
+          </div>
         </div>
       </div>
 

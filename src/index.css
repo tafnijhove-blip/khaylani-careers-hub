@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -21,11 +23,11 @@
     --popover-foreground: 222 47% 11%;
     
     /* Primary - Deep Blue (Professional & Trustworthy) */
-    --primary: 217 91% 35%;
+    --primary: 217 91% 60%;
     --primary-foreground: 0 0% 100%;
-    --primary-dark: 217 91% 25%;
-    --primary-light: 217 91% 45%;
-    --primary-glow: 217 91% 55%;
+    --primary-dark: 217 91% 50%;
+    --primary-light: 217 91% 70%;
+    --primary-glow: 217 91% 80%;
     
     /* Secondary - Emerald Green (Growth & Opportunity) */
     --secondary: 160 84% 39%;

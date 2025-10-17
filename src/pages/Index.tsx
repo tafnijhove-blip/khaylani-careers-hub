@@ -142,8 +142,8 @@ const Index = () => {
     },
     {
       icon: BarChart3,
-      title: "Managers weten precies waar de omzet zit",
-      description: "Managers weten precies hoe en waar ze hun team moeten bijsturen. Zie in één oogopslag waar je team actief is en waar de kansen liggen, zodat je doelgericht kunt bijsturen waar dat nodig is.",
+      title: "Managers weten precies hoe en waar ze hun team moeten bijsturen",
+      description: "Zie in één oogopslag waar je team actief is en waar de kansen liggen, zodat je doelgericht kunt bijsturen waar dat nodig is.",
     },
     {
       icon: Target,
@@ -233,11 +233,11 @@ const Index = () => {
           <main className="container mx-auto max-w-6xl relative z-10">
             <div className="text-center space-y-8 animate-fade-in">
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight tracking-tight">
-                <span className="text-gradient">Stop met losse e-mails en belrondes</span>
+                Stop met losse e-mails en belrondes. <span className="text-gradient">Eén platform, één overzicht.</span>
               </h1>
 
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                Eén platform, één overzicht. Recruiters en accountmanagers werken samen met realtime inzicht in klanten, vacatures en statistieken. Sneller schakelen = sneller plaatsen.
+                Recruiters en accountmanagers werken samen met realtime inzicht in klanten, vacatures en statistieken. Sneller schakelen = sneller plaatsen.
               </p>
 
               <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-sm text-muted-foreground">
@@ -257,7 +257,7 @@ const Index = () => {
 
               <div className="pt-8">
                 <a href="#offerte">
-                  <Button size="lg" className="gap-2 text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all">
+                  <Button size="lg" className="gap-2 text-lg px-8 py-6 shadow-xl hover:shadow-2xl transition-all rounded-xl">
                     Versnel nu jouw recruitmentproces
                     <ArrowRight className="h-5 w-5" />
                   </Button>
@@ -284,10 +284,10 @@ const Index = () => {
                 Realtime Inzicht
               </Badge>
               <h2 className="text-4xl md:text-6xl font-bold">
-                Krijg in één oogopslag inzicht <span className="text-gradient">waar de kansen liggen</span>
+                <span className="text-gradient">Krijg in één oogopslag inzicht</span> waar je klanten en vacatures zich bevinden
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Zie waar je klanten en vacatures zich bevinden, en waar de kansen liggen. Interactieve kaart met realtime vacaturedata per regio.
+                en waar de kansen liggen. Interactieve kaart met realtime vacaturedata per regio.
               </p>
             </div>
             <VacaturePreview />
