@@ -6,6 +6,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Building2, MapPin, Users, TrendingUp } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import logo from "@/assets/logo-khaylani.png";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -69,12 +70,14 @@ const Auth = () => {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2djEwaC0xMFYxNmgxMHptLTIgMmgtNnY2aDZ2LTZ6Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-30"></div>
         
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-3 bg-white/10 backdrop-blur-sm rounded-2xl shadow-glow">
-              <MapPin className="h-8 w-8 text-white" />
-            </div>
-            <Link to="/" className="text-4xl font-bold text-white hover:text-white/90 transition-colors">Khaylani</Link>
-          </div>
+          <Link to="/" className="flex items-center mb-8 hover:opacity-90 transition-opacity">
+            <img 
+              src={logo} 
+              alt="Khaylani Logo" 
+              className="h-16 w-auto"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
+          </Link>
           <p className="text-xl text-white/90 max-w-md">
             {t('auth.branding.tagline')}
           </p>
@@ -111,12 +114,14 @@ const Auth = () => {
         </div>
         <div className="w-full max-w-md">
           <div className="lg:hidden mb-8 text-center">
-            <div className="inline-flex items-center gap-3 mb-4">
-              <div className="p-2 bg-primary/10 rounded-xl">
-                <MapPin className="h-6 w-6 text-primary" />
-              </div>
-              <Link to="/" className="text-3xl font-bold text-foreground hover:text-primary transition-colors">Khaylani</Link>
-            </div>
+            <Link to="/" className="inline-flex items-center mb-4 hover:opacity-90 transition-opacity">
+              <img 
+                src={logo} 
+                alt="Khaylani Logo" 
+                className="h-12 w-auto mx-auto"
+                style={{ mixBlendMode: 'multiply' }}
+              />
+            </Link>
           </div>
 
           <div className="bg-card p-8 rounded-3xl shadow-xl border border-border">

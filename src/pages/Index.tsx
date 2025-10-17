@@ -39,6 +39,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { useLanguage } from "@/contexts/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import logo from "@/assets/logo-khaylani.png";
 
 const Index = () => {
   const { toast } = useToast();
@@ -223,11 +224,13 @@ const Index = () => {
           className={`fixed top-0 w-full z-50 glass-card border-b transition-all duration-300 ${showStickyNav ? "shadow-lg" : "shadow-sm"}`}
         >
           <div className="container mx-auto px-6 py-5 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-3 group">
-              <div className="h-10 w-10 rounded-xl bg-gradient-primary flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                <MapPin className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-xl font-bold text-gradient">Khaylani</span>
+            <Link to="/" className="flex items-center hover:opacity-90 transition-opacity">
+              <img 
+                src={logo} 
+                alt="Khaylani Logo" 
+                className="h-10 w-auto"
+                style={{ mixBlendMode: 'multiply' }}
+              />
             </Link>
             <div className="flex items-center gap-4">
               <LanguageSwitcher />

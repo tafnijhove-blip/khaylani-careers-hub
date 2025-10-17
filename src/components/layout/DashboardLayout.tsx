@@ -92,19 +92,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <Link to="/dashboard" className="flex items-center gap-3 group">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-primary blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                <img
+            <Link 
+              to="/dashboard" 
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            >
+              <img
                   src={logo}
-                  alt="Khaylani bedrijfslogo"
-                  className="h-8 w-auto relative z-10 group-hover:scale-110 transition-transform"
-                  loading="eager"
-                  width={128}
-                  height={32}
+                  alt="Khaylani Logo"
+                  className="h-10 w-auto"
+                  style={{ mixBlendMode: 'multiply' }}
                 />
-              </div>
-              <span className="text-2xl font-bold text-gradient">Khaylani</span>
             </Link>
 
         {/* Navigation Links */}

@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -87,26 +87,17 @@ const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="absolute inset-0 bg-gradient-primary blur-xl opacity-50"></div>
-                <img
+            <Link 
+              to="/superadmin" 
+              className="flex items-center hover:opacity-80 transition-opacity"
+            >
+              <img
                   src={logo}
-                  alt="Khaylani bedrijfslogo"
-                  className="h-8 w-auto relative z-10"
-                  loading="eager"
-                  width={128}
-                  height={32}
+                  alt="Khaylani Logo"
+                  className="h-10 w-auto"
+                  style={{ mixBlendMode: 'multiply' }}
                 />
-              </div>
-              <div>
-                <span className="text-2xl font-bold text-gradient">Khaylani</span>
-                <div className="flex items-center gap-1 text-xs text-primary">
-                  <Shield className="h-3 w-3" />
-                  <span>Superadmin</span>
-                </div>
-              </div>
-            </div>
+            </Link>
 
             {/* User Menu */}
             <DropdownMenu>
