@@ -5,6 +5,3 @@ verify_jwt = false
 
 [functions.geocode-address]
 verify_jwt = false
-
-[functions.geocode-existing-companies]
-verify_jwt = false

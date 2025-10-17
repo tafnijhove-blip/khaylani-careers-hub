@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import DashboardInteractiveMap from "@/components/dashboard/DashboardInteractiveMap";
 import DashboardStats from "@/components/dashboard/DashboardStats";
-import GeocodeMissingCompanies from "@/components/GeocodeMissingCompanies";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
 
 interface Company {
@@ -186,9 +185,6 @@ const AccountManagerDashboard = () => {
           regionalStats={regionalStats}
           onRegionClick={setSelectedRegion}
         />
-
-        {/* Geocoding Tool */}
-        <GeocodeMissingCompanies />
 
         {/* Interactive Map */}
         <div className="space-y-4">
