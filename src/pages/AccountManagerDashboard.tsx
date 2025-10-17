@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import DashboardInteractiveMap from "@/components/dashboard/DashboardInteractiveMap";
 import DashboardStats from "@/components/dashboard/DashboardStats";
+import UpdateCompanyCoordinates from "@/components/UpdateCompanyCoordinates";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
 
 interface Company {
@@ -20,6 +21,7 @@ interface Company {
   lat: number;
   lng: number;
   logo_url: string | null;
+  adres: string | null;
 }
 
 interface Vacancy {
@@ -43,6 +45,7 @@ const AccountManagerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [companies, setCompanies] = useState<CompanyWithVacancies[]>([]);
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
+  const [companiesWithoutCoords, setCompaniesWithoutCoords] = useState<CompanyWithVacancies[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
 
   useEffect(() => {
@@ -92,7 +95,7 @@ const AccountManagerDashboard = () => {
 
   const fetchData = async () => {
     try {
-      const [companiesRes, vacanciesRes] = await Promise.all([
+      const [companiesRes, companiesWithoutCoordsRes, vacanciesRes] = await Promise.all([
         supabase
           .from("bedrijven")
           .select("*")
@@ -100,12 +103,18 @@ const AccountManagerDashboard = () => {
           .not("lat", "is", null)
           .not("lng", "is", null),
         supabase
+          .from("bedrijven")
+          .select("*")
+          .eq("type", "klant")
+          .or("lat.is.null,lng.is.null"),
+        supabase
           .from("vacatures")
           .select("*")
           .order("datum_toegevoegd", { ascending: false })
       ]);
 
       if (companiesRes.error) throw companiesRes.error;
+      if (companiesWithoutCoordsRes.error) throw companiesWithoutCoordsRes.error;
       if (vacanciesRes.error) throw vacanciesRes.error;
 
       const companiesWithVacancies: CompanyWithVacancies[] = (companiesRes.data || []).map(company => {
@@ -117,7 +126,17 @@ const AccountManagerDashboard = () => {
         };
       });
 
+      const companiesWithoutCoordsWithVacancies: CompanyWithVacancies[] = (companiesWithoutCoordsRes.data || []).map(company => {
+        const companyVacancies = (vacanciesRes.data || []).filter((v: Vacancy) => v.bedrijf_id === company.id);
+        return {
+          ...company,
+          vacancies: companyVacancies,
+          vacancyCount: companyVacancies.filter((v: Vacancy) => v.status === 'open').length
+        };
+      });
+
       setCompanies(companiesWithVacancies);
+      setCompaniesWithoutCoords(companiesWithoutCoordsWithVacancies);
       setVacancies(vacanciesRes.data || []);
     } catch (error: any) {
       toast({
@@ -206,6 +225,47 @@ const AccountManagerDashboard = () => {
             minVacancies={0}
           />
         </div>
+
+        {/* Companies without coordinates */}
+        {companiesWithoutCoords.length > 0 && (
+          <Card className="border-orange-500/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-orange-500">
+                <MapPin className="h-5 w-5" />
+                Bedrijven zonder locatie ({companiesWithoutCoords.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Deze bedrijven hebben geen coördinaten en zijn daarom niet zichtbaar op de kaart. Voeg een locatie toe om ze te tonen.
+              </p>
+              <div className="space-y-2">
+                {companiesWithoutCoords.map((company) => (
+                  <div 
+                    key={company.id}
+                    className="flex items-center justify-between p-3 border rounded-lg bg-muted/30"
+                  >
+                    <div className="flex-1">
+                      <h3 className="font-semibold">{company.naam}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {company.adres && `${company.adres}, `}{company.plaats} - {company.regio}
+                      </p>
+                    </div>
+                    {company.adres && company.plaats && (
+                      <UpdateCompanyCoordinates
+                        companyId={company.id}
+                        companyName={company.naam}
+                        address={company.adres}
+                        city={company.plaats}
+                        onSuccess={fetchData}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Clients & Vacancies */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

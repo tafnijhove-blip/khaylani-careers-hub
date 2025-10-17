@@ -54,22 +54,45 @@ const AddCompanyDialog = ({ open, onOpenChange, type, onSuccess }: AddCompanyDia
 
       // Try to geocode the address if available
       let coordinates: { lat: number; lng: number } | null = null;
-      if (validated.adres || validated.plaats) {
+      if (validated.adres && validated.plaats) {
         try {
-          const addressToGeocode = validated.adres 
-            ? `${validated.adres}, ${validated.plaats || ''}, Nederland` 
-            : `${validated.plaats}, Nederland`;
+          const addressToGeocode = `${validated.adres}, ${validated.plaats}, Nederland`;
           
-          const { data: geocodeData } = await supabase.functions.invoke('geocode-address', {
+          console.log('Attempting to geocode:', addressToGeocode);
+          
+          const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-address', {
             body: { address: addressToGeocode }
           });
           
-          if (geocodeData?.lat && geocodeData?.lng) {
+          if (geocodeError) {
+            console.warn('Geocoding error:', geocodeError);
+          } else if (geocodeData?.lat && geocodeData?.lng) {
             coordinates = { lat: geocodeData.lat, lng: geocodeData.lng };
+            console.log('Geocoded successfully:', coordinates);
           }
         } catch (geocodeError) {
           console.warn('Geocoding failed:', geocodeError);
           // Continue without coordinates
+        }
+      } else if (validated.plaats) {
+        // If we only have a city, try to geocode that
+        try {
+          const addressToGeocode = `${validated.plaats}, Nederland`;
+          
+          console.log('Attempting to geocode city:', addressToGeocode);
+          
+          const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-address', {
+            body: { address: addressToGeocode }
+          });
+          
+          if (geocodeError) {
+            console.warn('Geocoding error:', geocodeError);
+          } else if (geocodeData?.lat && geocodeData?.lng) {
+            coordinates = { lat: geocodeData.lat, lng: geocodeData.lng };
+            console.log('Geocoded successfully:', coordinates);
+          }
+        } catch (geocodeError) {
+          console.warn('Geocoding failed:', geocodeError);
         }
       }
 
