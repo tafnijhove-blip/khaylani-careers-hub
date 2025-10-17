@@ -36,7 +36,7 @@ import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
 
 import DashboardPreview from "@/components/landing/DashboardPreview";
-import DemoJobMap from "@/components/landing/DemoJobMap";
+import LeafletJobMap from "@/components/map/LeafletJobMap";
 import VacaturePreview from "@/components/landing/VacaturePreview";
 import Footer from "@/components/landing/Footer";
 import CookieBanner from "@/components/CookieBanner";
@@ -288,7 +288,7 @@ const Index = () => {
                 </p>
               </div>
               
-              <DemoJobMap />
+              <LeafletJobMap />
             </div>
 
             <a href="#vacatures" className="flex justify-center mt-16 animate-bounce">

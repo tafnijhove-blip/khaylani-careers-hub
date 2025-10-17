@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import DashboardInteractiveMap from "@/components/dashboard/DashboardInteractiveMap";
+import LeafletDashboardMap from "@/components/map/LeafletDashboardMap";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
 
@@ -268,10 +268,11 @@ const ManagerDashboard = () => {
               </Button>
             )}
           </div>
-          <DashboardInteractiveMap
+          <LeafletDashboardMap
             companies={companies}
             selectedRegion={selectedRegion}
             minVacancies={0}
+            showHeatmap={true}
           />
         </div>
 

@@ -8,7 +8,7 @@ import { MapPin, Briefcase, Plus, Bell, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import DashboardInteractiveMap from "@/components/dashboard/DashboardInteractiveMap";
+import LeafletDashboardMap from "@/components/map/LeafletDashboardMap";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import UpdateCompanyCoordinates from "@/components/UpdateCompanyCoordinates";
 import { getVacatureStatusClass, getPriorityClass } from "@/lib/statusUtils";
@@ -219,10 +219,11 @@ const AccountManagerDashboard = () => {
               </Button>
             )}
           </div>
-          <DashboardInteractiveMap
+          <LeafletDashboardMap
             companies={companies}
             selectedRegion={selectedRegion}
             minVacancies={0}
+            showHeatmap={true}
           />
         </div>
 
