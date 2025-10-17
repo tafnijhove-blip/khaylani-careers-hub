@@ -76,7 +76,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const baseNavItems = [
     { icon: MapPin, label: "Kaartoverzicht", path: "/dashboard" },
     ...(userRole !== 'recruiter' ? [{ icon: FileText, label: "Vacaturebeheer", path: "/vacatures" }] : []),
-    { icon: Users, label: "Kandidaten", path: "/kandidaten" },
     { icon: BarChart3, label: "Analytics", path: "/analytics" },
   ];
   const navItems = userRole === 'superadmin'
