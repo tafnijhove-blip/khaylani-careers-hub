@@ -69,12 +69,6 @@ export function AppSidebar() {
       show: permissions.canViewVacancies && !permissions.isSuperAdmin,
     },
     {
-      title: "Kandidaten",
-      url: companyId ? `/bedrijf/${companyId}/kandidaten` : "/kandidaten",
-      icon: UserPlus,
-      show: permissions.canViewCandidates && !permissions.isSuperAdmin,
-    },
-    {
       title: "Analytics",
       url: companyId ? `/bedrijf/${companyId}/analytics` : "/analytics",
       icon: BarChart3,

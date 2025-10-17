@@ -16,7 +16,6 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Vacatures = lazy(() => import("./pages/Vacatures"));
-const Kandidaten = lazy(() => import("./pages/Kandidaten"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"));
 const CompanyDashboard = lazy(() => import("./pages/CompanyDashboard"));
@@ -112,11 +111,6 @@ const App = () => (
               <Route path="/vacatures" element={
                 <ProtectedRoute>
                   <Vacatures />
-                </ProtectedRoute>
-              } />
-              <Route path="/kandidaten" element={
-                <ProtectedRoute>
-                  <Kandidaten />
                 </ProtectedRoute>
               } />
               <Route path="/analytics" element={

@@ -19,12 +19,6 @@ export const usePermissions = () => {
     canDeleteVacancies: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),
     canViewVacancies: userRole !== null,
     
-    // Candidate Management (Recruiter is READ-ONLY)
-    canCreateCandidates: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),
-    canEditCandidates: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),
-    canDeleteCandidates: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),
-    canViewCandidates: userRole !== null,
-    
     // Analytics
     canViewAnalytics: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),
     canViewAdvancedAnalytics: ['superadmin', 'ceo', 'accountmanager'].includes(userRole || ''),

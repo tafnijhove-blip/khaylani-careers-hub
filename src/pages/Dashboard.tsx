@@ -132,15 +132,7 @@ const Dashboard = () => {
     try {
       const bedrijfVacatures = getVacaturesForBedrijf(deleteBedrijfDialog.id);
       
-      // First delete all kandidaten for vacatures of this bedrijf
-      const { error: kandidatenError } = await supabase
-        .from("kandidaten")
-        .delete()
-        .in("vacature_id", bedrijfVacatures.map(v => v.id));
-
-      if (kandidatenError) throw kandidatenError;
-
-      // Then delete all vacatures
+      // First delete all vacatures
       const { error: vacaturesError } = await supabase
         .from("vacatures")
         .delete()
@@ -148,7 +140,7 @@ const Dashboard = () => {
 
       if (vacaturesError) throw vacaturesError;
 
-      // Finally delete the bedrijf
+      // Then delete the bedrijf
       const { error: bedrijfError } = await supabase
         .from("bedrijven")
         .delete()
