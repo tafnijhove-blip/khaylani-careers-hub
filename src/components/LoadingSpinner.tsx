@@ -10,21 +10,21 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner = ({ size = "md", message, className, fullScreen = false }: LoadingSpinnerProps) => {
   const sizeClasses = {
-    sm: "h-6 w-6",
-    md: "h-12 w-12",
-    lg: "h-20 w-20",
+    sm: "h-5 w-5",
+    md: "h-10 w-10",
+    lg: "h-16 w-16",
   };
 
   const content = (
     <div className={cn("flex flex-col items-center justify-center gap-4", className)}>
       <div className="relative">
-        <div className="absolute inset-0 animate-pulse-glow rounded-full bg-gradient-primary opacity-20 blur-xl" />
+        <div className="absolute inset-0 rounded-full bg-primary/10 blur-lg" />
         <Loader2 className={cn("animate-spin text-primary relative z-10", sizeClasses[size])} />
       </div>
       {message && (
-        <div className="space-y-2 text-center">
-          <p className="text-lg font-semibold text-gradient animate-fade-in">{message}</p>
-          <p className="text-sm text-muted-foreground">Even geduld, we bereiden alles voor</p>
+        <div className="space-y-1 text-center">
+          <p className="text-base font-medium text-foreground">{message}</p>
+          <p className="text-sm text-muted-foreground">Even geduld...</p>
         </div>
       )}
     </div>
@@ -32,7 +32,7 @@ const LoadingSpinner = ({ size = "md", message, className, fullScreen = false }:
 
   if (fullScreen) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="flex items-center justify-center min-h-screen bg-background">
         {content}
       </div>
     );
