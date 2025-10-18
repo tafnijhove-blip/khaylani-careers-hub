@@ -24,7 +24,6 @@ import EditUserDialog from "@/components/superadmin/EditUserDialog";
 import { SearchBar } from "@/components/search/SearchBar";
 import { FilterSelect } from "@/components/search/FilterSelect";
 import MapboxDashboardMap from "@/components/map/MapboxDashboardMap";
-import MapDashboardView from "@/components/map/MapDashboardView";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import {
   AlertDialog,
@@ -272,10 +271,9 @@ const SuperAdminDashboard = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="bedrijven" className="space-y-6">
-          <TabsList className="grid w-full max-w-xl grid-cols-3">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="bedrijven">Bedrijven</TabsTrigger>
             <TabsTrigger value="gebruikers">Gebruikers</TabsTrigger>
-            <TabsTrigger value="kaart">Kaart</TabsTrigger>
           </TabsList>
 
           <TabsContent value="bedrijven" className="space-y-6">
@@ -551,10 +549,6 @@ const SuperAdminDashboard = () => {
                 </Table>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="kaart" className="space-y-6">
-            <MapDashboardView />
           </TabsContent>
         </Tabs>
       </div>
