@@ -23,8 +23,6 @@ import AddUserDialog from "@/components/superadmin/AddUserDialog";
 import EditUserDialog from "@/components/superadmin/EditUserDialog";
 import { SearchBar } from "@/components/search/SearchBar";
 import { FilterSelect } from "@/components/search/FilterSelect";
-import MapboxDashboardMap from "@/components/map/MapboxDashboardMap";
-import DashboardStats from "@/components/dashboard/DashboardStats";
 import {
   AlertDialog,
   AlertDialogAction,

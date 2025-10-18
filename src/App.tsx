@@ -62,19 +62,7 @@ const App = () => (
               {/* Role-specific dashboards */}
               <Route path="/superadmin" element={
                 <ProtectedRoute requiredRoles={["superadmin"]}>
-                  <SidebarProvider>
-                    <div className="min-h-screen flex w-full">
-                      <AppSidebar />
-                      <main className="flex-1">
-                        <header className="h-14 border-b flex items-center px-4">
-                          <SidebarTrigger />
-                        </header>
-                        <div className="p-6">
-                          <SuperAdminDashboard />
-                        </div>
-                      </main>
-                    </div>
-                  </SidebarProvider>
+                  <SuperAdminDashboard />
                 </ProtectedRoute>
               } />
               
