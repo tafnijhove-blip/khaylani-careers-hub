@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { Card } from "@/components/ui/card";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Info } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Vacancy {
   id: string;
@@ -41,6 +42,7 @@ const MapboxDashboardMap = ({
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   const NL_BOUNDS: [number, number, number, number] = [3.3, 50.7, 7.2, 53.6];
 
@@ -125,12 +127,26 @@ const MapboxDashboardMap = ({
     };
   }, []);
 
-  useEffect(() => {
+  // Fly to specific company
+  const flyToCompany = useCallback((company: Company) => {
+    const coords = getCompanyLngLat(company);
+    if (!coords || !map.current) return;
+
+    map.current.flyTo({
+      center: coords,
+      zoom: 12,
+      duration: 2000,
+      essential: true
+    });
+  }, []);
+
+  // Add markers with realtime support
+  const addMarkers = useCallback(() => {
     if (!map.current || !mapLoaded) return;
 
     // Remove existing markers
-    const markers = document.querySelectorAll(".mapboxgl-marker");
-    markers.forEach(marker => marker.remove());
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
 
     // Add new markers
     filteredCompanies.forEach(company => {
@@ -139,14 +155,14 @@ const MapboxDashboardMap = ({
 
       const vacancies = company.vacatures || [];
       const openVacancies = vacancies.filter(v => v.status === "open");
-      const filledVacancies = vacancies.filter(v => v.status === "vervuld");
+      const totalVacancies = openVacancies.length;
 
       const el = document.createElement("div");
       el.className = "marker";
       el.style.width = "40px";
       el.style.height = "40px";
       el.style.borderRadius = "50%";
-      el.style.backgroundColor = openVacancies.length > 0 ? "#00AEEF" : "#10b981";
+      el.style.backgroundColor = totalVacancies > 0 ? "#00AEEF" : "#10b981";
       el.style.border = "3px solid white";
       el.style.cursor = "pointer";
       el.style.display = "flex";
@@ -156,34 +172,26 @@ const MapboxDashboardMap = ({
       el.style.fontWeight = "bold";
       el.style.fontSize = "14px";
       el.style.boxShadow = "0 2px 8px rgba(0,0,0,0.3)";
-      el.textContent = openVacancies.length.toString();
+      el.textContent = totalVacancies.toString();
 
+      // Simplified popup: only company name and vacancy count
       const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
-        <div style="padding: 12px; min-width: 250px; font-family: system-ui;">
-          <h3 style="margin: 0 0 12px 0; font-weight: bold; color: #1a1a1a; font-size: 16px;">${company.naam}</h3>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <p style="margin: 0; color: #666; font-size: 14px;">
-              <strong>Locatie:</strong> ${company.plaats || company.regio}
-            </p>
-            <p style="margin: 0; color: #666; font-size: 14px;">
-              <strong>Regio:</strong> ${company.regio}
-            </p>
-            <div style="display: flex; gap: 8px; margin-top: 8px;">
-              <span style="background: #00AEEF; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                ${openVacancies.length} Open
-              </span>
-              <span style="background: #10b981; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                ${filledVacancies.length} Vervuld
-              </span>
-            </div>
+        <div style="padding: 16px; min-width: 220px; font-family: system-ui;">
+          <h3 style="margin: 0 0 12px 0; font-weight: 700; color: #1a1a1a; font-size: 18px;">${company.naam}</h3>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="background: #00AEEF; color: white; padding: 6px 16px; border-radius: 16px; font-size: 14px; font-weight: 600;">
+              ${totalVacancies} Open Vacature${totalVacancies !== 1 ? 's' : ''}
+            </span>
           </div>
         </div>
       `);
 
-      new mapboxgl.Marker(el)
+      const marker = new mapboxgl.Marker(el)
         .setLngLat(coords)
         .setPopup(popup)
         .addTo(map.current!);
+
+      markersRef.current.push(marker);
     });
 
     // Fit bounds to markers
@@ -196,6 +204,36 @@ const MapboxDashboardMap = ({
       map.current.fitBounds(bounds, { padding: 80, maxZoom: 10 });
     }
   }, [mapLoaded, filteredCompanies]);
+
+  // Subscribe to realtime updates
+  useEffect(() => {
+    if (!mapLoaded) return;
+
+    const channel = supabase
+      .channel('bedrijven-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'bedrijven'
+        },
+        (payload) => {
+          console.log('Company changed:', payload);
+          // Trigger re-render by updating a state
+          addMarkers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [mapLoaded, addMarkers]);
+
+  useEffect(() => {
+    addMarkers();
+  }, [addMarkers]);
 
   return (
     <Card className="relative overflow-hidden shadow-xl">
@@ -243,3 +281,4 @@ const MapboxDashboardMap = ({
 };
 
 export default MapboxDashboardMap;
+export type { Company };
