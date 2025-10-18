@@ -23,7 +23,7 @@ const JobMapFilters = ({
   onUseLocation
 }: JobMapFiltersProps) => {
   return (
-    <Card className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm p-4 shadow-xl border w-72 z-10">
+    <Card className="p-6">
       <div className="flex items-center gap-2 mb-4">
         <Filter className="h-5 w-5 text-primary" />
         <h3 className="font-semibold text-foreground">Filters</h3>
