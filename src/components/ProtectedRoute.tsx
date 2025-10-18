@@ -49,7 +49,7 @@ export const ProtectedRoute = ({
 
   // Authenticated but insufficient role
   if (requireAuth && requiredRoles.length > 0 && !requiredRoles.includes(userRole as UserRole)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/unauthorized" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;

@@ -26,6 +26,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const TermsAndConditions = lazy(() => import("./pages/TermsAndConditions"));
+const Unauthorized = lazy(() => import("./pages/Unauthorized"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -58,6 +59,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/login" element={<Auth />} />
+              <Route path="/unauthorized" element={<Unauthorized />} />
               
               {/* Role-specific dashboards */}
               <Route path="/superadmin" element={
@@ -97,7 +99,7 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/vacatures" element={
-                <ProtectedRoute>
+                <ProtectedRoute requiredRoles={["ceo", "accountmanager", "recruiter"]}>
                   <Vacatures />
                 </ProtectedRoute>
               } />
