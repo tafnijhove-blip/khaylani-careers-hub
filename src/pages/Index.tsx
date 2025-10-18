@@ -32,8 +32,9 @@ import {
   Loader2,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
+import { useUserRole } from "@/hooks/useUserRole";
 
 import DashboardPreview from "@/components/landing/DashboardPreview";
 import MapboxDemoMap from "@/components/map/MapboxDemoMap";
@@ -50,6 +51,8 @@ import logo from "@/assets/logo-khaylani-new.png";
 const Index = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
+  const navigate = useNavigate();
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
   const [showStickyNav, setShowStickyNav] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -60,6 +63,26 @@ const Index = () => {
     aantalMedewerkers: "",
     bericht: "",
   });
+
+  // Redirect logged-in users to their dashboard
+  useEffect(() => {
+    if (!roleLoading && userRole) {
+      switch (userRole) {
+        case 'superadmin':
+          navigate('/superadmin', { replace: true });
+          break;
+        case 'ceo':
+          navigate('/manager', { replace: true });
+          break;
+        case 'accountmanager':
+          navigate('/accountmanager', { replace: true });
+          break;
+        case 'recruiter':
+          navigate('/recruiter', { replace: true });
+          break;
+      }
+    }
+  }, [userRole, roleLoading, navigate]);
 
   useEffect(() => {
     const handleScroll = () => {
