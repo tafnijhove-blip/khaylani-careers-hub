@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import logo from "@/assets/logo-khaylani-new.png";
 
 interface SuperAdminLayoutProps {
@@ -23,6 +25,7 @@ const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [userName, setUserName] = useState<string>("");
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
 
   useEffect(() => {
     let isMounted = true;
@@ -61,6 +64,13 @@ const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
     };
   }, [navigate]);
 
+  // Redirect non-superadmin users to unauthorized page
+  useEffect(() => {
+    if (!roleLoading && userRole !== 'superadmin') {
+      navigate('/unauthorized');
+    }
+  }, [userRole, roleLoading, navigate]);
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast({
@@ -68,6 +78,20 @@ const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
       description: "Je bent succesvol uitgelogd",
     });
   };
+
+  // Show loading while checking role
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" message="Verificatie..." />
+      </div>
+    );
+  }
+
+  // Don't render anything if not superadmin (will redirect via useEffect)
+  if (userRole !== 'superadmin') {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">

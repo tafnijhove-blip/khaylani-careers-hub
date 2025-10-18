@@ -1,6 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 import SuperAdminLayout from "@/components/layout/SuperAdminLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,7 +37,9 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const SuperAdminDashboard = () => {
+  const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
   const [addCompanyDialogOpen, setAddCompanyDialogOpen] = useState(false);
   const [addCompanyType, setAddCompanyType] = useState<"detacheringbureau" | "klant">("detacheringbureau");
   const [editCompanyDialogOpen, setEditCompanyDialogOpen] = useState(false);
@@ -51,6 +55,13 @@ const SuperAdminDashboard = () => {
   const [companyRegioFilter, setCompanyRegioFilter] = useState("all");
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState("all");
+
+  // Additional security check - redirect if not superadmin
+  useEffect(() => {
+    if (!roleLoading && userRole !== 'superadmin') {
+      navigate('/unauthorized');
+    }
+  }, [userRole, roleLoading, navigate]);
 
   // Fetch all companies
   const { data: bedrijven, isLoading: bedrijvenLoading, refetch: refetchBedrijven } = useQuery({
