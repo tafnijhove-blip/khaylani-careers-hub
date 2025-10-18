@@ -25,52 +25,41 @@ const SuperAdminLayout = ({ children }: SuperAdminLayoutProps) => {
   const [userName, setUserName] = useState<string>("");
 
   useEffect(() => {
-    // Check authentication and role
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    let isMounted = true;
+
+    const init = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate("/auth");
-      } else {
-        // Check if user is superadmin
-        supabase
-          .from("user_roles")
-          .select("role")
-          .eq("user_id", session.user.id)
-          .single()
-          .then(({ data }) => {
-            if (data?.role !== 'superadmin') {
-              navigate("/dashboard");
-              toast({
-                title: "Geen toegang",
-                description: "Je hebt geen superadmin rechten",
-                variant: "destructive",
-              });
-            }
-          });
-
-        // Fetch user profile
-        supabase
+        return;
+      }
+      try {
+        const { data } = await supabase
           .from("profiles")
           .select("naam")
           .eq("id", session.user.id)
-          .single()
-          .then(({ data }) => {
-            if (data) {
-              setUserName(data.naam);
-            }
-          });
+          .single();
+        if (isMounted && data) {
+          setUserName(data.naam);
+        }
+      } catch (_e) {
+        // best-effort; ignore
       }
-    });
+    };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT" || !session) {
+    init();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
         navigate("/auth");
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [navigate, toast]);
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
