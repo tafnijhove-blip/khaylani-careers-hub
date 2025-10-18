@@ -16,35 +16,41 @@ const Auth = () => {
     const checkUserAndRedirect = async (session: any) => {
       if (!session) return;
 
-      // Fetch user role
+      // Hardcoded superadmin fast-path by email
+      const email = session.user.email?.toLowerCase();
+      if (email === 'tafnijhove@gmail.com') {
+        navigate("/superadmin");
+        return;
+      }
+
+      // Fetch user role (non-superadmin)
       const { data: roleData } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', session.user.id)
-        .single();
+        .maybeSingle();
 
       const role = roleData?.role;
 
       // Redirect based on role
       if (role === 'superadmin') {
         navigate("/superadmin");
-      } else {
-        // For other roles, fetch company_id and redirect to company dashboard
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('company_id')
-          .eq('id', session.user.id)
-          .single();
+        return;
+      }
 
-        if (profileData?.company_id) {
-          navigate(`/bedrijf/${profileData.company_id}`);
-        } else {
-          navigate("/dashboard");
-        }
+      // For other roles, fetch company_id and redirect to company dashboard
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('company_id')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profileData?.company_id) {
+        navigate(`/bedrijf/${profileData.company_id}`);
+      } else {
+        navigate("/dashboard");
       }
     };
-
-    // Check if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         checkUserAndRedirect(session);
