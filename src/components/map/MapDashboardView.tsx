@@ -6,20 +6,44 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
-import { Filter } from "lucide-react";
+import { Filter, Info } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { useUserRole } from "@/hooks/useUserRole";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const MapDashboardView = () => {
+  const { data: userRole } = useUserRole();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [minVacancies, setMinVacancies] = useState(0);
 
+  // Role-based access info
+  const getRoleInfo = () => {
+    switch (userRole) {
+      case 'superadmin':
+        return 'Je ziet alle bedrijven van alle bureaus';
+      case 'ceo':
+        return 'Je ziet alle bedrijven van je bureau';
+      case 'accountmanager':
+        return 'Je ziet alleen jouw klanten';
+      case 'recruiter':
+        return 'Je ziet alle bedrijven van je bureau';
+      default:
+        return 'Je ziet bedrijven waar je toegang tot hebt';
+    }
+  };
+
   const fetchCompanies = async () => {
     try {
       setLoading(true);
       
-      // Fetch companies with their vacancies
+      // RLS policies automatically filter based on user role
+      // SuperAdmin: sees all companies
+      // CEO/Manager: sees own company + linked customers
+      // AccountManager: sees linked customers they manage
+      // Recruiter: sees companies with vacancies they can access
+      
       const { data, error } = await supabase
         .from("bedrijven")
         .select(`
@@ -32,10 +56,12 @@ const MapDashboardView = () => {
           )
         `)
         .not("lat", "is", null)
-        .not("lng", "is", null);
+        .not("lng", "is", null)
+        .order('naam');
 
       if (error) throw error;
 
+      console.log(`Fetched ${data?.length || 0} companies for role: ${userRole}`);
       setCompanies(data || []);
     } catch (error) {
       console.error("Error fetching companies:", error);
@@ -65,6 +91,14 @@ const MapDashboardView = () => {
 
   return (
     <div className="space-y-6">
+      {/* Role Info Alert */}
+      <Alert>
+        <Info className="h-4 w-4" />
+        <AlertDescription>
+          {getRoleInfo()}
+        </AlertDescription>
+      </Alert>
+
       <div className="grid lg:grid-cols-4 gap-6">
         {/* Filters and Form Sidebar */}
         <div className="lg:col-span-1 space-y-6">
