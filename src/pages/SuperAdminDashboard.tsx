@@ -117,9 +117,19 @@ const SuperAdminDashboard = () => {
         refetchBedrijven();
         refetchUsers();
       } else {
-        const { error } = await supabase.auth.admin.deleteUser(deleteTarget.id);
-
-        if (error) throw error;
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-delete-user`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ user_id: deleteTarget.id })
+        });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(text || 'Verwijderen mislukt');
+        }
 
         toast({
           title: "Gebruiker verwijderd",
@@ -234,38 +244,7 @@ const SuperAdminDashboard = () => {
           <p className="text-muted-foreground text-lg">Beheer alle bedrijven en gebruikers</p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-primary/20">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Detacheringbureaus</CardTitle>
-              <Building2 className="h-8 w-8 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-gradient">{totalBureaus}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-primary/20">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Klantbedrijven</CardTitle>
-              <Building2 className="h-8 w-8 text-accent-cyan" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-accent-cyan">{totalKlanten}</div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-primary/20">
-            <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Totaal Gebruikers</CardTitle>
-              <Users className="h-8 w-8 text-accent-purple" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-4xl font-bold text-accent-purple">{totalUsers}</div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Stats removed for SuperAdmin minimal interface as requested */}
 
         {/* Tabs */}
         <Tabs defaultValue="bedrijven" className="space-y-6">
