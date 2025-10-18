@@ -82,29 +82,43 @@ const MapboxDashboardMap = ({
     const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN;
     if (!MAPBOX_TOKEN) {
       console.error("Mapbox token niet gevonden in environment variables");
+      setMapLoaded(true); // Show error state
       return;
     }
 
-    mapboxgl.accessToken = MAPBOX_TOKEN;
+    try {
+      mapboxgl.accessToken = MAPBOX_TOKEN;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/dark-v11",
-      center: [5.2913, 52.1326],
-      zoom: 7,
-      pitch: 45,
-      maxBounds: [
-        [NL_BOUNDS[0] - 1, NL_BOUNDS[1] - 1],
-        [NL_BOUNDS[2] + 1, NL_BOUNDS[3] + 1],
-      ],
-    });
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/mapbox/dark-v11",
+        center: [5.2913, 52.1326], // Centraal Nederland
+        zoom: 7,
+        pitch: 45,
+        maxZoom: 12,
+        minZoom: 4,
+        renderWorldCopies: false,
+        maxBounds: [
+          [NL_BOUNDS[0] - 1, NL_BOUNDS[1] - 1],
+          [NL_BOUNDS[2] + 1, NL_BOUNDS[3] + 1],
+        ],
+      });
 
-    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-    map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
+      map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+      map.current.addControl(new mapboxgl.FullscreenControl(), "top-right");
 
-    map.current.on("load", () => {
+      map.current.on("load", () => {
+        setMapLoaded(true);
+      });
+
+      map.current.on("error", (e) => {
+        console.error("Mapbox error:", e);
+        setMapLoaded(true);
+      });
+    } catch (error) {
+      console.error("Error initializing Mapbox:", error);
       setMapLoaded(true);
-    });
+    }
 
     return () => {
       map.current?.remove();
@@ -206,6 +220,15 @@ const MapboxDashboardMap = ({
       )}
       
       <div ref={mapContainer} className="w-full h-[600px]" />
+      
+      {mapLoaded && !map.current && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+          <div className="text-center p-6">
+            <p className="text-lg font-medium text-muted-foreground mb-2">Kaart kon niet geladen worden</p>
+            <p className="text-sm text-muted-foreground">Controleer of de Mapbox token correct is ingesteld</p>
+          </div>
+        </div>
+      )}
       
       {mapLoaded && filteredCompanies.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
