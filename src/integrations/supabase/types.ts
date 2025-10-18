@@ -450,6 +450,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_hardcoded_superadmin: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       manage_user_role: {
         Args: {
           new_role: Database["public"]["Enums"]["app_role"]

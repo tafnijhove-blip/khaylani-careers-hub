@@ -11,6 +11,11 @@ export const useUserRole = () => {
       
       if (!user) return null;
 
+      // Hardcoded superadmin check for specific account
+      if (user.email === 'tafnijhove@gmail.com') {
+        return 'superadmin' as UserRole;
+      }
+
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
