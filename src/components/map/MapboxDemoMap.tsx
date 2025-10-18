@@ -59,10 +59,10 @@ const MapboxDemoMap = () => {
 
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: "mapbox://styles/mapbox/dark-v11",
-        center: [5.2913, 52.1326], // Centraal Nederland
-        zoom: 7,
-        pitch: 45,
+        style: "mapbox://styles/mapbox/streets-v12",
+        center: [5.1214, 52.0907], // Centraal Nederland
+        zoom: 6,
+        pitch: 0,
         maxZoom: 12,
         minZoom: 4,
         renderWorldCopies: false,
